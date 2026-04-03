@@ -4,6 +4,7 @@
 # database
 *.db
 *.db-journal
+postgres_data/
 
 # logs
 *.log
