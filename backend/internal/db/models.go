@@ -5,91 +5,90 @@
 package db
 
 import (
-	"time"
-
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Character struct {
-	ID                   uuid.UUID     `json:"id"`
-	OwnerID              uuid.NullUUID `json:"owner_id"`
-	IsNpc                bool          `json:"is_npc"`
-	Name                 string        `json:"name"`
-	Race                 string        `json:"race"`
-	Class                string        `json:"class"`
-	Level                int32         `json:"level"`
-	Background           string        `json:"background"`
-	Alignment            string        `json:"alignment"`
-	Xp                   int32         `json:"xp"`
-	Strength             int32         `json:"strength"`
-	Dexterity            int32         `json:"dexterity"`
-	Constitution         int32         `json:"constitution"`
-	Intelligence         int32         `json:"intelligence"`
-	Wisdom               int32         `json:"wisdom"`
-	Charisma             int32         `json:"charisma"`
-	SaveProfStrength     bool          `json:"save_prof_strength"`
-	SaveProfDexterity    bool          `json:"save_prof_dexterity"`
-	SaveProfConstitution bool          `json:"save_prof_constitution"`
-	SaveProfIntelligence bool          `json:"save_prof_intelligence"`
-	SaveProfWisdom       bool          `json:"save_prof_wisdom"`
-	SaveProfCharisma     bool          `json:"save_prof_charisma"`
-	SkillAcrobatics      int32         `json:"skill_acrobatics"`
-	SkillAnimalHandling  int32         `json:"skill_animal_handling"`
-	SkillArcana          int32         `json:"skill_arcana"`
-	SkillAthletics       int32         `json:"skill_athletics"`
-	SkillDeception       int32         `json:"skill_deception"`
-	SkillHistory         int32         `json:"skill_history"`
-	SkillInsight         int32         `json:"skill_insight"`
-	SkillIntimidation    int32         `json:"skill_intimidation"`
-	SkillInvestigation   int32         `json:"skill_investigation"`
-	SkillMedicine        int32         `json:"skill_medicine"`
-	SkillNature          int32         `json:"skill_nature"`
-	SkillPerception      int32         `json:"skill_perception"`
-	SkillPerformance     int32         `json:"skill_performance"`
-	SkillPersuasion      int32         `json:"skill_persuasion"`
-	SkillReligion        int32         `json:"skill_religion"`
-	SkillSleightOfHand   int32         `json:"skill_sleight_of_hand"`
-	SkillStealth         int32         `json:"skill_stealth"`
-	SkillSurvival        int32         `json:"skill_survival"`
-	MaxHp                int32         `json:"max_hp"`
-	CurrentHp            int32         `json:"current_hp"`
-	TempHp               int32         `json:"temp_hp"`
-	ArmorClass           int32         `json:"armor_class"`
-	Speed                int32         `json:"speed"`
-	HitDiceType          int32         `json:"hit_dice_type"`
-	HitDiceRemaining     int32         `json:"hit_dice_remaining"`
-	DeathSaveSuccesses   int32         `json:"death_save_successes"`
-	DeathSaveFailures    int32         `json:"death_save_failures"`
-	Inspiration          bool          `json:"inspiration"`
-	TrainingArmor        []string      `json:"training_armor"`
-	TrainingWeapons      []string      `json:"training_weapons"`
-	TrainingTools        []string      `json:"training_tools"`
-	TrainingLanguages    []string      `json:"training_languages"`
-	AttunementSlots      int32         `json:"attunement_slots"`
-	Copper               int32         `json:"copper"`
-	Silver               int32         `json:"silver"`
-	Electrum             int32         `json:"electrum"`
-	Gold                 int32         `json:"gold"`
-	Platinum             int32         `json:"platinum"`
-	Conditions           []string      `json:"conditions"`
-	Resistances          []string      `json:"resistances"`
-	Vulnerabilities      []string      `json:"vulnerabilities"`
-	Immunities           []string      `json:"immunities"`
-	PersonalityTraits    string        `json:"personality_traits"`
-	Ideals               string        `json:"ideals"`
-	Bonds                string        `json:"bonds"`
-	Flaws                string        `json:"flaws"`
-	Notes                string        `json:"notes"`
-	CreatedAt            time.Time     `json:"created_at"`
-	UpdatedAt            time.Time     `json:"updated_at"`
+	ID                   uuid.UUID          `json:"id"`
+	OwnerID              pgtype.UUID        `json:"owner_id"`
+	IsNpc                bool               `json:"is_npc"`
+	Name                 string             `json:"name"`
+	Race                 string             `json:"race"`
+	Class                string             `json:"class"`
+	Level                int32              `json:"level"`
+	Background           string             `json:"background"`
+	Alignment            string             `json:"alignment"`
+	Xp                   int32              `json:"xp"`
+	Strength             int32              `json:"strength"`
+	Dexterity            int32              `json:"dexterity"`
+	Constitution         int32              `json:"constitution"`
+	Intelligence         int32              `json:"intelligence"`
+	Wisdom               int32              `json:"wisdom"`
+	Charisma             int32              `json:"charisma"`
+	SaveProfStrength     bool               `json:"save_prof_strength"`
+	SaveProfDexterity    bool               `json:"save_prof_dexterity"`
+	SaveProfConstitution bool               `json:"save_prof_constitution"`
+	SaveProfIntelligence bool               `json:"save_prof_intelligence"`
+	SaveProfWisdom       bool               `json:"save_prof_wisdom"`
+	SaveProfCharisma     bool               `json:"save_prof_charisma"`
+	SkillAcrobatics      int32              `json:"skill_acrobatics"`
+	SkillAnimalHandling  int32              `json:"skill_animal_handling"`
+	SkillArcana          int32              `json:"skill_arcana"`
+	SkillAthletics       int32              `json:"skill_athletics"`
+	SkillDeception       int32              `json:"skill_deception"`
+	SkillHistory         int32              `json:"skill_history"`
+	SkillInsight         int32              `json:"skill_insight"`
+	SkillIntimidation    int32              `json:"skill_intimidation"`
+	SkillInvestigation   int32              `json:"skill_investigation"`
+	SkillMedicine        int32              `json:"skill_medicine"`
+	SkillNature          int32              `json:"skill_nature"`
+	SkillPerception      int32              `json:"skill_perception"`
+	SkillPerformance     int32              `json:"skill_performance"`
+	SkillPersuasion      int32              `json:"skill_persuasion"`
+	SkillReligion        int32              `json:"skill_religion"`
+	SkillSleightOfHand   int32              `json:"skill_sleight_of_hand"`
+	SkillStealth         int32              `json:"skill_stealth"`
+	SkillSurvival        int32              `json:"skill_survival"`
+	MaxHp                int32              `json:"max_hp"`
+	CurrentHp            int32              `json:"current_hp"`
+	TempHp               int32              `json:"temp_hp"`
+	ArmorClass           int32              `json:"armor_class"`
+	Speed                int32              `json:"speed"`
+	HitDiceType          int32              `json:"hit_dice_type"`
+	HitDiceRemaining     int32              `json:"hit_dice_remaining"`
+	DeathSaveSuccesses   int32              `json:"death_save_successes"`
+	DeathSaveFailures    int32              `json:"death_save_failures"`
+	Inspiration          bool               `json:"inspiration"`
+	TrainingArmor        []string           `json:"training_armor"`
+	TrainingWeapons      []string           `json:"training_weapons"`
+	TrainingTools        []string           `json:"training_tools"`
+	TrainingLanguages    []string           `json:"training_languages"`
+	AttunementSlots      int32              `json:"attunement_slots"`
+	Copper               int32              `json:"copper"`
+	Silver               int32              `json:"silver"`
+	Electrum             int32              `json:"electrum"`
+	Gold                 int32              `json:"gold"`
+	Platinum             int32              `json:"platinum"`
+	Conditions           []string           `json:"conditions"`
+	Resistances          []string           `json:"resistances"`
+	Vulnerabilities      []string           `json:"vulnerabilities"`
+	Immunities           []string           `json:"immunities"`
+	PersonalityTraits    string             `json:"personality_traits"`
+	Ideals               string             `json:"ideals"`
+	Bonds                string             `json:"bonds"`
+	Flaws                string             `json:"flaws"`
+	Notes                string             `json:"notes"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
 }
 
 type CombatEncounter struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	IsActive  bool      `json:"is_active"`
-	Round     int32     `json:"round"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        uuid.UUID          `json:"id"`
+	Name      string             `json:"name"`
+	IsActive  bool               `json:"is_active"`
+	Round     int32              `json:"round"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type CombatParticipant struct {
@@ -110,40 +109,40 @@ type CombatParticipant struct {
 }
 
 type Feature struct {
-	ID          uuid.UUID `json:"id"`
-	CharacterID uuid.UUID `json:"character_id"`
-	Name        string    `json:"name"`
-	Source      string    `json:"source"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID          uuid.UUID          `json:"id"`
+	CharacterID uuid.UUID          `json:"character_id"`
+	Name        string             `json:"name"`
+	Source      string             `json:"source"`
+	Description string             `json:"description"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
 type InventoryItem struct {
-	ID                 uuid.UUID `json:"id"`
-	CharacterID        uuid.UUID `json:"character_id"`
-	Name               string    `json:"name"`
-	Quantity           int32     `json:"quantity"`
-	Weight             string    `json:"weight"`
-	Description        string    `json:"description"`
-	IsEquipped         bool      `json:"is_equipped"`
-	RequiresAttunement bool      `json:"requires_attunement"`
-	IsAttuned          bool      `json:"is_attuned"`
-	CreatedAt          time.Time `json:"created_at"`
+	ID                 uuid.UUID          `json:"id"`
+	CharacterID        uuid.UUID          `json:"character_id"`
+	Name               string             `json:"name"`
+	Quantity           int32              `json:"quantity"`
+	Weight             pgtype.Numeric     `json:"weight"`
+	Description        string             `json:"description"`
+	IsEquipped         bool               `json:"is_equipped"`
+	RequiresAttunement bool               `json:"requires_attunement"`
+	IsAttuned          bool               `json:"is_attuned"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 }
 
 type Spell struct {
-	ID          uuid.UUID `json:"id"`
-	CharacterID uuid.UUID `json:"character_id"`
-	Name        string    `json:"name"`
-	Level       int32     `json:"level"`
-	School      string    `json:"school"`
-	CastingTime string    `json:"casting_time"`
-	Range       string    `json:"range"`
-	Components  string    `json:"components"`
-	Duration    string    `json:"duration"`
-	Description string    `json:"description"`
-	IsPrepared  bool      `json:"is_prepared"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID          uuid.UUID          `json:"id"`
+	CharacterID uuid.UUID          `json:"character_id"`
+	Name        string             `json:"name"`
+	Level       int32              `json:"level"`
+	School      string             `json:"school"`
+	CastingTime string             `json:"casting_time"`
+	Range       string             `json:"range"`
+	Components  string             `json:"components"`
+	Duration    string             `json:"duration"`
+	Description string             `json:"description"`
+	IsPrepared  bool               `json:"is_prepared"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
 type SpellSlot struct {
@@ -155,10 +154,10 @@ type SpellSlot struct {
 }
 
 type User struct {
-	ID           uuid.UUID `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"password_hash"`
-	Role         string    `json:"role"`
-	CreatedAt    time.Time `json:"created_at"`
+	ID           uuid.UUID          `json:"id"`
+	Username     string             `json:"username"`
+	Email        string             `json:"email"`
+	PasswordHash string             `json:"password_hash"`
+	Role         string             `json:"role"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }

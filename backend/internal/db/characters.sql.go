@@ -9,7 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCharacter = `-- name: CreateCharacter :one
@@ -31,20 +31,20 @@ RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment,
 `
 
 type CreateCharacterParams struct {
-	OwnerID    uuid.NullUUID `json:"owner_id"`
-	IsNpc      bool          `json:"is_npc"`
-	Name       string        `json:"name"`
-	Race       string        `json:"race"`
-	Class      string        `json:"class"`
-	Level      int32         `json:"level"`
-	MaxHp      int32         `json:"max_hp"`
-	CurrentHp  int32         `json:"current_hp"`
-	ArmorClass int32         `json:"armor_class"`
-	Speed      int32         `json:"speed"`
+	OwnerID    pgtype.UUID `json:"owner_id"`
+	IsNpc      bool        `json:"is_npc"`
+	Name       string      `json:"name"`
+	Race       string      `json:"race"`
+	Class      string      `json:"class"`
+	Level      int32       `json:"level"`
+	MaxHp      int32       `json:"max_hp"`
+	CurrentHp  int32       `json:"current_hp"`
+	ArmorClass int32       `json:"armor_class"`
+	Speed      int32       `json:"speed"`
 }
 
 func (q *Queries) CreateCharacter(ctx context.Context, arg CreateCharacterParams) (Character, error) {
-	row := q.db.QueryRowContext(ctx, createCharacter,
+	row := q.db.QueryRow(ctx, createCharacter,
 		arg.OwnerID,
 		arg.IsNpc,
 		arg.Name,
@@ -108,20 +108,20 @@ func (q *Queries) CreateCharacter(ctx context.Context, arg CreateCharacterParams
 		&i.DeathSaveSuccesses,
 		&i.DeathSaveFailures,
 		&i.Inspiration,
-		pq.Array(&i.TrainingArmor),
-		pq.Array(&i.TrainingWeapons),
-		pq.Array(&i.TrainingTools),
-		pq.Array(&i.TrainingLanguages),
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
 		&i.AttunementSlots,
 		&i.Copper,
 		&i.Silver,
 		&i.Electrum,
 		&i.Gold,
 		&i.Platinum,
-		pq.Array(&i.Conditions),
-		pq.Array(&i.Resistances),
-		pq.Array(&i.Vulnerabilities),
-		pq.Array(&i.Immunities),
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
 		&i.PersonalityTraits,
 		&i.Ideals,
 		&i.Bonds,
@@ -139,7 +139,7 @@ WHERE id = $1
 `
 
 func (q *Queries) DeleteCharacter(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteCharacter, id)
+	_, err := q.db.Exec(ctx, deleteCharacter, id)
 	return err
 }
 
@@ -149,7 +149,7 @@ WHERE id = $1
 `
 
 func (q *Queries) GetCharacter(ctx context.Context, id uuid.UUID) (Character, error) {
-	row := q.db.QueryRowContext(ctx, getCharacter, id)
+	row := q.db.QueryRow(ctx, getCharacter, id)
 	var i Character
 	err := row.Scan(
 		&i.ID,
@@ -202,20 +202,20 @@ func (q *Queries) GetCharacter(ctx context.Context, id uuid.UUID) (Character, er
 		&i.DeathSaveSuccesses,
 		&i.DeathSaveFailures,
 		&i.Inspiration,
-		pq.Array(&i.TrainingArmor),
-		pq.Array(&i.TrainingWeapons),
-		pq.Array(&i.TrainingTools),
-		pq.Array(&i.TrainingLanguages),
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
 		&i.AttunementSlots,
 		&i.Copper,
 		&i.Silver,
 		&i.Electrum,
 		&i.Gold,
 		&i.Platinum,
-		pq.Array(&i.Conditions),
-		pq.Array(&i.Resistances),
-		pq.Array(&i.Vulnerabilities),
-		pq.Array(&i.Immunities),
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
 		&i.PersonalityTraits,
 		&i.Ideals,
 		&i.Bonds,
@@ -233,7 +233,7 @@ ORDER BY name
 `
 
 func (q *Queries) ListCharacters(ctx context.Context) ([]Character, error) {
-	rows, err := q.db.QueryContext(ctx, listCharacters)
+	rows, err := q.db.Query(ctx, listCharacters)
 	if err != nil {
 		return nil, err
 	}
@@ -292,20 +292,20 @@ func (q *Queries) ListCharacters(ctx context.Context) ([]Character, error) {
 			&i.DeathSaveSuccesses,
 			&i.DeathSaveFailures,
 			&i.Inspiration,
-			pq.Array(&i.TrainingArmor),
-			pq.Array(&i.TrainingWeapons),
-			pq.Array(&i.TrainingTools),
-			pq.Array(&i.TrainingLanguages),
+			&i.TrainingArmor,
+			&i.TrainingWeapons,
+			&i.TrainingTools,
+			&i.TrainingLanguages,
 			&i.AttunementSlots,
 			&i.Copper,
 			&i.Silver,
 			&i.Electrum,
 			&i.Gold,
 			&i.Platinum,
-			pq.Array(&i.Conditions),
-			pq.Array(&i.Resistances),
-			pq.Array(&i.Vulnerabilities),
-			pq.Array(&i.Immunities),
+			&i.Conditions,
+			&i.Resistances,
+			&i.Vulnerabilities,
+			&i.Immunities,
 			&i.PersonalityTraits,
 			&i.Ideals,
 			&i.Bonds,
@@ -317,9 +317,6 @@ func (q *Queries) ListCharacters(ctx context.Context) ([]Character, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -334,7 +331,7 @@ ORDER BY name
 `
 
 func (q *Queries) ListNPCs(ctx context.Context) ([]Character, error) {
-	rows, err := q.db.QueryContext(ctx, listNPCs)
+	rows, err := q.db.Query(ctx, listNPCs)
 	if err != nil {
 		return nil, err
 	}
@@ -393,20 +390,20 @@ func (q *Queries) ListNPCs(ctx context.Context) ([]Character, error) {
 			&i.DeathSaveSuccesses,
 			&i.DeathSaveFailures,
 			&i.Inspiration,
-			pq.Array(&i.TrainingArmor),
-			pq.Array(&i.TrainingWeapons),
-			pq.Array(&i.TrainingTools),
-			pq.Array(&i.TrainingLanguages),
+			&i.TrainingArmor,
+			&i.TrainingWeapons,
+			&i.TrainingTools,
+			&i.TrainingLanguages,
 			&i.AttunementSlots,
 			&i.Copper,
 			&i.Silver,
 			&i.Electrum,
 			&i.Gold,
 			&i.Platinum,
-			pq.Array(&i.Conditions),
-			pq.Array(&i.Resistances),
-			pq.Array(&i.Vulnerabilities),
-			pq.Array(&i.Immunities),
+			&i.Conditions,
+			&i.Resistances,
+			&i.Vulnerabilities,
+			&i.Immunities,
 			&i.PersonalityTraits,
 			&i.Ideals,
 			&i.Bonds,
@@ -418,9 +415,6 @@ func (q *Queries) ListNPCs(ctx context.Context) ([]Character, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -435,7 +429,7 @@ ORDER BY name
 `
 
 func (q *Queries) ListPlayerCharacters(ctx context.Context) ([]Character, error) {
-	rows, err := q.db.QueryContext(ctx, listPlayerCharacters)
+	rows, err := q.db.Query(ctx, listPlayerCharacters)
 	if err != nil {
 		return nil, err
 	}
@@ -494,20 +488,20 @@ func (q *Queries) ListPlayerCharacters(ctx context.Context) ([]Character, error)
 			&i.DeathSaveSuccesses,
 			&i.DeathSaveFailures,
 			&i.Inspiration,
-			pq.Array(&i.TrainingArmor),
-			pq.Array(&i.TrainingWeapons),
-			pq.Array(&i.TrainingTools),
-			pq.Array(&i.TrainingLanguages),
+			&i.TrainingArmor,
+			&i.TrainingWeapons,
+			&i.TrainingTools,
+			&i.TrainingLanguages,
 			&i.AttunementSlots,
 			&i.Copper,
 			&i.Silver,
 			&i.Electrum,
 			&i.Gold,
 			&i.Platinum,
-			pq.Array(&i.Conditions),
-			pq.Array(&i.Resistances),
-			pq.Array(&i.Vulnerabilities),
-			pq.Array(&i.Immunities),
+			&i.Conditions,
+			&i.Resistances,
+			&i.Vulnerabilities,
+			&i.Immunities,
 			&i.PersonalityTraits,
 			&i.Ideals,
 			&i.Bonds,
@@ -520,13 +514,451 @@ func (q *Queries) ListPlayerCharacters(ctx context.Context) ([]Character, error)
 		}
 		items = append(items, i)
 	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 	return items, nil
+}
+
+const longRest = `-- name: LongRest :one
+UPDATE characters
+SET
+    current_hp              = max_hp,
+    hit_dice_remaining      = GREATEST(hit_dice_remaining + (level / 2), level),
+    death_save_successes    = 0,
+    death_save_failures     = 0,
+    conditions              = '{}',
+    updated_at              = NOW()
+WHERE id = $1
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+func (q *Queries) LongRest(ctx context.Context, id uuid.UUID) (Character, error) {
+	row := q.db.QueryRow(ctx, longRest, id)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const resetDeathSaves = `-- name: ResetDeathSaves :one
+UPDATE characters
+SET
+    death_save_successes    = 0,
+    death_save_failures     = 0,
+    updated_at              = NOW()
+WHERE id = $1
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+func (q *Queries) ResetDeathSaves(ctx context.Context, id uuid.UUID) (Character, error) {
+	row := q.db.QueryRow(ctx, resetDeathSaves, id)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const shortRest = `-- name: ShortRest :one
+UPDATE characters
+SET
+    hit_dice_remaining      = GREATEST(hit_dice_remaining - $2, 0),
+    current_hp              = LEAST(current_hp + $3, max_hp),
+    updated_at              = NOW()
+WHERE id = $1
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+type ShortRestParams struct {
+	ID               uuid.UUID `json:"id"`
+	HitDiceRemaining int32     `json:"hit_dice_remaining"`
+	CurrentHp        int32     `json:"current_hp"`
+}
+
+func (q *Queries) ShortRest(ctx context.Context, arg ShortRestParams) (Character, error) {
+	row := q.db.QueryRow(ctx, shortRest, arg.ID, arg.HitDiceRemaining, arg.CurrentHp)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateCharacter = `-- name: UpdateCharacter :one
+UPDATE characters
+SET
+    name                    = $2,
+    race                    = $3,
+    class                   = $4,
+    level                   = $5,
+    background              = $6,
+    alignment              = $7,
+    xp                      = $8,
+    strength                = $9,
+    dexterity               = $10,
+    constitution            = $11,
+    intelligence            = $12,
+    wisdom                  = $13,
+    charisma                = $14,
+    save_prof_strength      = $15,
+    save_prof_dexterity     = $16,
+    save_prof_constitution  = $17,
+    save_prof_intelligence  = $18,
+    save_prof_wisdom        = $19,
+    save_prof_charisma      = $20,
+    armor_class             = $21,
+    speed                   = $22,
+    hit_dice_type           = $23,
+    hit_dice_remaining      = $24,
+    inspiration             = $25,
+    updated_at              = NOW()
+WHERE id = $1
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+type UpdateCharacterParams struct {
+	ID                   uuid.UUID `json:"id"`
+	Name                 string    `json:"name"`
+	Race                 string    `json:"race"`
+	Class                string    `json:"class"`
+	Level                int32     `json:"level"`
+	Background           string    `json:"background"`
+	Alignment            string    `json:"alignment"`
+	Xp                   int32     `json:"xp"`
+	Strength             int32     `json:"strength"`
+	Dexterity            int32     `json:"dexterity"`
+	Constitution         int32     `json:"constitution"`
+	Intelligence         int32     `json:"intelligence"`
+	Wisdom               int32     `json:"wisdom"`
+	Charisma             int32     `json:"charisma"`
+	SaveProfStrength     bool      `json:"save_prof_strength"`
+	SaveProfDexterity    bool      `json:"save_prof_dexterity"`
+	SaveProfConstitution bool      `json:"save_prof_constitution"`
+	SaveProfIntelligence bool      `json:"save_prof_intelligence"`
+	SaveProfWisdom       bool      `json:"save_prof_wisdom"`
+	SaveProfCharisma     bool      `json:"save_prof_charisma"`
+	ArmorClass           int32     `json:"armor_class"`
+	Speed                int32     `json:"speed"`
+	HitDiceType          int32     `json:"hit_dice_type"`
+	HitDiceRemaining     int32     `json:"hit_dice_remaining"`
+	Inspiration          bool      `json:"inspiration"`
+}
+
+func (q *Queries) UpdateCharacter(ctx context.Context, arg UpdateCharacterParams) (Character, error) {
+	row := q.db.QueryRow(ctx, updateCharacter,
+		arg.ID,
+		arg.Name,
+		arg.Race,
+		arg.Class,
+		arg.Level,
+		arg.Background,
+		arg.Alignment,
+		arg.Xp,
+		arg.Strength,
+		arg.Dexterity,
+		arg.Constitution,
+		arg.Intelligence,
+		arg.Wisdom,
+		arg.Charisma,
+		arg.SaveProfStrength,
+		arg.SaveProfDexterity,
+		arg.SaveProfConstitution,
+		arg.SaveProfIntelligence,
+		arg.SaveProfWisdom,
+		arg.SaveProfCharisma,
+		arg.ArmorClass,
+		arg.Speed,
+		arg.HitDiceType,
+		arg.HitDiceRemaining,
+		arg.Inspiration,
+	)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const updateCharacterHP = `-- name: UpdateCharacterHP :one
@@ -546,7 +978,7 @@ type UpdateCharacterHPParams struct {
 }
 
 func (q *Queries) UpdateCharacterHP(ctx context.Context, arg UpdateCharacterHPParams) (Character, error) {
-	row := q.db.QueryRowContext(ctx, updateCharacterHP, arg.ID, arg.CurrentHp, arg.TempHp)
+	row := q.db.QueryRow(ctx, updateCharacterHP, arg.ID, arg.CurrentHp, arg.TempHp)
 	var i Character
 	err := row.Scan(
 		&i.ID,
@@ -599,20 +1031,208 @@ func (q *Queries) UpdateCharacterHP(ctx context.Context, arg UpdateCharacterHPPa
 		&i.DeathSaveSuccesses,
 		&i.DeathSaveFailures,
 		&i.Inspiration,
-		pq.Array(&i.TrainingArmor),
-		pq.Array(&i.TrainingWeapons),
-		pq.Array(&i.TrainingTools),
-		pq.Array(&i.TrainingLanguages),
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
 		&i.AttunementSlots,
 		&i.Copper,
 		&i.Silver,
 		&i.Electrum,
 		&i.Gold,
 		&i.Platinum,
-		pq.Array(&i.Conditions),
-		pq.Array(&i.Resistances),
-		pq.Array(&i.Vulnerabilities),
-		pq.Array(&i.Immunities),
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateConditions = `-- name: UpdateConditions :one
+UPDATE characters
+SET
+    conditions = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+type UpdateConditionsParams struct {
+	ID         uuid.UUID `json:"id"`
+	Conditions []string  `json:"conditions"`
+}
+
+func (q *Queries) UpdateConditions(ctx context.Context, arg UpdateConditionsParams) (Character, error) {
+	row := q.db.QueryRow(ctx, updateConditions, arg.ID, arg.Conditions)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateDeathSaves = `-- name: UpdateDeathSaves :one
+UPDATE characters
+SET
+    death_save_successes    = $2,
+    death_save_failures     = $3,
+    updated_at              = NOW()
+WHERE id = $1
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+type UpdateDeathSavesParams struct {
+	ID                 uuid.UUID `json:"id"`
+	DeathSaveSuccesses int32     `json:"death_save_successes"`
+	DeathSaveFailures  int32     `json:"death_save_failures"`
+}
+
+func (q *Queries) UpdateDeathSaves(ctx context.Context, arg UpdateDeathSavesParams) (Character, error) {
+	row := q.db.QueryRow(ctx, updateDeathSaves, arg.ID, arg.DeathSaveSuccesses, arg.DeathSaveFailures)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
 		&i.PersonalityTraits,
 		&i.Ideals,
 		&i.Bonds,

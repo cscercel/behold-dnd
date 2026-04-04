@@ -17,7 +17,13 @@ type Querier interface {
 	ListCharacters(ctx context.Context) ([]Character, error)
 	ListNPCs(ctx context.Context) ([]Character, error)
 	ListPlayerCharacters(ctx context.Context) ([]Character, error)
+	LongRest(ctx context.Context, id uuid.UUID) (Character, error)
+	ResetDeathSaves(ctx context.Context, id uuid.UUID) (Character, error)
+	ShortRest(ctx context.Context, arg ShortRestParams) (Character, error)
+	UpdateCharacter(ctx context.Context, arg UpdateCharacterParams) (Character, error)
 	UpdateCharacterHP(ctx context.Context, arg UpdateCharacterHPParams) (Character, error)
+	UpdateConditions(ctx context.Context, arg UpdateConditionsParams) (Character, error)
+	UpdateDeathSaves(ctx context.Context, arg UpdateDeathSavesParams) (Character, error)
 }
 
 var _ Querier = (*Queries)(nil)
