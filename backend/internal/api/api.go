@@ -14,12 +14,18 @@ type API struct {
 	queries				*db.Queries
 	pool				*pgxpool.Pool
 	characterService	*service.CharacterService
+	inventoryService	*service.InventoryService
+	spellService		*service.SpellService
 }
 
 func New(pool *pgxpool.Pool) *API {
+	queries := db.New(pool)
 	return &API{
-		queries: db.New(pool),
+		queries: queries,
 		pool: pool,
+		characterService: service.NewCharacterService(queries),
+		inventoryService: service.NewInventoryService(queries),
+		spellService: service.NewSpellService(queries),
 	}
 }
 
@@ -49,7 +55,33 @@ func (a *API) Routes() *chi.Mux {
 			r.Post("/death-save", a.handleDeathSave)
 			r.Post("long-rest", a.handleLongRest)
 			r.Post("short-rest", a.handleShortRest)
-			r.Put("/conditions", a.HandleUpdateConditions)
+			r.Put("/conditions", a.handleUpdateConditions)
+
+			// Inventory
+			r.Route("/inventory", func(r chi.Router) {
+				r.Get("/", a.handleListInventory)
+				r.Post("/", a.handleCreateInventoryItem)
+				r.Put("/{itemID}", a.handleUpdateInventoryItem)
+				r.Delete("/{itemID}", a.handleDeleteInventoryItem)
+				r.Post("/{itemID}/attune", a.handleAttuneItem)
+				r.Post("/{itemID}/unattune", a.handleUnattuneItem)
+			})
+
+			// Spells
+			r.Route("/spells", func(r chi.Router) {
+				r.Get("/", a.handleListSpells)
+				r.Post("/", a.handleCreateSpell)
+				r.Put("/{spellID}", a.handleUpdateSpell)
+				r.Delete("/{spellID}", a.handleDeleteSpell)
+				r.Post("/{spellID}/toggle-prepared", a.handleToggleSpellPrepared)
+			})
+
+			// Spell slots
+			r.Route("/spell-slots", func(r chi.Router) {
+				r.Get("/", a.handleListSpellSlots)
+				r.Put("/", a.handleUpsertSpellSlot)
+				r.Post("/use", a.handleUseSpellSlot)
+			})
 		})
 	})
 

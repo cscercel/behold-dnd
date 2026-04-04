@@ -11,19 +11,36 @@ import (
 )
 
 type Querier interface {
+	CountAttunedItems(ctx context.Context, characterID uuid.UUID) (int64, error)
 	CreateCharacter(ctx context.Context, arg CreateCharacterParams) (Character, error)
+	CreateInventoryItem(ctx context.Context, arg CreateInventoryItemParams) (InventoryItem, error)
+	CreateSpell(ctx context.Context, arg CreateSpellParams) (Spell, error)
 	DeleteCharacter(ctx context.Context, id uuid.UUID) error
+	DeleteInventoryItem(ctx context.Context, id uuid.UUID) error
+	DeleteSpell(ctx context.Context, id uuid.UUID) error
 	GetCharacter(ctx context.Context, id uuid.UUID) (Character, error)
+	GetInventoryItem(ctx context.Context, id uuid.UUID) (InventoryItem, error)
+	GetSpell(ctx context.Context, id uuid.UUID) (Spell, error)
 	ListCharacters(ctx context.Context) ([]Character, error)
+	ListInventoryItems(ctx context.Context, characterID uuid.UUID) ([]InventoryItem, error)
 	ListNPCs(ctx context.Context) ([]Character, error)
 	ListPlayerCharacters(ctx context.Context) ([]Character, error)
+	ListPreparedSpells(ctx context.Context, characterID uuid.UUID) ([]Spell, error)
+	ListSpellSlots(ctx context.Context, characterID uuid.UUID) ([]SpellSlot, error)
+	ListSpells(ctx context.Context, characterID uuid.UUID) ([]Spell, error)
 	LongRest(ctx context.Context, id uuid.UUID) (Character, error)
 	ResetDeathSaves(ctx context.Context, id uuid.UUID) (Character, error)
+	ResetSpellSlots(ctx context.Context, characterID uuid.UUID) error
 	ShortRest(ctx context.Context, arg ShortRestParams) (Character, error)
+	ToggleSpellPrepared(ctx context.Context, id uuid.UUID) (Spell, error)
 	UpdateCharacter(ctx context.Context, arg UpdateCharacterParams) (Character, error)
 	UpdateCharacterHP(ctx context.Context, arg UpdateCharacterHPParams) (Character, error)
 	UpdateConditions(ctx context.Context, arg UpdateConditionsParams) (Character, error)
 	UpdateDeathSaves(ctx context.Context, arg UpdateDeathSavesParams) (Character, error)
+	UpdateInventoryItem(ctx context.Context, arg UpdateInventoryItemParams) (InventoryItem, error)
+	UpdateSpell(ctx context.Context, arg UpdateSpellParams) (Spell, error)
+	UpsertSpellSlot(ctx context.Context, arg UpsertSpellSlotParams) (SpellSlot, error)
+	UseSpellSlot(ctx context.Context, arg UseSpellSlotParams) (SpellSlot, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -1,0 +1,45 @@
+-- name: GetInventoryItem :one
+SELECT * FROM inventory_items
+WHERE id = $1;
+
+-- name: ListInventoryItems :many
+SELECT * FROM inventory_items
+WHERE character_id = $1
+ORDER BY name;
+
+-- name: CreateInventoryItem :one
+INSERT INTO inventory_items (
+    character_id,
+    name,
+    quantity,
+    weight,
+    description,
+    is_equipped,
+    requires_attunement,
+    is_attuned
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8
+)
+RETURNING *;
+
+-- name: UpdateInventoryItem :one
+UPDATE inventory_items
+SET 
+    name                = $2,
+    quantity            = $3,
+    weight              = $4, 
+    description         = $5,
+    is_equipped         = $6,
+    requires_attunement = $7,
+    is_attuned          = $8
+WHERE id = $1
+RETURNING *;
+
+-- name: DeleteInventoryItem :exec
+DELETE FROM inventory_items
+WHERE id = $1;
+
+-- name: CountAttunedItems :one
+SELECT COUNT(*) FROM inventory_items
+WHERE character_id = $1
+AND is_attuned = TRUE;
