@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/cscercel/beyond-dnd/internal/db"
+	"github.com/cscercel/behold-dnd/internal/db"
 )
 
 

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/cscercel/beyond-dnd/internal/db"
+	"github.com/cscercel/behold-dnd/internal/db"
 	"github.com/google/uuid"
 )
 

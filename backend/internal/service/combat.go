@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cscercel/beyond-dnd/internal/db"
+	"github.com/cscercel/behold-dnd/internal/db"
 	"github.com/google/uuid"
 )
 

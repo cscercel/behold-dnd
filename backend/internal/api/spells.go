@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/cscercel/beyond-dnd/internal/db"
+	"github.com/cscercel/behold-dnd/internal/db"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )

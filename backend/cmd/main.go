@@ -8,9 +8,9 @@ import (
 	"net/http"
 
 
-	"github.com/cscercel/beyond-dnd/internal/api"
-	"github.com/cscercel/beyond-dnd/internal/config"
-	"github.com/cscercel/beyond-dnd/internal/database"
+	"github.com/cscercel/behold-dnd/internal/api"
+	"github.com/cscercel/behold-dnd/internal/config"
+	"github.com/cscercel/behold-dnd/internal/database"
 
 )
 
@@ -33,11 +33,11 @@ func main() {
 	defer pool.Close()
 
 	// Instantiate API
-	a := api.New(pool)
+	a := api.New(pool, cfg)
 	router := a.Routes()
 
 	addr := fmt.Sprintf(":%s", cfg.Port)
-	log.Printf("Beyond DnD server listening on %s", addr)
+	log.Printf("Behold DnD server listening on %s", addr)
 
 	if err := http.ListenAndServe(addr, router); err != nil {
 		log.Fatalf("server error: %v", err)

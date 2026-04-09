@@ -2,9 +2,11 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
-	"github.com/cscercel/beyond-dnd/internal/db"
+	"github.com/cscercel/behold-dnd/internal/db"
+	"github.com/cscercel/behold-dnd/internal/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
@@ -28,9 +30,9 @@ func (a *API) handleGetCharacter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	character, err := a.queries.GetCharacter(r.Context(), id)
+	character, err := a.requireCharacterAccess(r, id)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "character not found")
+		respondAccessError(w, err)
 		return
 	}
 
@@ -60,6 +62,11 @@ func (a *API) handleUpdateCharacter(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, "invalid character id")
 		return
 	}
+
+	if _, err := a.requireCharacterAccess(r, id); err != nil {
+		respondAccessError(w, err)
+		return
+	}
 	
 	var params db.UpdateCharacterParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
@@ -85,6 +92,11 @@ func (a *API) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if _, err := a.requireCharacterAccess(r, id); err != nil {
+		respondAccessError(w, err)
+		return
+	}
+
 	if err := a.queries.DeleteCharacter(r.Context(), id); err != nil {
 		respondError(w, http.StatusInternalServerError, "failed to delete character")
 		return
@@ -97,6 +109,11 @@ func (a *API) handleDamage(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "invalid character id")
+		return
+	}
+
+	if _, err := a.requireCharacterAccess(r, id); err != nil {
+		respondAccessError(w, err)
 		return
 	}
 
@@ -125,6 +142,11 @@ func (a *API) handleHeal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if _, err := a.requireCharacterAccess(r, id); err != nil {
+		respondAccessError(w, err)
+		return
+	}
+
 	var body struct {
 		Amount	int	`json:"amount"`
 	}
@@ -147,6 +169,11 @@ func (a *API) handleTempHP(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "invalid character id")
+		return
+	}
+
+	if _, err := a.requireCharacterAccess(r, id); err != nil {
+		respondAccessError(w, err)
 		return
 	}
 
@@ -175,6 +202,11 @@ func (a *API) handleDeathSave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if _, err := a.requireCharacterAccess(r, id); err != nil {
+		respondAccessError(w, err)
+		return
+	}
+
 	var body struct {
 		Success	bool `json:"success"`
 	}
@@ -200,6 +232,11 @@ func (a *API) handleLongRest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if _, err := a.requireCharacterAccess(r, id); err != nil {
+		respondAccessError(w, err)
+		return
+	}
+
 	character, err := a.queries.LongRest(r.Context(), id)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "failed to apply long rest")
@@ -219,6 +256,11 @@ func (a *API) handleShortRest(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "invalid character id")
+		return
+	}
+
+	if _, err := a.requireCharacterAccess(r, id); err != nil {
+		respondAccessError(w, err)
 		return
 	}
 
@@ -252,6 +294,11 @@ func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if _, err := a.requireCharacterAccess(r, id); err != nil {
+		respondAccessError(w, err)
+		return
+	}
+
 	var body struct {
 		Conditions []string	`json:"conditions"`
 	}
@@ -272,3 +319,24 @@ func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 
 	respondJSON(w, http.StatusOK, character)
 }
+
+// Function to authenticate character ownership
+func (a *API) requireCharacterAccess(r *http.Request, characterID uuid.UUID) (db.Character, error) {
+	character, err := a.queries.GetCharacter(r.Context(), characterID)
+	if err != nil {
+		return db.Character{}, fmt.Errorf("not found")
+	}
+
+	role, _ := middleware.RoleFromContext(r.Context())
+	if role == "dm" {
+		return character, nil
+	}
+
+	userID, _ := middleware.UserIDFromContext(r.Context())
+	if !character.OwnerID.Valid || character.OwnerID.Bytes != userID {
+		return db.Character{}, fmt.Errorf("forbidden")
+	}
+
+	return character, nil
+}
+

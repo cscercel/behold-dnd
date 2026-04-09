@@ -17,6 +17,7 @@ type Querier interface {
 	CreateEncounter(ctx context.Context, name string) (CombatEncounter, error)
 	CreateInventoryItem(ctx context.Context, arg CreateInventoryItemParams) (InventoryItem, error)
 	CreateSpell(ctx context.Context, arg CreateSpellParams) (Spell, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeactivateParticipant(ctx context.Context, id uuid.UUID) (CombatParticipant, error)
 	DeleteCharacter(ctx context.Context, id uuid.UUID) error
 	DeleteEncounter(ctx context.Context, id uuid.UUID) error
@@ -29,6 +30,8 @@ type Querier interface {
 	GetInventoryItem(ctx context.Context, id uuid.UUID) (InventoryItem, error)
 	GetParticipant(ctx context.Context, id uuid.UUID) (CombatParticipant, error)
 	GetSpell(ctx context.Context, id uuid.UUID) (Spell, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 	ListActiveParticipants(ctx context.Context, encounterID uuid.UUID) ([]CombatParticipant, error)
 	ListCharacters(ctx context.Context) ([]Character, error)
 	ListEncounters(ctx context.Context) ([]CombatEncounter, error)
@@ -39,6 +42,7 @@ type Querier interface {
 	ListPreparedSpells(ctx context.Context, characterID uuid.UUID) ([]Spell, error)
 	ListSpellSlots(ctx context.Context, characterID uuid.UUID) ([]SpellSlot, error)
 	ListSpells(ctx context.Context, characterID uuid.UUID) ([]Spell, error)
+	ListUsers(ctx context.Context) ([]ListUsersRow, error)
 	LongRest(ctx context.Context, id uuid.UUID) (Character, error)
 	NextRound(ctx context.Context, id uuid.UUID) (CombatEncounter, error)
 	RemoveParticipant(ctx context.Context, id uuid.UUID) error
