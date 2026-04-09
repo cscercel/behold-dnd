@@ -46,10 +46,10 @@ func (a *API) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 	}
 
 	character, err := a.queries.CreateCharacter(r.Context(), params)
-		if err != nil {
-			respondError(w, http.StatusInternalServerError, "failed to create character")
-			return
-		}
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "failed to create character")
+		return
+	}
 
 	respondJSON(w, http.StatusCreated, character)
 }
@@ -203,6 +203,12 @@ func (a *API) handleLongRest(w http.ResponseWriter, r *http.Request) {
 	character, err := a.queries.LongRest(r.Context(), id)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "failed to apply long rest")
+		return
+	}
+
+	// Reset spell slots
+	if err := a.spellService.LongRestSlots(r.Context(), id); err != nil {
+		respondError(w, http.StatusInternalServerError, "failed to reset spell slots")
 		return
 	}
 

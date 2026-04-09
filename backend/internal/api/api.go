@@ -16,6 +16,7 @@ type API struct {
 	characterService	*service.CharacterService
 	inventoryService	*service.InventoryService
 	spellService		*service.SpellService
+	combatService		*service.CombatService
 }
 
 func New(pool *pgxpool.Pool) *API {
@@ -26,6 +27,7 @@ func New(pool *pgxpool.Pool) *API {
 		characterService: service.NewCharacterService(queries),
 		inventoryService: service.NewInventoryService(queries),
 		spellService: service.NewSpellService(queries),
+		combatService: service.NewCombatService(queries),
 	}
 }
 
@@ -51,10 +53,10 @@ func (a *API) Routes() *chi.Mux {
 			// Game mechanics
 			r.Post("/damage", a.handleDamage)
 			r.Post("/heal", a.handleHeal)
-			r.Post("temp-hp", a.handleTempHP)
+			r.Post("/temp-hp", a.handleTempHP)
 			r.Post("/death-save", a.handleDeathSave)
-			r.Post("long-rest", a.handleLongRest)
-			r.Post("short-rest", a.handleShortRest)
+			r.Post("/long-rest", a.handleLongRest)
+			r.Post("/short-rest", a.handleShortRest)
 			r.Put("/conditions", a.handleUpdateConditions)
 
 			// Inventory
@@ -81,6 +83,37 @@ func (a *API) Routes() *chi.Mux {
 				r.Get("/", a.handleListSpellSlots)
 				r.Put("/", a.handleUpsertSpellSlot)
 				r.Post("/use", a.handleUseSpellSlot)
+			})
+		})
+	})
+
+
+	// Combat Routes
+	r.Route("/combat", func(r chi.Router) {
+		r.Get("/", a.handleListEncounters)
+		r.Post("/", a.handleCreateEncounter)
+		r.Get("/active", a.handleGetActiveEncounter)
+
+		r.Route("/{encounterID}", func(r chi.Router) {
+			r.Get("/", a.handleGetEncounter)
+			r.Delete("/", a.handleDeleteEncounter)
+			r.Post("/start", a.handleStartEncounter)
+			r.Post("/end", a.handleEndEncounter)
+			r.Post("/next-round", a.handleNextRound)
+
+			// Participants
+			r.Get("/participants", a.handleListParticipants)
+			r.Post("/participants", a.handleAddParticipant)
+
+			r.Route("/participants/{participantID}", func(r chi.Router) {
+				r.Delete("/", a.handleRemoveParticipant)
+				r.Post("/damage", a.handleParticipantDamage)
+				r.Post("/heal", a.handleParticipantHeal)
+				r.Post("/temp-hp", a.handleParticipantTempHP)
+				r.Put("/initiative", a.handleParticipantInitiative)
+				r.Put("/conditions", a.handleParticipantConditions)
+				r.Post("/toggle-concentration", a.handleParticipantToggleConcentration)
+				r.Post("/deactivate", a.handleDeactivateParticipant)
 			})
 		})
 	})

@@ -53,7 +53,7 @@ func (s *InventoryService) AttuneItem(ctx context.Context, characterID uuid.UUID
 		Description: item.Description,
 		IsEquipped:	item.IsEquipped,
 		RequiresAttunement: item.RequiresAttunement,
-		isAttuned:	true,
+		IsAttuned:	true,
 	})
 }
 
@@ -77,6 +77,6 @@ func (s *InventoryService) UnattuneItem(ctx context.Context, characterID uuid.UU
 		Description: item.Description,
 		IsEquipped:	item.IsEquipped,
 		RequiresAttunement: item.RequiresAttunement,
-		isAttuned:	false,
+		IsAttuned:	false,
 	})
 }
