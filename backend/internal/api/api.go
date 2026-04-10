@@ -114,7 +114,7 @@ func (a *API) Routes() *chi.Mux {
 			r.Use(appMiddleware.RequireDM)
 			
 			// List all characters
-			r.Route("/characters", func(r chi.Router) {
+			r.Route("/list-characters", func(r chi.Router) {
 				r.Get("/", a.handleListCharacters)
 			})
 
