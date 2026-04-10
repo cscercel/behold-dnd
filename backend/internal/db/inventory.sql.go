@@ -151,32 +151,31 @@ func (q *Queries) ListInventoryItems(ctx context.Context, characterID uuid.UUID)
 
 const updateInventoryItem = `-- name: UpdateInventoryItem :one
 UPDATE inventory_items
-SET 
-    name                = $2,
-    quantity            = $3,
-    weight              = $4, 
-    description         = $5,
-    is_equipped         = $6,
-    requires_attunement = $7,
-    is_attuned          = $8
-WHERE id = $1
+SET
+    name                = COALESCE($1, name),
+    quantity            = COALESCE($2, quantity),
+    weight              = COALESCE($3, weight),
+    description         = COALESCE($4, description),
+    is_equipped         = COALESCE($5, is_equipped),
+    requires_attunement = COALESCE($6, requires_attunement),
+    is_attuned          = COALESCE($7, is_attuned)
+WHERE id = $8
 RETURNING id, character_id, name, quantity, weight, description, is_equipped, requires_attunement, is_attuned, created_at
 `
 
 type UpdateInventoryItemParams struct {
-	ID                 uuid.UUID      `json:"id"`
-	Name               string         `json:"name"`
-	Quantity           int32          `json:"quantity"`
+	Name               pgtype.Text    `json:"name"`
+	Quantity           pgtype.Int4    `json:"quantity"`
 	Weight             pgtype.Numeric `json:"weight"`
-	Description        string         `json:"description"`
-	IsEquipped         bool           `json:"is_equipped"`
-	RequiresAttunement bool           `json:"requires_attunement"`
-	IsAttuned          bool           `json:"is_attuned"`
+	Description        pgtype.Text    `json:"description"`
+	IsEquipped         pgtype.Bool    `json:"is_equipped"`
+	RequiresAttunement pgtype.Bool    `json:"requires_attunement"`
+	IsAttuned          pgtype.Bool    `json:"is_attuned"`
+	ID                 uuid.UUID      `json:"id"`
 }
 
 func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryItemParams) (InventoryItem, error) {
 	row := q.db.QueryRow(ctx, updateInventoryItem,
-		arg.ID,
 		arg.Name,
 		arg.Quantity,
 		arg.Weight,
@@ -184,6 +183,7 @@ func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryIt
 		arg.IsEquipped,
 		arg.RequiresAttunement,
 		arg.IsAttuned,
+		arg.ID,
 	)
 	var i InventoryItem
 	err := row.Scan(

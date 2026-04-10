@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createSpell = `-- name: CreateSpell :one
@@ -217,35 +218,34 @@ func (q *Queries) ToggleSpellPrepared(ctx context.Context, id uuid.UUID) (Spell,
 const updateSpell = `-- name: UpdateSpell :one
 UPDATE spells
 SET
-    name            = $2,
-    level           = $3,
-    school          = $4,
-    casting_time    = $5,
-    range           = $6,
-    components      = $7,
-    duration        = $8,
-    description     = $9,
-    is_prepared     = $10
-WHERE id = $1
+    name         = COALESCE($1, name),
+    level        = COALESCE($2, level),
+    school       = COALESCE($3, school),
+    casting_time = COALESCE($4, casting_time),
+    range        = COALESCE($5, range),
+    components   = COALESCE($6, components),
+    duration     = COALESCE($7, duration),
+    description  = COALESCE($8, description),
+    is_prepared  = COALESCE($9, is_prepared)
+WHERE id = $10
 RETURNING id, character_id, name, level, school, casting_time, range, components, duration, description, is_prepared, created_at
 `
 
 type UpdateSpellParams struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Level       int32     `json:"level"`
-	School      string    `json:"school"`
-	CastingTime string    `json:"casting_time"`
-	Range       string    `json:"range"`
-	Components  string    `json:"components"`
-	Duration    string    `json:"duration"`
-	Description string    `json:"description"`
-	IsPrepared  bool      `json:"is_prepared"`
+	Name        pgtype.Text `json:"name"`
+	Level       pgtype.Int4 `json:"level"`
+	School      pgtype.Text `json:"school"`
+	CastingTime pgtype.Text `json:"casting_time"`
+	Range       pgtype.Text `json:"range"`
+	Components  pgtype.Text `json:"components"`
+	Duration    pgtype.Text `json:"duration"`
+	Description pgtype.Text `json:"description"`
+	IsPrepared  pgtype.Bool `json:"is_prepared"`
+	ID          uuid.UUID   `json:"id"`
 }
 
 func (q *Queries) UpdateSpell(ctx context.Context, arg UpdateSpellParams) (Spell, error) {
 	row := q.db.QueryRow(ctx, updateSpell,
-		arg.ID,
 		arg.Name,
 		arg.Level,
 		arg.School,
@@ -255,6 +255,7 @@ func (q *Queries) UpdateSpell(ctx context.Context, arg UpdateSpellParams) (Spell
 		arg.Duration,
 		arg.Description,
 		arg.IsPrepared,
+		arg.ID,
 	)
 	var i Spell
 	err := row.Scan(

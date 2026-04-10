@@ -87,7 +87,7 @@ func (a *API) handleCreateInventoryItem(w http.ResponseWriter, r *http.Request) 
 // @Failure      401  {object}  object{error=string}
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
-// @Router       /characters/{id}/inventory/{itemID} [put]
+// @Router       /characters/{id}/inventory/{itemID} [patch]
 func (a *API) handleUpdateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	itemID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {

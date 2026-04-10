@@ -17,7 +17,7 @@ import (
 // @Security     BearerAuth
 // @Success      200  {array}   db.Character
 // @Failure      401  {object}  object{error=string}
-// @Router       /characters [get]
+// @Router       /list-characters [get]
 func (a *API) handleListCharacters(w http.ResponseWriter, r *http.Request) {
 	characters, err := a.queries.ListCharacters(r.Context())
 	if err != nil {
@@ -95,7 +95,7 @@ func (a *API) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 // @Failure      403  {object}  object{error=string}
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
-// @Router       /characters/{id} [put]
+// @Router       /characters/{id} [patch]
 func (a *API) handleUpdateCharacter(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {

@@ -24,15 +24,15 @@ RETURNING *;
 
 -- name: UpdateInventoryItem :one
 UPDATE inventory_items
-SET 
-    name                = $2,
-    quantity            = $3,
-    weight              = $4, 
-    description         = $5,
-    is_equipped         = $6,
-    requires_attunement = $7,
-    is_attuned          = $8
-WHERE id = $1
+SET
+    name                = COALESCE(sqlc.narg('name'), name),
+    quantity            = COALESCE(sqlc.narg('quantity'), quantity),
+    weight              = COALESCE(sqlc.narg('weight'), weight),
+    description         = COALESCE(sqlc.narg('description'), description),
+    is_equipped         = COALESCE(sqlc.narg('is_equipped'), is_equipped),
+    requires_attunement = COALESCE(sqlc.narg('requires_attunement'), requires_attunement),
+    is_attuned          = COALESCE(sqlc.narg('is_attuned'), is_attuned)
+WHERE id = sqlc.arg('id')
 RETURNING *;
 
 -- name: DeleteInventoryItem :exec

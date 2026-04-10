@@ -340,97 +340,189 @@ definitions:
   github_com_cscercel_behold-dnd_internal_db.UpdateCharacterParams:
     properties:
       alignment:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
       armor_class:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
+      attunement_slots:
+        $ref: '#/definitions/pgtype.Int4'
       background:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
+      bonds:
+        $ref: '#/definitions/pgtype.Text'
       charisma:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       class:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
+      conditions:
+        items:
+          type: string
+        type: array
       constitution:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
+      copper:
+        $ref: '#/definitions/pgtype.Int4'
       dexterity:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
+      electrum:
+        $ref: '#/definitions/pgtype.Int4'
+      flaws:
+        $ref: '#/definitions/pgtype.Text'
+      gold:
+        $ref: '#/definitions/pgtype.Int4'
       hit_dice_remaining:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       hit_dice_type:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       id:
         type: string
+      ideals:
+        $ref: '#/definitions/pgtype.Text'
+      immunities:
+        items:
+          type: string
+        type: array
       inspiration:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       intelligence:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       level:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
+      max_hp:
+        $ref: '#/definitions/pgtype.Int4'
       name:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
+      notes:
+        $ref: '#/definitions/pgtype.Text'
+      personality_traits:
+        $ref: '#/definitions/pgtype.Text'
+      platinum:
+        $ref: '#/definitions/pgtype.Int4'
       race:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
+      resistances:
+        items:
+          type: string
+        type: array
       save_prof_charisma:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       save_prof_constitution:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       save_prof_dexterity:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       save_prof_intelligence:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       save_prof_strength:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       save_prof_wisdom:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
+      silver:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_acrobatics:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_animal_handling:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_arcana:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_athletics:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_deception:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_history:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_insight:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_intimidation:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_investigation:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_medicine:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_nature:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_perception:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_performance:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_persuasion:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_religion:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_sleight_of_hand:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_stealth:
+        $ref: '#/definitions/pgtype.Int4'
+      skill_survival:
+        $ref: '#/definitions/pgtype.Int4'
       speed:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       strength:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
+      training_armor:
+        items:
+          type: string
+        type: array
+      training_languages:
+        items:
+          type: string
+        type: array
+      training_tools:
+        items:
+          type: string
+        type: array
+      training_weapons:
+        items:
+          type: string
+        type: array
+      vulnerabilities:
+        items:
+          type: string
+        type: array
       wisdom:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       xp:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
     type: object
   github_com_cscercel_behold-dnd_internal_db.UpdateInventoryItemParams:
     properties:
       description:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
       id:
         type: string
       is_attuned:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       is_equipped:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       name:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
       quantity:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       requires_attunement:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       weight:
         $ref: '#/definitions/pgtype.Numeric'
     type: object
   github_com_cscercel_behold-dnd_internal_db.UpdateSpellParams:
     properties:
       casting_time:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
       components:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
       description:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
       duration:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
       id:
         type: string
       is_prepared:
-        type: boolean
+        $ref: '#/definitions/pgtype.Bool'
       level:
-        type: integer
+        $ref: '#/definitions/pgtype.Int4'
       name:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
       range:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
       school:
-        type: string
+        $ref: '#/definitions/pgtype.Text'
     type: object
   github_com_cscercel_behold-dnd_internal_db.UpsertSpellSlotParams:
     properties:
@@ -443,6 +535,13 @@ definitions:
       used:
         type: integer
     type: object
+  pgtype.Bool:
+    properties:
+      bool:
+        type: boolean
+      valid:
+        type: boolean
+    type: object
   pgtype.InfinityModifier:
     enum:
     - 1
@@ -454,6 +553,14 @@ definitions:
     - Infinity
     - Finite
     - NegativeInfinity
+  pgtype.Int4:
+    properties:
+      int32:
+        format: int32
+        type: integer
+      valid:
+        type: boolean
+    type: object
   pgtype.Numeric:
     properties:
       exp:
@@ -465,6 +572,13 @@ definitions:
         $ref: '#/definitions/big.Int'
       naN:
         type: boolean
+      valid:
+        type: boolean
+    type: object
+  pgtype.Text:
+    properties:
+      string:
+        type: string
       valid:
         type: boolean
     type: object
@@ -607,28 +721,6 @@ paths:
       tags:
       - auth
   /characters:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            properties:
-              error:
-                type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: List all characters
-      tags:
-      - characters
     post:
       consumes:
       - application/json
@@ -758,7 +850,7 @@ paths:
       summary: Get a character
       tags:
       - characters
-    put:
+    patch:
       consumes:
       - application/json
       parameters:
@@ -1242,7 +1334,7 @@ paths:
       summary: Delete an inventory item
       tags:
       - inventory
-    put:
+    patch:
       consumes:
       - application/json
       parameters:
@@ -1831,7 +1923,7 @@ paths:
       summary: Delete a spell
       tags:
       - spells
-    put:
+    patch:
       consumes:
       - application/json
       parameters:
@@ -2972,6 +3064,29 @@ paths:
       summary: Get the currently active encounter
       tags:
       - combat
+  /list-characters:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all characters
+      tags:
+      - characters
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by your JWT token

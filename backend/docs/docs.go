@@ -208,42 +208,6 @@ const docTemplate = `{
             }
         },
         "/characters": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "characters"
-                ],
-                "summary": "List all characters",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.Character"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -368,14 +332,11 @@ const docTemplate = `{
                     }
                 }
             },
-            "put": {
+            "delete": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
-                "consumes": [
-                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -383,7 +344,7 @@ const docTemplate = `{
                 "tags": [
                     "characters"
                 ],
-                "summary": "Update a character",
+                "summary": "Delete a character",
                 "parameters": [
                     {
                         "type": "string",
@@ -391,23 +352,11 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Character data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateCharacterParams"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.Character"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -466,11 +415,14 @@ const docTemplate = `{
                     }
                 }
             },
-            "delete": {
+            "patch": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -478,7 +430,7 @@ const docTemplate = `{
                 "tags": [
                     "characters"
                 ],
-                "summary": "Delete a character",
+                "summary": "Update a character",
                 "parameters": [
                     {
                         "type": "string",
@@ -486,11 +438,23 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Character data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateCharacterParams"
+                        }
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.Character"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -1141,14 +1105,11 @@ const docTemplate = `{
             }
         },
         "/characters/{id}/inventory/{itemID}": {
-            "put": {
+            "delete": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
-                "consumes": [
-                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -1156,7 +1117,7 @@ const docTemplate = `{
                 "tags": [
                     "inventory"
                 ],
-                "summary": "Update an inventory item",
+                "summary": "Delete an inventory item",
                 "parameters": [
                     {
                         "type": "string",
@@ -1171,23 +1132,11 @@ const docTemplate = `{
                         "name": "itemID",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Item data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateInventoryItemParams"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.InventoryItem"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -1235,11 +1184,14 @@ const docTemplate = `{
                     }
                 }
             },
-            "delete": {
+            "patch": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -1247,7 +1199,7 @@ const docTemplate = `{
                 "tags": [
                     "inventory"
                 ],
-                "summary": "Delete an inventory item",
+                "summary": "Update an inventory item",
                 "parameters": [
                     {
                         "type": "string",
@@ -1262,11 +1214,23 @@ const docTemplate = `{
                         "name": "itemID",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Item data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateInventoryItemParams"
+                        }
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.InventoryItem"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -2075,14 +2039,11 @@ const docTemplate = `{
             }
         },
         "/characters/{id}/spells/{spellID}": {
-            "put": {
+            "delete": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
-                ],
-                "consumes": [
-                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -2090,7 +2051,7 @@ const docTemplate = `{
                 "tags": [
                     "spells"
                 ],
-                "summary": "Update a spell",
+                "summary": "Delete a spell",
                 "parameters": [
                     {
                         "type": "string",
@@ -2105,23 +2066,11 @@ const docTemplate = `{
                         "name": "spellID",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Spell data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateSpellParams"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.Spell"
-                        }
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -2169,11 +2118,14 @@ const docTemplate = `{
                     }
                 }
             },
-            "delete": {
+            "patch": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -2181,7 +2133,7 @@ const docTemplate = `{
                 "tags": [
                     "spells"
                 ],
-                "summary": "Delete a spell",
+                "summary": "Update a spell",
                 "parameters": [
                     {
                         "type": "string",
@@ -2196,11 +2148,23 @@ const docTemplate = `{
                         "name": "spellID",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Spell data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateSpellParams"
+                        }
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.Spell"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -3966,6 +3930,44 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/list-characters": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "summary": "List all characters",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.Character"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -4483,79 +4485,217 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "alignment": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "armor_class": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "attunement_slots": {
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "background": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
+                },
+                "bonds": {
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "charisma": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "class": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
+                },
+                "conditions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "constitution": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "copper": {
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "dexterity": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "electrum": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "flaws": {
+                    "$ref": "#/definitions/pgtype.Text"
+                },
+                "gold": {
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "hit_dice_remaining": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "hit_dice_type": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "id": {
                     "type": "string"
                 },
+                "ideals": {
+                    "$ref": "#/definitions/pgtype.Text"
+                },
+                "immunities": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "inspiration": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "intelligence": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "level": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "max_hp": {
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "name": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
+                },
+                "notes": {
+                    "$ref": "#/definitions/pgtype.Text"
+                },
+                "personality_traits": {
+                    "$ref": "#/definitions/pgtype.Text"
+                },
+                "platinum": {
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "race": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
+                },
+                "resistances": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "save_prof_charisma": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "save_prof_constitution": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "save_prof_dexterity": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "save_prof_intelligence": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "save_prof_strength": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "save_prof_wisdom": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
+                },
+                "silver": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_acrobatics": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_animal_handling": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_arcana": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_athletics": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_deception": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_history": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_insight": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_intimidation": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_investigation": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_medicine": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_nature": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_perception": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_performance": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_persuasion": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_religion": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_sleight_of_hand": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_stealth": {
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "skill_survival": {
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "speed": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "strength": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
+                },
+                "training_armor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "training_languages": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "training_tools": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "training_weapons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "vulnerabilities": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "wisdom": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "xp": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 }
             }
         },
@@ -4563,25 +4703,25 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "description": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "id": {
                     "type": "string"
                 },
                 "is_attuned": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "is_equipped": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "name": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "quantity": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "requires_attunement": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "weight": {
                     "$ref": "#/definitions/pgtype.Numeric"
@@ -4592,34 +4732,34 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "casting_time": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "components": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "description": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "duration": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "id": {
                     "type": "string"
                 },
                 "is_prepared": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/pgtype.Bool"
                 },
                 "level": {
-                    "type": "integer"
+                    "$ref": "#/definitions/pgtype.Int4"
                 },
                 "name": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "range": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 },
                 "school": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Text"
                 }
             }
         },
@@ -4640,6 +4780,17 @@ const docTemplate = `{
                 }
             }
         },
+        "pgtype.Bool": {
+            "type": "object",
+            "properties": {
+                "bool": {
+                    "type": "boolean"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
         "pgtype.InfinityModifier": {
             "type": "integer",
             "format": "int32",
@@ -4653,6 +4804,18 @@ const docTemplate = `{
                 "Finite",
                 "NegativeInfinity"
             ]
+        },
+        "pgtype.Int4": {
+            "type": "object",
+            "properties": {
+                "int32": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
         },
         "pgtype.Numeric": {
             "type": "object",
@@ -4669,6 +4832,17 @@ const docTemplate = `{
                 },
                 "naN": {
                     "type": "boolean"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "pgtype.Text": {
+            "type": "object",
+            "properties": {
+                "string": {
+                    "type": "string"
                 },
                 "valid": {
                     "type": "boolean"

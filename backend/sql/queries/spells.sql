@@ -33,16 +33,16 @@ RETURNING *;
 -- name: UpdateSpell :one
 UPDATE spells
 SET
-    name            = $2,
-    level           = $3,
-    school          = $4,
-    casting_time    = $5,
-    range           = $6,
-    components      = $7,
-    duration        = $8,
-    description     = $9,
-    is_prepared     = $10
-WHERE id = $1
+    name         = COALESCE(sqlc.narg('name'), name),
+    level        = COALESCE(sqlc.narg('level'), level),
+    school       = COALESCE(sqlc.narg('school'), school),
+    casting_time = COALESCE(sqlc.narg('casting_time'), casting_time),
+    range        = COALESCE(sqlc.narg('range'), range),
+    components   = COALESCE(sqlc.narg('components'), components),
+    duration     = COALESCE(sqlc.narg('duration'), duration),
+    description  = COALESCE(sqlc.narg('description'), description),
+    is_prepared  = COALESCE(sqlc.narg('is_prepared'), is_prepared)
+WHERE id = sqlc.arg('id')
 RETURNING *;
 
 -- name: DeleteSpell :exec

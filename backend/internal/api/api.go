@@ -67,7 +67,7 @@ func (a *API) Routes() *chi.Mux {
 
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/", a.handleGetCharacter)
-				r.Put("/", a.handleUpdateCharacter)
+				r.Patch("/", a.handleUpdateCharacter)
 				r.Delete("/", a.handleDeleteCharacter)
 
 
@@ -84,7 +84,7 @@ func (a *API) Routes() *chi.Mux {
 				r.Route("/inventory", func(r chi.Router) {
 					r.Get("/", a.handleListInventory)
 					r.Post("/", a.handleCreateInventoryItem)
-					r.Put("/{itemID}", a.handleUpdateInventoryItem)
+					r.Patch("/{itemID}", a.handleUpdateInventoryItem)
 					r.Delete("/{itemID}", a.handleDeleteInventoryItem)
 					r.Post("/{itemID}/attune", a.handleAttuneItem)
 					r.Post("/{itemID}/unattune", a.handleUnattuneItem)
@@ -94,7 +94,7 @@ func (a *API) Routes() *chi.Mux {
 				r.Route("/spells", func(r chi.Router) {
 					r.Get("/", a.handleListSpells)
 					r.Post("/", a.handleCreateSpell)
-					r.Put("/{spellID}", a.handleUpdateSpell)
+					r.Patch("/{spellID}", a.handleUpdateSpell)
 					r.Delete("/{spellID}", a.handleDeleteSpell)
 					r.Post("/{spellID}/toggle-prepared", a.handleToggleSpellPrepared)
 				})

@@ -88,7 +88,7 @@ func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 // @Failure      401  {object}  object{error=string}
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
-// @Router       /characters/{id}/spells/{spellID} [put]
+// @Router       /characters/{id}/spells/{spellID} [patch]
 func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {

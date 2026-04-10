@@ -262,66 +262,34 @@ func (a *API) handleAddParticipant(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		CharacterID	string	`json:"character_id"`
 		Initiative	int32	`json:"initiative"`
-
-		// Only used when adding directly from a character sheet
-		Name		string	`json:"name"`
-		CurrentHP	int32	`json:"current_hp"`
-		MaxHP		int32	`json:"max_hp"`
-		TempHP		int32	`json:"temp_hp"`
-		ArmorClass	int32	`json:"armor_class"`
-		Speed		int32	`json:"speed"`
 	}
-	
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
-	// If a character_id was provided, prefill stats from character sheet
 	if body.CharacterID != "" {
-		characterID, err := uuid.Parse(body.CharacterID)
-		if err != nil {
-			respondError(w, http.StatusBadRequest, "invalid character id")
-			return
-		}
-
-		participant, err := a.combatService.AddCharacterToEncounter(
-			r.Context(), encounterID, characterID, body.Initiative,
-		)
-		if err != nil {
-			respondError(w, http.StatusInternalServerError, "failed to add participant")
-			return
-		}
-	
-		respondJSON(w, http.StatusCreated, participant)
+		respondError(w, http.StatusBadRequest, "character_id is required")
 		return
 	}
 
-	// Otherwise use manually provided stats
-	if body.Name == "" {
-		respondError(w, http.StatusBadRequest, "name is required when not using a character id")
+	characterID, err := uuid.Parse(body.CharacterID)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "invalid character id")
 		return
 	}
 
-	participant, err := a.queries.AddParticipant(r.Context(), db.AddParticipantParams{
-		EncounterID: encounterID,
-		Name: body.Name,
-		Initiative: body.Initiative,
-		CurrentHp: body.CurrentHP,
-		MaxHp: body.MaxHP,
-		TempHp: body.TempHP,
-		ArmorClass: body.ArmorClass,
-		Speed: body.Speed,
-	})
-	
+	participant, err := a.combatService.AddCharacterToEncounter(
+		r.Context(), encounterID, characterID, body.Initiative,
+	)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "failed to add participant")
 		return
 	}
 
 	respondJSON(w, http.StatusCreated, participant)
-} 
-
+	return
+}
 
 // @Summary      Remove a participant from an encounter
 // @Tags         combat
