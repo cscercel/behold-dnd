@@ -10,6 +10,17 @@ import (
 )
 
 
+// @Summary      List spells for a character
+// @Tags         spells
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id  path      string  true  "Character ID"
+// @Success      200  {array}   db.Spell
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/spells [get]
 func (a *API) handleListSpells(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -26,6 +37,19 @@ func (a *API) handleListSpells(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, spells)
 }
 
+// @Summary      Add a spell to a character
+// @Tags         spells
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string               true  "Character ID"
+// @Param        body body      db.CreateSpellParams true  "Spell data"
+// @Success      201  {object}  db.Spell
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/spells [post]
 func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -51,6 +75,20 @@ func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, spell)
 }
 
+// @Summary      Update a spell
+// @Tags         spells
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path      string               true  "Character ID"
+// @Param        spellID path      string               true  "Spell ID"
+// @Param        body    body      db.UpdateSpellParams true  "Spell data"
+// @Success      200  {object}  db.Spell
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/spells/{spellID} [put]
 func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {
@@ -75,6 +113,18 @@ func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, spell)
 }
 
+// @Summary      Delete a spell
+// @Tags         spells
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path      string  true  "Character ID"
+// @Param        spellID path      string  true  "Spell ID"
+// @Success      204
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/spells/{spellID} [delete]
 func (a *API) handleDeleteSpell(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {
@@ -90,6 +140,18 @@ func (a *API) handleDeleteSpell(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Summary      Toggle a spell's prepared status
+// @Tags         spells
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id      path      string  true  "Character ID"
+// @Param        spellID path      string  true  "Spell ID"
+// @Success      200  {object}  db.Spell
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/spells/{spellID}/toggle-prepared [post]
 func (a *API) handleToggleSpellPrepared(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {
@@ -106,6 +168,17 @@ func (a *API) handleToggleSpellPrepared(w http.ResponseWriter, r *http.Request) 
 	respondJSON(w, http.StatusOK, spell)
 }
 
+// @Summary      List spell slots for a character
+// @Tags         spells
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id  path      string  true  "Character ID"
+// @Success      200  {array}   db.SpellSlot
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/spell-slots [get]
 func (a *API) handleListSpellSlots(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -122,6 +195,19 @@ func (a *API) handleListSpellSlots(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, slots)
 }
 
+// @Summary      Create or update a spell slot level
+// @Tags         spells
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string                    true  "Character ID"
+// @Param        body body      db.UpsertSpellSlotParams  true  "Spell slot data"
+// @Success      200  {object}  db.SpellSlot
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/spell-slots [put]
 func (a *API) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -146,6 +232,19 @@ func (a *API) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, slot)
 }
 
+
+// @Summary      Use a spell slot
+// @Tags         spells
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string                    true  "Character ID"
+// @Param        body body      object{spell_level=int}   true  "Spell level to use"
+// @Success      200  {object}  db.SpellSlot
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Router       /characters/{id}/spell-slots/use [post]
 func (a *API) handleUseSpellSlot(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {

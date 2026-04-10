@@ -9,8 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
-
-// Encounter handlers
+// @Summary      List all combat encounters
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {array}   db.CombatEncounter
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat [get]
 func (a *API) handleListEncounters(w http.ResponseWriter, r *http.Request) {
 	encounters, err := a.queries.ListEncounters(r.Context())
 	if err != nil {
@@ -21,6 +28,15 @@ func (a *API) handleListEncounters(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, encounters)
 }
 
+// @Summary      Get the currently active encounter
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  db.CombatEncounter
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Router       /combat/active [get]
 func (a *API) handleGetActiveEncounter(w http.ResponseWriter, r *http.Request) {
 	encounter, err := a.queries.GetActiveEncounter(r.Context())
 	if err != nil {
@@ -31,6 +47,18 @@ func (a *API) handleGetActiveEncounter(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, encounter)
 }
 
+// @Summary      Create a combat encounter
+// @Tags         combat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body body      object{name=string}  true  "Encounter name"
+// @Success      201  {object}  db.CombatEncounter
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat [post]
 func (a *API) handleCreateEncounter(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Name	string	`json:"name"`
@@ -49,6 +77,17 @@ func (a *API) handleCreateEncounter(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusCreated, encounter)
 }
 
+// @Summary      Get a combat encounter
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID  path      string  true  "Encounter ID"
+// @Success      200  {object}  db.CombatEncounter
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Router       /combat/{encounterID} [get]
 func (a *API) handleGetEncounter(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
@@ -65,6 +104,17 @@ func (a *API) handleGetEncounter(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, encounter)
 }
 
+// @Summary      Start a combat encounter
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID  path      string  true  "Encounter ID"
+// @Success      200  {object}  db.CombatEncounter
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/start [post]
 func (a *API) handleStartEncounter(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
@@ -81,6 +131,17 @@ func (a *API) handleStartEncounter(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, encounter)
 }
 
+// @Summary      End a combat encounter
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID  path      string  true  "Encounter ID"
+// @Success      200  {object}  db.CombatEncounter
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/end [post]
 func (a *API) handleEndEncounter(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
@@ -97,6 +158,17 @@ func (a *API) handleEndEncounter(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, encounter)
 }
 
+// @Summary      Advance to the next round
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID  path      string  true  "Encounter ID"
+// @Success      200  {object}  db.CombatEncounter
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/next-round [post]
 func (a *API) handleNextRound(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
@@ -113,6 +185,17 @@ func (a *API) handleNextRound(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, encounter)
 }
 
+// @Summary      Delete a combat encounter
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID  path      string  true  "Encounter ID"
+// @Success      204
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID} [delete]
 func (a *API) handleDeleteEncounter(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
@@ -129,7 +212,17 @@ func (a *API) handleDeleteEncounter(w http.ResponseWriter, r *http.Request) {
 }
 
 
-// Participant handlers
+// @Summary      List participants in an encounter
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID  path      string  true  "Encounter ID"
+// @Success      200  {array}   db.CombatParticipant
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants [get]
 func (a *API) handleListParticipants(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
@@ -146,8 +239,19 @@ func (a *API) handleListParticipants(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, participants)
 }
 
-// handleAddParticipant accepts either a character_id (full sheet) or 
-// manual stats (for quick ad-hoc enemies)
+// @Summary      Add a participant to an encounter
+// @Tags         combat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID  path      string  true  "Encounter ID"
+// @Param        body body object{character_id=string,initiative=int,name=string,current_hp=int,max_hp=int,armor_class=int,speed=int} true "Participant data. Provide character_id to copy stats from a character sheet, or fill in fields manually."
+// @Success      201  {object}  db.CombatParticipant
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants [post]
 func (a *API) handleAddParticipant(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
@@ -218,6 +322,19 @@ func (a *API) handleAddParticipant(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusCreated, participant)
 } 
 
+
+// @Summary      Remove a participant from an encounter
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID    path      string  true  "Encounter ID"
+// @Param        participantID  path      string  true  "Participant ID"
+// @Success      204
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants/{participantID} [delete]
 func (a *API) handleRemoveParticipant(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
@@ -233,6 +350,20 @@ func (a *API) handleRemoveParticipant(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Summary      Deal damage to a participant
+// @Tags         combat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID    path      string             true  "Encounter ID"
+// @Param        participantID  path      string             true  "Participant ID"
+// @Param        body           body      object{amount=int} true  "Damage amount"
+// @Success      200  {object}  db.CombatParticipant
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants/{participantID}/damage [post]
 func (a *API) handleParticipantDamage(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
@@ -256,6 +387,21 @@ func (a *API) handleParticipantDamage(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, participant)
 }
 
+
+// @Summary      Heal a participant
+// @Tags         combat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID    path      string             true  "Encounter ID"
+// @Param        participantID  path      string             true  "Participant ID"
+// @Param        body           body      object{amount=int} true  "Heal amount"
+// @Success      200  {object}  db.CombatParticipant
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants/{participantID}/heal [post]
 func (a *API) handleParticipantHeal(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
@@ -279,7 +425,21 @@ func (a *API) handleParticipantHeal(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, participant)
 }
 
-func (a *API) handleUpdateTempHP(w http.ResponseWriter, r *http.Request) {
+// @Summary      Give Temp HP to a participant
+// @Tags         combat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID    path      string             true  "Encounter ID"
+// @Param        participantID  path      string             true  "Participant ID"
+// @Param        body           body      object{amount=int} true  "TempHP amount"
+// @Success      200  {object}  db.CombatParticipant
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants/{participantID}/temp-hp [post]
+func (a *API) handleParticipantTempHP(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "invalid participant id")
@@ -306,7 +466,21 @@ func (a *API) handleUpdateTempHP(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, participant)
 }
 
-func (a *API) handleUpdateParticipantInitiative(w http.ResponseWriter, r *http.Request) {
+// @Summary      Update a participant's initiative
+// @Tags         combat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID    path      string                  true  "Encounter ID"
+// @Param        participantID  path      string                  true  "Participant ID"
+// @Param        body           body      object{initiative=int}  true  "Initiative value"
+// @Success      200  {object}  db.CombatParticipant
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants/{participantID}/initiative [put]
+func (a *API) handleParticipantInitiative(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "invalid participant id")
@@ -333,7 +507,21 @@ func (a *API) handleUpdateParticipantInitiative(w http.ResponseWriter, r *http.R
 	respondJSON(w, http.StatusOK, participant)
 }
 
-func (a *API) handleUpdateParticipantConditions(w http.ResponseWriter, r *http.Request) {
+// @Summary      Update conditions on a participant
+// @Tags         combat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID    path      string                       true  "Encounter ID"
+// @Param        participantID  path      string                       true  "Participant ID"
+// @Param        body           body      object{conditions=[]string}  true  "Conditions list"
+// @Success      200  {object}  db.CombatParticipant
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants/{participantID}/conditions [put]
+func (a *API) handleParticipantConditions(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "invalid participant id")
@@ -360,7 +548,19 @@ func (a *API) handleUpdateParticipantConditions(w http.ResponseWriter, r *http.R
 	respondJSON(w, http.StatusOK, participant)
 }
 
-func (a *API) handleUpdateParticipantToggleConcentration(w http.ResponseWriter, r *http.Request) {
+// @Summary      Toggle concentration for a participant
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID    path      string  true  "Encounter ID"
+// @Param        participantID  path      string  true  "Participant ID"
+// @Success      200  {object}  db.CombatParticipant
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants/{participantID}/toggle-concentration [post]
+func (a *API) handleParticipantToggleConcentration(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
 		respondError(w, http.StatusBadRequest, "invalid participant id")
@@ -376,6 +576,18 @@ func (a *API) handleUpdateParticipantToggleConcentration(w http.ResponseWriter, 
 	respondJSON(w, http.StatusOK, participant)
 }
 
+// @Summary      Deactivate a participant (knocked out or fled)
+// @Tags         combat
+// @Produce      json
+// @Security     BearerAuth
+// @Param        encounterID    path      string  true  "Encounter ID"
+// @Param        participantID  path      string  true  "Participant ID"
+// @Success      200  {object}  db.CombatParticipant
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /combat/{encounterID}/participants/{participantID}/deactivate [post]
 func (a *API) handleDeactivateParticipant(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {

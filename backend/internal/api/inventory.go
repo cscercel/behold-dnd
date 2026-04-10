@@ -9,7 +9,17 @@ import (
 	"github.com/google/uuid"
 )
 
-
+// @Summary      List inventory items for a character
+// @Tags         inventory
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id  path      string  true  "Character ID"
+// @Success      200  {array}   db.InventoryItem
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/inventory [get]
 func (a *API) handleListInventory(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -26,6 +36,19 @@ func (a *API) handleListInventory(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, items)
 }
 
+// @Summary      Add an item to a character's inventory
+// @Tags         inventory
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string                      true  "Character ID"
+// @Param        body body      db.CreateInventoryItemParams true  "Item data"
+// @Success      201  {object}  db.InventoryItem
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/inventory [post]
 func (a *API) handleCreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -51,6 +74,20 @@ func (a *API) handleCreateInventoryItem(w http.ResponseWriter, r *http.Request) 
 	respondJSON(w, http.StatusCreated, item)
 }
 
+// @Summary      Update an inventory item
+// @Tags         inventory
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id     path      string                      true  "Character ID"
+// @Param        itemID path      string                      true  "Item ID"
+// @Param        body   body      db.UpdateInventoryItemParams true  "Item data"
+// @Success      200  {object}  db.InventoryItem
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/inventory/{itemID} [put]
 func (a *API) handleUpdateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	itemID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -75,6 +112,18 @@ func (a *API) handleUpdateInventoryItem(w http.ResponseWriter, r *http.Request) 
 	respondJSON(w, http.StatusOK, item)
 }
 
+// @Summary      Delete an inventory item
+// @Tags         inventory
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id     path      string  true  "Character ID"
+// @Param        itemID path      string  true  "Item ID"
+// @Success      204
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/inventory/{itemID} [delete]
 func (a *API) handleDeleteInventoryItem(w http.ResponseWriter, r *http.Request) {
 	itemID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -90,6 +139,17 @@ func (a *API) handleDeleteInventoryItem(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Summary      Attune to a magic item
+// @Tags         inventory
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id     path      string  true  "Character ID"
+// @Param        itemID path      string  true  "Item ID"
+// @Success      200  {object}  db.InventoryItem
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Router       /characters/{id}/inventory/{itemID}/attune [post]
 func (a *API) handleAttuneItem(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -112,6 +172,18 @@ func (a *API) handleAttuneItem(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, item)
 }
 
+
+// @Summary      Remove attunement from a magic item
+// @Tags         inventory
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id     path      string  true  "Character ID"
+// @Param        itemID path      string  true  "Item ID"
+// @Success      200  {object}  db.InventoryItem
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Router       /characters/{id}/inventory/{itemID}/unattune [post]
 func (a *API) handleUnattuneItem(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {

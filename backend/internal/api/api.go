@@ -9,6 +9,9 @@ import (
 	"github.com/cscercel/behold-dnd/internal/db"
 	"github.com/cscercel/behold-dnd/internal/service"
 	appMiddleware "github.com/cscercel/behold-dnd/internal/middleware"
+
+	_ "github.com/cscercel/behold-dnd/docs"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 
@@ -41,6 +44,10 @@ func (a *API) Routes() *chi.Mux {
 	r.Use(chiMiddleware.Logger)
 	r.Use(chiMiddleware.Recoverer)
 
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("swagger/doc.json"),
+	))
+
 	// Public routes
 	r.Get("/health", a.handleHealth)
 	r.Post("/auth/register", a.handleRegister)
@@ -56,7 +63,6 @@ func (a *API) Routes() *chi.Mux {
 
 		// Character Routes
 		r.Route("/characters", func(r chi.Router) {
-			r.Get("/", a.handleListCharacters)
 			r.Post("/", a.handleCreateCharacter)
 
 			r.Route("/{id}", func(r chi.Router) {
@@ -106,7 +112,11 @@ func (a *API) Routes() *chi.Mux {
 		r.Group(func(r chi.Router) {
 
 			r.Use(appMiddleware.RequireDM)
-
+			
+			// List all characters
+			r.Route("/characters", func(r chi.Router) {
+				r.Get("/", a.handleListCharacters)
+			})
 
 			// Combat Routes
 			r.Route("/combat", func(r chi.Router) {

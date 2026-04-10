@@ -15,6 +15,18 @@ import (
 )
 
 
+// @title           Behold D&D API
+// @version         1.0.0
+// @description     API for managing your D&D campaign characters, inventory, spells and combat.
+
+// @host            localhost:8080
+// @BasePath        /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by your JWT token
+
 func main() {
 
 	// Load Config

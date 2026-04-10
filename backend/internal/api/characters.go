@@ -11,7 +11,13 @@ import (
 	"github.com/google/uuid"
 )
 
-
+// @Summary      List all characters
+// @Tags         characters
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {array}   db.Character
+// @Failure      401  {object}  object{error=string}
+// @Router       /characters [get]
 func (a *API) handleListCharacters(w http.ResponseWriter, r *http.Request) {
 	characters, err := a.queries.ListCharacters(r.Context())
 	if err != nil {
@@ -22,6 +28,16 @@ func (a *API) handleListCharacters(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, characters)
 }
 
+// @Summary      Get a character
+// @Tags         characters
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Character ID"
+// @Success      200  {object}  db.Character
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Router       /characters/{id} [get]
 func (a *API) handleGetCharacter(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 
@@ -39,6 +55,16 @@ func (a *API) handleGetCharacter(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, character)
 }
 
+// @Summary      Create a character
+// @Tags         characters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body body      db.CreateCharacterParams true "Character data"
+// @Success      201  {object}  db.Character
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Router       /characters [post]
 func (a *API) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 	var params db.CreateCharacterParams
 
@@ -56,6 +82,20 @@ func (a *API) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusCreated, character)
 }
 
+// @Summary      Update a character
+// @Tags         characters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string                   true  "Character ID"
+// @Param        body body      db.UpdateCharacterParams true  "Character data"
+// @Success      200  {object}  db.Character
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id} [put]
 func (a *API) handleUpdateCharacter(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -85,6 +125,18 @@ func (a *API) handleUpdateCharacter(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, character)
 }
 
+// @Summary      Delete a character
+// @Tags         characters
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id  path      string  true  "Character ID"
+// @Success      204
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id} [delete]
 func (a *API) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -105,6 +157,21 @@ func (a *API) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+
+// @Summary      Deal damage to a character
+// @Tags         characters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string             true  "Character ID"
+// @Param        body body      object{amount=int} true  "Damage amount"
+// @Success      200  {object}  db.Character
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/damage [post]
 func (a *API) handleDamage(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -135,6 +202,20 @@ func (a *API) handleDamage(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, character)
 }
 
+// @Summary      Heal a character
+// @Tags         characters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string             true  "Character ID"
+// @Param        body body      object{amount=int} true  "Heal amount"
+// @Success      200  {object}  db.Character
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/heal [post]
 func (a *API) handleHeal(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -165,6 +246,20 @@ func (a *API) handleHeal(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, character)
 }
 
+// @Summary      Add temporary HP to a character
+// @Tags         characters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string             true  "Character ID"
+// @Param        body body      object{amount=int} true  "Temp HP amount"
+// @Success      200  {object}  db.Character
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/temp-hp [post]
 func (a *API) handleTempHP(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -195,6 +290,20 @@ func (a *API) handleTempHP(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, character)
 }
 
+// @Summary      Record a death saving throw
+// @Tags         characters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string               true  "Character ID"
+// @Param        body body      object{success=bool} true  "Death save result"
+// @Success      200  {object}  db.Character
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/death-save [post]
 func (a *API) handleDeathSave(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -225,6 +334,18 @@ func (a *API) handleDeathSave(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, character)
 }
 
+// @Summary      Long rest — restores HP, hit dice, resets death saves, conditions and spell slots
+// @Tags         characters
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id  path      string  true  "Character ID"
+// @Success      200  {object}  db.Character
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/long-rest [post]
 func (a *API) handleLongRest(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -252,6 +373,20 @@ func (a *API) handleLongRest(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, character)
 }
 
+// @Summary      Short rest — spend hit dice to regain HP
+// @Tags         characters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string                                        true  "Character ID"
+// @Param        body body      object{hit_dice_used=int,hp_regained=int}     true  "Short rest details"
+// @Success      200  {object}  db.Character
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/short-rest [post]
 func (a *API) handleShortRest(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -287,6 +422,20 @@ func (a *API) handleShortRest(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, character)
 }
 
+// @Summary      Update active conditions on a character
+// @Tags         characters
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string                       true  "Character ID"
+// @Param        body body      object{conditions=[]string}  true  "Conditions list"
+// @Success      200  {object}  db.Character
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      404  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/{id}/conditions [put]
 func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -339,4 +488,3 @@ func (a *API) requireCharacterAccess(r *http.Request, characterID uuid.UUID) (db
 
 	return character, nil
 }
-

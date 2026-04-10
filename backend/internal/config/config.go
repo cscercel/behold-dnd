@@ -30,7 +30,7 @@ func Load() (*Config, error) {
 	cfg := &Config{
 		DatabaseURL: os.Getenv("DATABASE_URL"),
 		Port: os.Getenv("PORT"),
-		JWTSecret: os.Getenv("JWT_Secret"),
+		JWTSecret: os.Getenv("JWT_SECRET"),
 		JWTExpiryHours: expiryHours,
 		RegistrationCode: os.Getenv("REGISTRATION_CODE"),
 	}

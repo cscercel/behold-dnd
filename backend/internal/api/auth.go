@@ -7,7 +7,17 @@ import (
 	"github.com/cscercel/behold-dnd/internal/middleware"
 )
 
-func (a *API) handlerRegister(w http.ResponseWriter, r *http.Request) {
+
+// @Summary      Register a new user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body object{username=string,email=string,password=string,role=string,registration_code=string} true "Registration details"
+// @Success      201  {object}  object{id=string,username=string,email=string,role=string}
+// @Failure      400  {object}  object{error=string}
+// @Failure      401  {object}  object{error=string}
+// @Router       /auth/register [post]
+func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Username 			string `json:"username"`
 		Email				string	`json:"email"`
@@ -40,6 +50,14 @@ func (a *API) handlerRegister(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// @Summary      Login
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body object{email=string,password=string} true "Login credentials"
+// @Success      200  {object}  object{token=string}
+// @Failure      401  {object}  object{error=string}
+// @Router       /auth/login [post]
 func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Email		string	`json:"email"`
@@ -67,6 +85,13 @@ func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// @Summary      Get current user
+// @Tags         auth
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  object{id=string,username=string,email=string,role=string}
+// @Failure      401  {object}  object{error=string}
+// @Router       /auth/me [get]
 func (a *API) handleMe(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {
