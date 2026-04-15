@@ -19,6 +19,7 @@ import (
 type API struct {
 	queries				*db.Queries
 	pool				*pgxpool.Pool
+	allowedOrigins		[]string
 	authService			*service.AuthService
 	characterService	*service.CharacterService
 	inventoryService	*service.InventoryService
@@ -31,6 +32,7 @@ func New(pool *pgxpool.Pool, cfg *config.Config) *API {
 	return &API{
 		queries: queries,
 		pool: pool,
+		allowedOrigins: []string{cfg.FrontendURL},
 		authService: service.NewAuthService(queries, cfg.JWTSecret, cfg.JWTExpiryHours, cfg.RegistrationCode),
 		characterService: service.NewCharacterService(queries),
 		inventoryService: service.NewInventoryService(queries),
@@ -43,7 +45,7 @@ func (a *API) Routes() *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedOrigins:   a.allowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},

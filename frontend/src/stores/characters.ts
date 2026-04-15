@@ -4,7 +4,7 @@ import type { Character, UpdateCharacterPayload } from '@/types'
 import { characterAPI } from '@/api/characters'
 
 
-export const useCharacterStore = defineStore('characters', () => {
+export const useCharactersStore = defineStore('characters', () => {
   const characters = ref<Character[]>([])
   const current = ref<Character | null>(null)
   const loading = ref(false)

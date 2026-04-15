@@ -16,7 +16,7 @@ async function handleLogin() {
   loading.value = true
   try {
     await auth.login(email.value, password.value)
-    router.push({ name: 'characters' })
+    await router.push({ name: 'characters' })
   } catch (e: any) {
     error.value = e.message ?? 'Login failed'
   } finally {
