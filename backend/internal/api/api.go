@@ -68,13 +68,13 @@ func (a *API) Routes() *chi.Mux {
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
-
 		r.Use(appMiddleware.Authenticate(a.authService))
 
 		r.Get("/auth/me", a.handleMe)
 
 		// Character Routes
 		r.Route("/characters", func(r chi.Router) {
+			r.Get("/", a.handleListCharacters)
 			r.Post("/", a.handleCreateCharacter)
 
 			r.Route("/{id}", func(r chi.Router) {
@@ -122,14 +122,8 @@ func (a *API) Routes() *chi.Mux {
 
 		// DM only routes
 		r.Group(func(r chi.Router) {
-
 			r.Use(appMiddleware.RequireDM)
 			
-			// List all characters
-			r.Route("/list-characters", func(r chi.Router) {
-				r.Get("/", a.handleListCharacters)
-			})
-
 			// Combat Routes
 			r.Route("/combat", func(r chi.Router) {
 				r.Get("/", a.handleListEncounters)

@@ -17,7 +17,7 @@ import (
 // @Security     BearerAuth
 // @Success      200  {array}   db.Character
 // @Failure      401  {object}  object{error=string}
-// @Router       /list-characters [get]
+// @Router       /characters [get]
 func (a *API) handleListCharacters(w http.ResponseWriter, r *http.Request) {
 	characters, err := a.queries.ListCharacters(r.Context())
 	if err != nil {

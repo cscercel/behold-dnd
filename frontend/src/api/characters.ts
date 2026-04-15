@@ -4,7 +4,7 @@ import type { Character, UpdateCharacterPayload } from '@/types'
 
 export const characterAPI = {
   list: () =>
-    client.get<Character[]>('/list-characters'),
+    client.get<Character[]>('/characters'),
 
   get: (id: string) =>
     client.get<Character>(`/characters/${id}`),

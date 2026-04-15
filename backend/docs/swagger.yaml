@@ -721,6 +721,28 @@ paths:
       tags:
       - auth
   /characters:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all characters
+      tags:
+      - characters
     post:
       consumes:
       - application/json
@@ -3064,29 +3086,6 @@ paths:
       summary: Get the currently active encounter
       tags:
       - combat
-  /list-characters:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            properties:
-              error:
-                type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: List all characters
-      tags:
-      - characters
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by your JWT token
