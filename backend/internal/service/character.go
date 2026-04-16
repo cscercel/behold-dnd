@@ -71,7 +71,7 @@ func (s *CharacterService) AddTempHP(ctx context.Context, id uuid.UUID, amount i
 		return db.Character{}, fmt.Errorf("character not found: %w", err)
 	}
 
-	newTempHP := max(int(char.TempHp), amount)
+	newTempHP := amount
 
 	return s.queries.UpdateCharacterHP(ctx, db.UpdateCharacterHPParams{
 		ID: id,
