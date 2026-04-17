@@ -122,12 +122,13 @@ type InventoryItem struct {
 	CharacterID        uuid.UUID          `json:"character_id"`
 	Name               string             `json:"name"`
 	Quantity           int32              `json:"quantity"`
-	Weight             pgtype.Numeric     `json:"weight"`
+	Weight             int32              `json:"weight"`
 	Description        string             `json:"description"`
 	IsEquipped         bool               `json:"is_equipped"`
 	RequiresAttunement bool               `json:"requires_attunement"`
 	IsAttuned          bool               `json:"is_attuned"`
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	Value              int32              `json:"value"`
 }
 
 type Spell struct {

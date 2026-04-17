@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
@@ -36,6 +37,7 @@ type Querier interface {
 	ListCharacters(ctx context.Context) ([]Character, error)
 	ListEncounters(ctx context.Context) ([]CombatEncounter, error)
 	ListInventoryItems(ctx context.Context, characterID uuid.UUID) ([]InventoryItem, error)
+	ListMyCharacters(ctx context.Context, ownerID pgtype.UUID) ([]Character, error)
 	ListNPCs(ctx context.Context) ([]Character, error)
 	ListParticipants(ctx context.Context, encounterID uuid.UUID) ([]CombatParticipant, error)
 	ListPlayerCharacters(ctx context.Context) ([]Character, error)

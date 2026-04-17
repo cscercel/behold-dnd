@@ -82,7 +82,7 @@ func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 // @Security     BearerAuth
 // @Param        id      path      string               true  "Character ID"
 // @Param        spellID path      string               true  "Spell ID"
-// @Param        body    body      db.UpdateSpellParams true  "Spell data"
+// @Param        body    body      db.UpdateSpellParams false  "Spell data"
 // @Success      200  {object}  db.Spell
 // @Failure      400  {object}  object{error=string}
 // @Failure      401  {object}  object{error=string}

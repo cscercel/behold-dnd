@@ -6,7 +6,6 @@ import (
 
 	"github.com/cscercel/behold-dnd/internal/db"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 
@@ -46,15 +45,11 @@ func (s *InventoryService) AttuneItem(ctx context.Context, characterID uuid.UUID
 		return db.InventoryItem{}, fmt.Errorf("item does not require attunement")
 	}
 
+	attuned := true
+
 	return s.queries.UpdateInventoryItem(ctx, db.UpdateInventoryItemParams{
 		ID:	itemID,
-		Name: pgtype.Text{String: item.Name, Valid: true},
-		Quantity: pgtype.Int4{Int32: item.Quantity, Valid: true},
-		Weight:	pgtype.Numeric{Valid: false},
-		Description: pgtype.Text{String: item.Description, Valid: true},
-		IsEquipped:	pgtype.Bool{Bool: item.IsEquipped, Valid: true},
-		RequiresAttunement: pgtype.Bool{Bool: item.RequiresAttunement, Valid: true},
-		IsAttuned: pgtype.Bool{Bool: true, Valid: true},
+		IsAttuned: &attuned,
 	})
 }
 
@@ -70,14 +65,10 @@ func (s *InventoryService) UnattuneItem(ctx context.Context, characterID uuid.UU
 		return db.InventoryItem{}, fmt.Errorf("item does not require attunement")
 	}
 
+	attuned := false
+
 	return s.queries.UpdateInventoryItem(ctx, db.UpdateInventoryItemParams{
 		ID:	itemID,
-		Name: pgtype.Text{String: item.Name, Valid: true},
-		Quantity: pgtype.Int4{Int32: item.Quantity, Valid: true},
-		Weight:	pgtype.Numeric{Valid: false},
-		Description: pgtype.Text{String: item.Description, Valid: true},
-		IsEquipped:	pgtype.Bool{Bool: item.IsEquipped, Valid: true},
-		RequiresAttunement: pgtype.Bool{Bool: item.RequiresAttunement, Valid: true},
-		IsAttuned: pgtype.Bool{Bool: false, Valid: true},
+		IsAttuned: &attuned,
 	})
 }

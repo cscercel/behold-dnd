@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createSpell = `-- name: CreateSpell :one
@@ -232,16 +231,16 @@ RETURNING id, character_id, name, level, school, casting_time, range, components
 `
 
 type UpdateSpellParams struct {
-	Name        pgtype.Text `json:"name"`
-	Level       pgtype.Int4 `json:"level"`
-	School      pgtype.Text `json:"school"`
-	CastingTime pgtype.Text `json:"casting_time"`
-	Range       pgtype.Text `json:"range"`
-	Components  pgtype.Text `json:"components"`
-	Duration    pgtype.Text `json:"duration"`
-	Description pgtype.Text `json:"description"`
-	IsPrepared  pgtype.Bool `json:"is_prepared"`
-	ID          uuid.UUID   `json:"id"`
+	Name        *string   `json:"name"`
+	Level       *int32    `json:"level"`
+	School      *string   `json:"school"`
+	CastingTime *string   `json:"casting_time"`
+	Range       *string   `json:"range"`
+	Components  *string   `json:"components"`
+	Duration    *string   `json:"duration"`
+	Description *string   `json:"description"`
+	IsPrepared  *bool     `json:"is_prepared"`
+	ID          uuid.UUID `json:"id"`
 }
 
 func (q *Queries) UpdateSpell(ctx context.Context, arg UpdateSpellParams) (Spell, error) {

@@ -6,6 +6,11 @@ WHERE id = $1;
 SELECT * FROM characters
 ORDER BY name;
 
+-- name: ListMyCharacters :many
+SELECT * FROM characters
+WHERE owner_id = $1
+ORDER BY name;
+
 -- name: ListPlayerCharacters :many
 SELECT * FROM characters
 WHERE is_npc = FALSE
@@ -141,6 +146,7 @@ RETURNING *;
 UPDATE characters
 SET
     current_hp              = max_hp,
+    temp_hp                 = 0,
     hit_dice_remaining      = GREATEST(hit_dice_remaining + (level / 2), level),
     death_save_successes    = 0,
     death_save_failures     = 0,
@@ -154,6 +160,7 @@ UPDATE characters
 SET
     hit_dice_remaining      = GREATEST(hit_dice_remaining - $2, 0),
     current_hp              = LEAST(current_hp + $3, max_hp),
+    temp_hp                 = 0,
     updated_at              = NOW()
 WHERE id = $1
 RETURNING *;

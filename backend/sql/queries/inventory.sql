@@ -13,12 +13,13 @@ INSERT INTO inventory_items (
     name,
     quantity,
     weight,
+    value,
     description,
     is_equipped,
     requires_attunement,
     is_attuned
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
 )
 RETURNING *;
 
@@ -28,6 +29,7 @@ SET
     name                = COALESCE(sqlc.narg('name'), name),
     quantity            = COALESCE(sqlc.narg('quantity'), quantity),
     weight              = COALESCE(sqlc.narg('weight'), weight),
+    value               = COALESCE(sqlc.narg('value'), value),
     description         = COALESCE(sqlc.narg('description'), description),
     is_equipped         = COALESCE(sqlc.narg('is_equipped'), is_equipped),
     requires_attunement = COALESCE(sqlc.narg('requires_attunement'), requires_attunement),

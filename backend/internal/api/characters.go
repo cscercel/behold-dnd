@@ -9,6 +9,7 @@ import (
 	"github.com/cscercel/behold-dnd/internal/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // @Summary      List all characters
@@ -19,9 +20,64 @@ import (
 // @Failure      401  {object}  object{error=string}
 // @Router       /characters [get]
 func (a *API) handleListCharacters(w http.ResponseWriter, r *http.Request) {
-	characters, err := a.queries.ListCharacters(r.Context())
+	role, _ := middleware.RoleFromContext(r.Context())
+	userID, _ := middleware.UserIDFromContext(r.Context())
+
+	if role == "dm" {
+		// DM should see all characters
+		characters, err := a.queries.ListCharacters(r.Context())
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, "failed to list characters")
+			return
+		}
+
+		respondJSON(w, http.StatusOK, characters)
+		return
+	}
+
+	// Players only see their own characters
+	pgUuid := pgtype.UUID{Bytes: userID, Valid: true,}
+	characters, err := a.queries.ListMyCharacters(r.Context(), pgUuid)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "failed to list characters")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, characters)
+}
+
+// @Summary      List all player characters (DM only)
+// @Tags         characters
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {array}   db.Character
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/players [get]
+func (a *API) handleListPlayerCharacters(w http.ResponseWriter, r *http.Request) {
+	characters, err := a.queries.ListPlayerCharacters(r.Context())
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "failed to list player characters")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, characters)
+}
+
+// @Summary      List all NPCs (DM only)
+// @Tags         characters
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {array}   db.Character
+// @Failure      401  {object}  object{error=string}
+// @Failure      403  {object}  object{error=string}
+// @Failure      500  {object}  object{error=string}
+// @Router       /characters/npcs [get]
+func (a *API) handleListNPCs(w http.ResponseWriter, r *http.Request) {
+	characters, err := a.queries.ListNPCs(r.Context())
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "failed to list NPCs")
 		return
 	}
 
@@ -88,7 +144,7 @@ func (a *API) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path      string                   true  "Character ID"
-// @Param        body body      db.UpdateCharacterParams true  "Character data"
+// @Param        body body      db.UpdateCharacterParams false  "Character data"
 // @Success      200  {object}  db.Character
 // @Failure      400  {object}  object{error=string}
 // @Failure      401  {object}  object{error=string}

@@ -2,7 +2,7 @@ import { client } from './client'
 import type { InventoryItem, UpdateInventoryItemPayload } from '@/types'
 
 
-export const InventoryAPI = {
+export const inventoryAPI = {
   list: (characterId: string) =>
     client.get<InventoryItem[]>(`/characters/${characterId}/inventory`),
 

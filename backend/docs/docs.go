@@ -303,6 +303,126 @@ const docTemplate = `{
                 }
             }
         },
+        "/characters/npcs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "summary": "List all NPCs (DM only)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.Character"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/characters/players": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characters"
+                ],
+                "summary": "List all player characters (DM only)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.Character"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/characters/{id}": {
             "get": {
                 "security": [
@@ -479,7 +599,6 @@ const docTemplate = `{
                         "description": "Character data",
                         "name": "body",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateCharacterParams"
                         }
@@ -1255,7 +1374,6 @@ const docTemplate = `{
                         "description": "Item data",
                         "name": "body",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateInventoryItemParams"
                         }
@@ -2189,7 +2307,6 @@ const docTemplate = `{
                         "description": "Spell data",
                         "name": "body",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateSpellParams"
                         }
@@ -3969,9 +4086,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "big.Int": {
-            "type": "object"
-        },
         "github_com_cscercel_behold-dnd_internal_db.Character": {
             "type": "object",
             "properties": {
@@ -4343,8 +4457,11 @@ const docTemplate = `{
                 "requires_attunement": {
                     "type": "boolean"
                 },
+                "value": {
+                    "type": "integer"
+                },
                 "weight": {
-                    "$ref": "#/definitions/pgtype.Numeric"
+                    "type": "integer"
                 }
             }
         },
@@ -4413,8 +4530,11 @@ const docTemplate = `{
                 "requires_attunement": {
                     "type": "boolean"
                 },
+                "value": {
+                    "type": "integer"
+                },
                 "weight": {
-                    "$ref": "#/definitions/pgtype.Numeric"
+                    "type": "integer"
                 }
             }
         },
@@ -4483,25 +4603,25 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "alignment": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "armor_class": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "attunement_slots": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "background": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "bonds": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "charisma": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "class": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "conditions": {
                     "type": "array",
@@ -4510,34 +4630,34 @@ const docTemplate = `{
                     }
                 },
                 "constitution": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "copper": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "dexterity": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "electrum": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "flaws": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "gold": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "hit_dice_remaining": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "hit_dice_type": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "id": {
                     "type": "string"
                 },
                 "ideals": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "immunities": {
                     "type": "array",
@@ -4546,31 +4666,31 @@ const docTemplate = `{
                     }
                 },
                 "inspiration": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "intelligence": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "level": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "max_hp": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "name": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "notes": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "personality_traits": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "platinum": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "race": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "resistances": {
                     "type": "array",
@@ -4579,85 +4699,85 @@ const docTemplate = `{
                     }
                 },
                 "save_prof_charisma": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "save_prof_constitution": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "save_prof_dexterity": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "save_prof_intelligence": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "save_prof_strength": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "save_prof_wisdom": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "silver": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_acrobatics": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_animal_handling": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_arcana": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_athletics": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_deception": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_history": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_insight": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_intimidation": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_investigation": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_medicine": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_nature": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_perception": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_performance": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_persuasion": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_religion": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_sleight_of_hand": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_stealth": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "skill_survival": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "speed": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "strength": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "training_armor": {
                     "type": "array",
@@ -4690,10 +4810,10 @@ const docTemplate = `{
                     }
                 },
                 "wisdom": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "xp": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 }
             }
         },
@@ -4701,28 +4821,31 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "description": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
                 "is_attuned": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "is_equipped": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "name": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "quantity": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "requires_attunement": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
+                },
+                "value": {
+                    "type": "integer"
                 },
                 "weight": {
-                    "$ref": "#/definitions/pgtype.Numeric"
+                    "type": "integer"
                 }
             }
         },
@@ -4730,34 +4853,34 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "casting_time": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "components": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "description": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "duration": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
                 "is_prepared": {
-                    "$ref": "#/definitions/pgtype.Bool"
+                    "type": "boolean"
                 },
                 "level": {
-                    "$ref": "#/definitions/pgtype.Int4"
+                    "type": "integer"
                 },
                 "name": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "range": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 },
                 "school": {
-                    "$ref": "#/definitions/pgtype.Text"
+                    "type": "string"
                 }
             }
         },
@@ -4778,17 +4901,6 @@ const docTemplate = `{
                 }
             }
         },
-        "pgtype.Bool": {
-            "type": "object",
-            "properties": {
-                "bool": {
-                    "type": "boolean"
-                },
-                "valid": {
-                    "type": "boolean"
-                }
-            }
-        },
         "pgtype.InfinityModifier": {
             "type": "integer",
             "format": "int32",
@@ -4802,50 +4914,6 @@ const docTemplate = `{
                 "Finite",
                 "NegativeInfinity"
             ]
-        },
-        "pgtype.Int4": {
-            "type": "object",
-            "properties": {
-                "int32": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "valid": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "pgtype.Numeric": {
-            "type": "object",
-            "properties": {
-                "exp": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "infinityModifier": {
-                    "$ref": "#/definitions/pgtype.InfinityModifier"
-                },
-                "int": {
-                    "$ref": "#/definitions/big.Int"
-                },
-                "naN": {
-                    "type": "boolean"
-                },
-                "valid": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "pgtype.Text": {
-            "type": "object",
-            "properties": {
-                "string": {
-                    "type": "string"
-                },
-                "valid": {
-                    "type": "boolean"
-                }
-            }
         },
         "pgtype.Timestamptz": {
             "type": "object",

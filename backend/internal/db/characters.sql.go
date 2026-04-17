@@ -324,6 +324,104 @@ func (q *Queries) ListCharacters(ctx context.Context) ([]Character, error) {
 	return items, nil
 }
 
+const listMyCharacters = `-- name: ListMyCharacters :many
+SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at FROM characters
+WHERE owner_id = $1
+ORDER BY name
+`
+
+func (q *Queries) ListMyCharacters(ctx context.Context, ownerID pgtype.UUID) ([]Character, error) {
+	rows, err := q.db.Query(ctx, listMyCharacters, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Character{}
+	for rows.Next() {
+		var i Character
+		if err := rows.Scan(
+			&i.ID,
+			&i.OwnerID,
+			&i.IsNpc,
+			&i.Name,
+			&i.Race,
+			&i.Class,
+			&i.Level,
+			&i.Background,
+			&i.Alignment,
+			&i.Xp,
+			&i.Strength,
+			&i.Dexterity,
+			&i.Constitution,
+			&i.Intelligence,
+			&i.Wisdom,
+			&i.Charisma,
+			&i.SaveProfStrength,
+			&i.SaveProfDexterity,
+			&i.SaveProfConstitution,
+			&i.SaveProfIntelligence,
+			&i.SaveProfWisdom,
+			&i.SaveProfCharisma,
+			&i.SkillAcrobatics,
+			&i.SkillAnimalHandling,
+			&i.SkillArcana,
+			&i.SkillAthletics,
+			&i.SkillDeception,
+			&i.SkillHistory,
+			&i.SkillInsight,
+			&i.SkillIntimidation,
+			&i.SkillInvestigation,
+			&i.SkillMedicine,
+			&i.SkillNature,
+			&i.SkillPerception,
+			&i.SkillPerformance,
+			&i.SkillPersuasion,
+			&i.SkillReligion,
+			&i.SkillSleightOfHand,
+			&i.SkillStealth,
+			&i.SkillSurvival,
+			&i.MaxHp,
+			&i.CurrentHp,
+			&i.TempHp,
+			&i.ArmorClass,
+			&i.Speed,
+			&i.HitDiceType,
+			&i.HitDiceRemaining,
+			&i.DeathSaveSuccesses,
+			&i.DeathSaveFailures,
+			&i.Inspiration,
+			&i.TrainingArmor,
+			&i.TrainingWeapons,
+			&i.TrainingTools,
+			&i.TrainingLanguages,
+			&i.AttunementSlots,
+			&i.Copper,
+			&i.Silver,
+			&i.Electrum,
+			&i.Gold,
+			&i.Platinum,
+			&i.Conditions,
+			&i.Resistances,
+			&i.Vulnerabilities,
+			&i.Immunities,
+			&i.PersonalityTraits,
+			&i.Ideals,
+			&i.Bonds,
+			&i.Flaws,
+			&i.Notes,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listNPCs = `-- name: ListNPCs :many
 SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at FROM characters
 WHERE is_npc = TRUE
@@ -524,6 +622,7 @@ const longRest = `-- name: LongRest :one
 UPDATE characters
 SET
     current_hp              = max_hp,
+    temp_hp                 = 0,
     hit_dice_remaining      = GREATEST(hit_dice_remaining + (level / 2), level),
     death_save_successes    = 0,
     death_save_failures     = 0,
@@ -706,6 +805,7 @@ UPDATE characters
 SET
     hit_dice_remaining      = GREATEST(hit_dice_remaining - $2, 0),
     current_hp              = LEAST(current_hp + $3, max_hp),
+    temp_hp                 = 0,
     updated_at              = NOW()
 WHERE id = $1
 RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
@@ -867,69 +967,69 @@ RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment,
 `
 
 type UpdateCharacterParams struct {
-	Name                 pgtype.Text `json:"name"`
-	Race                 pgtype.Text `json:"race"`
-	Class                pgtype.Text `json:"class"`
-	Level                pgtype.Int4 `json:"level"`
-	Background           pgtype.Text `json:"background"`
-	Alignment            pgtype.Text `json:"alignment"`
-	Xp                   pgtype.Int4 `json:"xp"`
-	Strength             pgtype.Int4 `json:"strength"`
-	Dexterity            pgtype.Int4 `json:"dexterity"`
-	Constitution         pgtype.Int4 `json:"constitution"`
-	Intelligence         pgtype.Int4 `json:"intelligence"`
-	Wisdom               pgtype.Int4 `json:"wisdom"`
-	Charisma             pgtype.Int4 `json:"charisma"`
-	SaveProfStrength     pgtype.Bool `json:"save_prof_strength"`
-	SaveProfDexterity    pgtype.Bool `json:"save_prof_dexterity"`
-	SaveProfConstitution pgtype.Bool `json:"save_prof_constitution"`
-	SaveProfIntelligence pgtype.Bool `json:"save_prof_intelligence"`
-	SaveProfWisdom       pgtype.Bool `json:"save_prof_wisdom"`
-	SaveProfCharisma     pgtype.Bool `json:"save_prof_charisma"`
-	SkillAcrobatics      pgtype.Int4 `json:"skill_acrobatics"`
-	SkillAnimalHandling  pgtype.Int4 `json:"skill_animal_handling"`
-	SkillArcana          pgtype.Int4 `json:"skill_arcana"`
-	SkillAthletics       pgtype.Int4 `json:"skill_athletics"`
-	SkillDeception       pgtype.Int4 `json:"skill_deception"`
-	SkillHistory         pgtype.Int4 `json:"skill_history"`
-	SkillInsight         pgtype.Int4 `json:"skill_insight"`
-	SkillIntimidation    pgtype.Int4 `json:"skill_intimidation"`
-	SkillInvestigation   pgtype.Int4 `json:"skill_investigation"`
-	SkillMedicine        pgtype.Int4 `json:"skill_medicine"`
-	SkillNature          pgtype.Int4 `json:"skill_nature"`
-	SkillPerception      pgtype.Int4 `json:"skill_perception"`
-	SkillPerformance     pgtype.Int4 `json:"skill_performance"`
-	SkillPersuasion      pgtype.Int4 `json:"skill_persuasion"`
-	SkillReligion        pgtype.Int4 `json:"skill_religion"`
-	SkillSleightOfHand   pgtype.Int4 `json:"skill_sleight_of_hand"`
-	SkillStealth         pgtype.Int4 `json:"skill_stealth"`
-	SkillSurvival        pgtype.Int4 `json:"skill_survival"`
-	ArmorClass           pgtype.Int4 `json:"armor_class"`
-	Speed                pgtype.Int4 `json:"speed"`
-	MaxHp                pgtype.Int4 `json:"max_hp"`
-	HitDiceType          pgtype.Int4 `json:"hit_dice_type"`
-	HitDiceRemaining     pgtype.Int4 `json:"hit_dice_remaining"`
-	Inspiration          pgtype.Bool `json:"inspiration"`
-	AttunementSlots      pgtype.Int4 `json:"attunement_slots"`
-	TrainingArmor        []string    `json:"training_armor"`
-	TrainingWeapons      []string    `json:"training_weapons"`
-	TrainingTools        []string    `json:"training_tools"`
-	TrainingLanguages    []string    `json:"training_languages"`
-	Copper               pgtype.Int4 `json:"copper"`
-	Silver               pgtype.Int4 `json:"silver"`
-	Electrum             pgtype.Int4 `json:"electrum"`
-	Gold                 pgtype.Int4 `json:"gold"`
-	Platinum             pgtype.Int4 `json:"platinum"`
-	Conditions           []string    `json:"conditions"`
-	Resistances          []string    `json:"resistances"`
-	Vulnerabilities      []string    `json:"vulnerabilities"`
-	Immunities           []string    `json:"immunities"`
-	PersonalityTraits    pgtype.Text `json:"personality_traits"`
-	Ideals               pgtype.Text `json:"ideals"`
-	Bonds                pgtype.Text `json:"bonds"`
-	Flaws                pgtype.Text `json:"flaws"`
-	Notes                pgtype.Text `json:"notes"`
-	ID                   uuid.UUID   `json:"id"`
+	Name                 *string   `json:"name"`
+	Race                 *string   `json:"race"`
+	Class                *string   `json:"class"`
+	Level                *int32    `json:"level"`
+	Background           *string   `json:"background"`
+	Alignment            *string   `json:"alignment"`
+	Xp                   *int32    `json:"xp"`
+	Strength             *int32    `json:"strength"`
+	Dexterity            *int32    `json:"dexterity"`
+	Constitution         *int32    `json:"constitution"`
+	Intelligence         *int32    `json:"intelligence"`
+	Wisdom               *int32    `json:"wisdom"`
+	Charisma             *int32    `json:"charisma"`
+	SaveProfStrength     *bool     `json:"save_prof_strength"`
+	SaveProfDexterity    *bool     `json:"save_prof_dexterity"`
+	SaveProfConstitution *bool     `json:"save_prof_constitution"`
+	SaveProfIntelligence *bool     `json:"save_prof_intelligence"`
+	SaveProfWisdom       *bool     `json:"save_prof_wisdom"`
+	SaveProfCharisma     *bool     `json:"save_prof_charisma"`
+	SkillAcrobatics      *int32    `json:"skill_acrobatics"`
+	SkillAnimalHandling  *int32    `json:"skill_animal_handling"`
+	SkillArcana          *int32    `json:"skill_arcana"`
+	SkillAthletics       *int32    `json:"skill_athletics"`
+	SkillDeception       *int32    `json:"skill_deception"`
+	SkillHistory         *int32    `json:"skill_history"`
+	SkillInsight         *int32    `json:"skill_insight"`
+	SkillIntimidation    *int32    `json:"skill_intimidation"`
+	SkillInvestigation   *int32    `json:"skill_investigation"`
+	SkillMedicine        *int32    `json:"skill_medicine"`
+	SkillNature          *int32    `json:"skill_nature"`
+	SkillPerception      *int32    `json:"skill_perception"`
+	SkillPerformance     *int32    `json:"skill_performance"`
+	SkillPersuasion      *int32    `json:"skill_persuasion"`
+	SkillReligion        *int32    `json:"skill_religion"`
+	SkillSleightOfHand   *int32    `json:"skill_sleight_of_hand"`
+	SkillStealth         *int32    `json:"skill_stealth"`
+	SkillSurvival        *int32    `json:"skill_survival"`
+	ArmorClass           *int32    `json:"armor_class"`
+	Speed                *int32    `json:"speed"`
+	MaxHp                *int32    `json:"max_hp"`
+	HitDiceType          *int32    `json:"hit_dice_type"`
+	HitDiceRemaining     *int32    `json:"hit_dice_remaining"`
+	Inspiration          *bool     `json:"inspiration"`
+	AttunementSlots      *int32    `json:"attunement_slots"`
+	TrainingArmor        []string  `json:"training_armor"`
+	TrainingWeapons      []string  `json:"training_weapons"`
+	TrainingTools        []string  `json:"training_tools"`
+	TrainingLanguages    []string  `json:"training_languages"`
+	Copper               *int32    `json:"copper"`
+	Silver               *int32    `json:"silver"`
+	Electrum             *int32    `json:"electrum"`
+	Gold                 *int32    `json:"gold"`
+	Platinum             *int32    `json:"platinum"`
+	Conditions           []string  `json:"conditions"`
+	Resistances          []string  `json:"resistances"`
+	Vulnerabilities      []string  `json:"vulnerabilities"`
+	Immunities           []string  `json:"immunities"`
+	PersonalityTraits    *string   `json:"personality_traits"`
+	Ideals               *string   `json:"ideals"`
+	Bonds                *string   `json:"bonds"`
+	Flaws                *string   `json:"flaws"`
+	Notes                *string   `json:"notes"`
+	ID                   uuid.UUID `json:"id"`
 }
 
 func (q *Queries) UpdateCharacter(ctx context.Context, arg UpdateCharacterParams) (Character, error) {

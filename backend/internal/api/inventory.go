@@ -81,7 +81,7 @@ func (a *API) handleCreateInventoryItem(w http.ResponseWriter, r *http.Request) 
 // @Security     BearerAuth
 // @Param        id     path      string                      true  "Character ID"
 // @Param        itemID path      string                      true  "Item ID"
-// @Param        body   body      db.UpdateInventoryItemParams true  "Item data"
+// @Param        body   body      db.UpdateInventoryItemParams false  "Item data"
 // @Success      200  {object}  db.InventoryItem
 // @Failure      400  {object}  object{error=string}
 // @Failure      401  {object}  object{error=string}

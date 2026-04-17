@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const countAttunedItems = `-- name: CountAttunedItems :one
@@ -31,25 +30,27 @@ INSERT INTO inventory_items (
     name,
     quantity,
     weight,
+    value,
     description,
     is_equipped,
     requires_attunement,
     is_attuned
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
 )
-RETURNING id, character_id, name, quantity, weight, description, is_equipped, requires_attunement, is_attuned, created_at
+RETURNING id, character_id, name, quantity, weight, description, is_equipped, requires_attunement, is_attuned, created_at, value
 `
 
 type CreateInventoryItemParams struct {
-	CharacterID        uuid.UUID      `json:"character_id"`
-	Name               string         `json:"name"`
-	Quantity           int32          `json:"quantity"`
-	Weight             pgtype.Numeric `json:"weight"`
-	Description        string         `json:"description"`
-	IsEquipped         bool           `json:"is_equipped"`
-	RequiresAttunement bool           `json:"requires_attunement"`
-	IsAttuned          bool           `json:"is_attuned"`
+	CharacterID        uuid.UUID `json:"character_id"`
+	Name               string    `json:"name"`
+	Quantity           int32     `json:"quantity"`
+	Weight             int32     `json:"weight"`
+	Value              int32     `json:"value"`
+	Description        string    `json:"description"`
+	IsEquipped         bool      `json:"is_equipped"`
+	RequiresAttunement bool      `json:"requires_attunement"`
+	IsAttuned          bool      `json:"is_attuned"`
 }
 
 func (q *Queries) CreateInventoryItem(ctx context.Context, arg CreateInventoryItemParams) (InventoryItem, error) {
@@ -58,6 +59,7 @@ func (q *Queries) CreateInventoryItem(ctx context.Context, arg CreateInventoryIt
 		arg.Name,
 		arg.Quantity,
 		arg.Weight,
+		arg.Value,
 		arg.Description,
 		arg.IsEquipped,
 		arg.RequiresAttunement,
@@ -75,6 +77,7 @@ func (q *Queries) CreateInventoryItem(ctx context.Context, arg CreateInventoryIt
 		&i.RequiresAttunement,
 		&i.IsAttuned,
 		&i.CreatedAt,
+		&i.Value,
 	)
 	return i, err
 }
@@ -90,7 +93,7 @@ func (q *Queries) DeleteInventoryItem(ctx context.Context, id uuid.UUID) error {
 }
 
 const getInventoryItem = `-- name: GetInventoryItem :one
-SELECT id, character_id, name, quantity, weight, description, is_equipped, requires_attunement, is_attuned, created_at FROM inventory_items
+SELECT id, character_id, name, quantity, weight, description, is_equipped, requires_attunement, is_attuned, created_at, value FROM inventory_items
 WHERE id = $1
 `
 
@@ -108,12 +111,13 @@ func (q *Queries) GetInventoryItem(ctx context.Context, id uuid.UUID) (Inventory
 		&i.RequiresAttunement,
 		&i.IsAttuned,
 		&i.CreatedAt,
+		&i.Value,
 	)
 	return i, err
 }
 
 const listInventoryItems = `-- name: ListInventoryItems :many
-SELECT id, character_id, name, quantity, weight, description, is_equipped, requires_attunement, is_attuned, created_at FROM inventory_items
+SELECT id, character_id, name, quantity, weight, description, is_equipped, requires_attunement, is_attuned, created_at, value FROM inventory_items
 WHERE character_id = $1
 ORDER BY name
 `
@@ -138,6 +142,7 @@ func (q *Queries) ListInventoryItems(ctx context.Context, characterID uuid.UUID)
 			&i.RequiresAttunement,
 			&i.IsAttuned,
 			&i.CreatedAt,
+			&i.Value,
 		); err != nil {
 			return nil, err
 		}
@@ -155,23 +160,25 @@ SET
     name                = COALESCE($1, name),
     quantity            = COALESCE($2, quantity),
     weight              = COALESCE($3, weight),
-    description         = COALESCE($4, description),
-    is_equipped         = COALESCE($5, is_equipped),
-    requires_attunement = COALESCE($6, requires_attunement),
-    is_attuned          = COALESCE($7, is_attuned)
-WHERE id = $8
-RETURNING id, character_id, name, quantity, weight, description, is_equipped, requires_attunement, is_attuned, created_at
+    value               = COALESCE($4, value),
+    description         = COALESCE($5, description),
+    is_equipped         = COALESCE($6, is_equipped),
+    requires_attunement = COALESCE($7, requires_attunement),
+    is_attuned          = COALESCE($8, is_attuned)
+WHERE id = $9
+RETURNING id, character_id, name, quantity, weight, description, is_equipped, requires_attunement, is_attuned, created_at, value
 `
 
 type UpdateInventoryItemParams struct {
-	Name               pgtype.Text    `json:"name"`
-	Quantity           pgtype.Int4    `json:"quantity"`
-	Weight             pgtype.Numeric `json:"weight"`
-	Description        pgtype.Text    `json:"description"`
-	IsEquipped         pgtype.Bool    `json:"is_equipped"`
-	RequiresAttunement pgtype.Bool    `json:"requires_attunement"`
-	IsAttuned          pgtype.Bool    `json:"is_attuned"`
-	ID                 uuid.UUID      `json:"id"`
+	Name               *string   `json:"name"`
+	Quantity           *int32    `json:"quantity"`
+	Weight             *int32    `json:"weight"`
+	Value              *int32    `json:"value"`
+	Description        *string   `json:"description"`
+	IsEquipped         *bool     `json:"is_equipped"`
+	RequiresAttunement *bool     `json:"requires_attunement"`
+	IsAttuned          *bool     `json:"is_attuned"`
+	ID                 uuid.UUID `json:"id"`
 }
 
 func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryItemParams) (InventoryItem, error) {
@@ -179,6 +186,7 @@ func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryIt
 		arg.Name,
 		arg.Quantity,
 		arg.Weight,
+		arg.Value,
 		arg.Description,
 		arg.IsEquipped,
 		arg.RequiresAttunement,
@@ -197,6 +205,7 @@ func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryIt
 		&i.RequiresAttunement,
 		&i.IsAttuned,
 		&i.CreatedAt,
+		&i.Value,
 	)
 	return i, err
 }

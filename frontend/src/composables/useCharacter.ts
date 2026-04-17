@@ -58,7 +58,7 @@ export function useCharacter(character: Character) {
         SKILLS.map((skill) => {
             const abilityMod = modifiers.value[skill.ability as AbilityKey]
             const profLevel = character[skill.field as keyof Character] as number
-            const bonus = abilityMod + profLevel + proficiencyBonus.value
+            const bonus = abilityMod + profLevel * proficiencyBonus.value
             return {
                 name: skill.name,
                 ability: skill.ability,
