@@ -6,7 +6,8 @@ import { useCharacter } from '@/composables/useCharacter'
 import { useAuthStore } from '@/stores/auth'
 import { inventoryAPI } from '@/api/inventory'
 import { spellsAPI } from '@/api/spells'
-import type { InventoryItem, Spell } from '@/types'
+import { featuresAPI } from '@/api/features'
+import type { InventoryItem, Spell, Feature } from '@/types'
 
 const route  = useRoute()
 const router = useRouter()
@@ -16,7 +17,7 @@ const id     = route.params.id as string
 
 onMounted(async () => {
   await store.fetchOne(id)
-  if (store.current) await Promise.all([loadInventory(), loadSpells()])
+  if (store.current) await Promise.all([loadInventory(), loadSpells(), loadFeatures()])
 })
 
 const derived = computed(() => store.current ? useCharacter(store.current) : null)
@@ -171,6 +172,54 @@ const spellsByLevel = computed(() => {
   return Object.entries(g).sort(([a],[b])=>Number(a)-Number(b))
 })
 
+const features = ref<Feature[]>([])
+const featuresLoading = ref(false)
+const showFeatureForm = ref(false)
+const editingFeature = ref<Feature | null>(null)
+const featureDraft = ref({ name: '', source: '', description: '', action_type: 'none' as ActionType })
+
+async function loadFeatures() {
+  featuresLoading.value = true
+  try { features.value = await featuresAPI.list(id) }
+  finally { featuresLoading.value = false }
+}
+
+function startAddFeature(defaultType: ActionType = 'none') {
+  editingFeature.value = null
+  featureDraft.value = { name: '', source: '', description: '', action_type: defaultType }
+  showFeatureForm.value = true
+}
+
+function startEditFeature(feature: Feature) {
+  editingFeature.value = feature
+  featureDraft.value = { name: feature.name, source: feature.source, description: feature.description, action_type: feature.action_type }
+  showFeatureForm.value = true
+}
+
+async function saveFeature() {
+  if (editingFeature.value) {
+    const updated = await featuresAPI.update(id, editingFeature.value.id, featureDraft.value)
+    const idx = features.value.findIndex(f => f.id === editingFeature.value!.id)
+    if (idx !== -1) features.value[idx] = updated
+  } else {
+    features.value.push(await featuresAPI.create(id, featureDraft.value))
+  }
+  showFeatureForm.value = false
+}
+
+async function deleteFeature(featureId: string) {
+  if (!confirm('Remove this feature?')) return
+  await featuresAPI.delete(id, featureId)
+  features.value = features.value.filter(f => f.id !== featureId)
+}
+
+// Computed feature groups for the tabs
+const actions      = computed(() => features.value.filter(f => f.action_type === 'action'))
+const bonusActions = computed(() => features.value.filter(f => f.action_type === 'bonus_action'))
+const reactions    = computed(() => features.value.filter(f => f.action_type === 'reaction'))
+const freeActions  = computed(() => features.value.filter(f => f.action_type === 'free'))
+const feats        = computed(() => features.value.filter(f => f.action_type === 'none'))
+
 const editingPersonality = ref(false)
 const personalityDraft = ref({personality_traits:'',ideals:'',bonds:'',flaws:'',notes:''})
 function startEditPersonality() {
@@ -180,6 +229,30 @@ function startEditPersonality() {
   editingPersonality.value = true
 }
 async function savePersonality() { await store.update(id, personalityDraft.value); editingPersonality.value = false }
+
+async function handleLevelChange() {
+  const current = store.current!.level
+  const input = prompt(`Current level: ${current}\nEnter +1 to level up or -1 to level down (min 1):`)
+  if (!input) return
+  const delta = parseInt(input)
+  if (isNaN(delta)) return
+  const newLevel = Math.max(1, current + delta)
+  if (newLevel === current) return
+  await store.update(id, { level: newLevel })
+}
+
+async function handleDeathSave(success: boolean) {
+  await store.recordDeathSave(id, success)
+}
+
+function toggleComponent(c: string) {
+  const parts = spellDraft.value.components
+    .split(',').map(s => s.trim()).filter(Boolean)
+  const idx = parts.indexOf(c)
+  if (idx === -1) parts.push(c)
+  else parts.splice(idx, 1)
+  spellDraft.value.components = parts.join(', ')
+}
 
 const ABILITIES = [
   {key:'strength',label:'STR'},{key:'dexterity',label:'DEX'},{key:'constitution',label:'CON'},
@@ -219,10 +292,15 @@ const SAVES = [
         <div class="identity-portrait">{{ store.current.name[0] }}</div>
         <div class="identity-info">
           <h1 class="identity-name">{{ store.current.name }}</h1>
-          <p class="identity-sub">{{ store.current.race }} · {{ store.current.class }}<span v-if="store.current.background"> · {{ store.current.background }}</span><span v-if="store.current.alignment"> · {{ store.current.alignment }}</span></p>
+          <p class="identity-sub">
+              {{ store.current.race }} ·
+              {{ store.current.class }} <span class="identity-level-inline">{{ store.current.level }}</span>
+              <span v-if="store.current.background"> · {{ store.current.background }}</span>
+              <span v-if="store.current.alignment"> · {{ store.current.alignment }}</span>
+          </p>
+          <p class="identity-xp">{{ store.current.xp }} XP</p>
         </div>
-        <div class="identity-stat"><span class="istat-val">{{ store.current.level }}</span><span class="istat-label">Level</span></div>
-        <div class="identity-stat"><span class="istat-val">{{ store.current.xp }}</span><span class="istat-label">XP</span></div>
+        <button class="btn btn-ghost level-btn" @click="handleLevelChange">⬆ Level</button>
       </div>
 
       <!-- HP + rest bar -->
@@ -248,8 +326,27 @@ const SAVES = [
           </template>
         </div>
         <div v-if="store.current.current_hp===0" class="death-saves-inline">
-          <div class="death-row"><span class="death-lbl">Successes</span><span v-for="i in 3" :key="'s'+i" class="death-dot success" :class="{filled:i<=store.current.death_save_successes}" /></div>
-          <div class="death-row"><span class="death-lbl">Failures</span><span v-for="i in 3" :key="'f'+i" class="death-dot failure" :class="{filled:i<=store.current.death_save_failures}" /></div>
+            <div class="death-row">
+                <span class="death-lbl">Successes</span>
+                <span
+                        v-for="i in 3" :key="'s'+i"
+                        class="death-dot success"
+                        :class="{filled:i<=store.current.death_save_successes}"
+                        @click="handleDeathSave(true)"
+                        title="Record success"
+                        />
+            </div>
+            <div class="death-row">
+                <span class="death-lbl">Failures</span>
+                <span
+                        v-for="i in 3" :key="'f'+i"
+                        class="death-dot failure"
+                        :class="{filled:i<=store.current.death_save_failures}"
+                        @click="handleDeathSave(false)"
+                        title="Record failure"
+                        />
+            </div>
+            <button class="btn btn-ghost" style="font-size:9px;padding:3px 8px;margin-top:4px" @click="store.update(id,{death_save_successes:0,death_save_failures:0})">Reset</button>
         </div>
         <div class="rest-zone">
           <button class="btn btn-ghost rest-btn" @click="handleShortRest">☀ Short Rest</button>
@@ -337,11 +434,115 @@ const SAVES = [
             </div>
             <div class="tab-content">
 
-              <div v-if="activeTab==='actions'" class="tab-panel">
-                <p class="tab-empty-hint">Actions, Bonus Actions and Reactions from your class features appear here. Add them under Feats.</p>
-              </div>
+                <div v-if="activeTab==='actions'" class="tab-panel">
+                    <div class="tab-toolbar">
+                        <span class="tab-count">{{ actions.length + bonusActions.length + reactions.length }} entries</span>
+                        <button class="btn btn-ghost btn-sm" @click="startAddFeature('action')">+ Add</button>
+                    </div>
+
+                    <template v-if="actions.length">
+                        <div class="feature-section-header">Actions</div>
+                        <div v-for="f in actions" :key="f.id" class="feature-row">
+                            <div class="feature-info">
+                                <span class="feature-name">{{ f.name }}</span>
+                                <span v-if="f.source" class="feature-source">{{ f.source }}</span>
+                            </div>
+                            <p v-if="f.description" class="feature-desc">{{ f.description }}</p>
+                            <div class="row-actions">
+                                <button class="icon-btn" @click="startEditFeature(f)">✎</button>
+                                <button class="icon-btn danger" @click="deleteFeature(f.id)">✕</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template v-if="bonusActions.length">
+                        <div class="feature-section-header">Bonus Actions</div>
+                        <div v-for="f in bonusActions" :key="f.id" class="feature-row">
+                            <div class="feature-info">
+                                <span class="feature-name">{{ f.name }}</span>
+                                <span v-if="f.source" class="feature-source">{{ f.source }}</span>
+                            </div>
+                            <p v-if="f.description" class="feature-desc">{{ f.description }}</p>
+                            <div class="row-actions">
+                                <button class="icon-btn" @click="startEditFeature(f)">✎</button>
+                                <button class="icon-btn danger" @click="deleteFeature(f.id)">✕</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template v-if="reactions.length">
+                        <div class="feature-section-header">Reactions</div>
+                        <div v-for="f in reactions" :key="f.id" class="feature-row">
+                            <div class="feature-info">
+                                <span class="feature-name">{{ f.name }}</span>
+                                <span v-if="f.source" class="feature-source">{{ f.source }}</span>
+                            </div>
+                            <p v-if="f.description" class="feature-desc">{{ f.description }}</p>
+                            <div class="row-actions">
+                                <button class="icon-btn" @click="startEditFeature(f)">✎</button>
+                                <button class="icon-btn danger" @click="deleteFeature(f.id)">✕</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template v-if="freeActions.length">
+                        <div class="feature-section-header">Free Actions</div>
+                        <div v-for="f in freeActions" :key="f.id" class="feature-row">
+                            <div class="feature-info">
+                                <span class="feature-name">{{ f.name }}</span>
+                                <span v-if="f.source" class="feature-source">{{ f.source }}</span>
+                            </div>
+                            <p v-if="f.description" class="feature-desc">{{ f.description }}</p>
+                            <div class="row-actions">
+                                <button class="icon-btn" @click="startEditFeature(f)">✎</button>
+                                <button class="icon-btn danger" @click="deleteFeature(f.id)">✕</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <p v-if="!actions.length && !bonusActions.length && !reactions.length && !freeActions.length" class="empty-tab">
+                    No actions added yet. Add class features, spells or abilities.
+                    </p>
+                </div>
 
               <div v-if="activeTab==='spells'" class="tab-panel">
+              <div class="spell-ability-edit">
+                  <span class="spell-ability-label">Spellcasting Ability</span>
+                  <select
+                          class="input spell-ability-select"
+                          :value="store.current.spellcasting_ability"
+                          @change="store.update(id, { spellcasting_ability: ($event.target as HTMLSelectElement).value })"
+                          >
+                          <option value="">None</option>
+                          <option value="strength">Strength</option>
+                          <option value="dexterity">Dexterity</option>
+                          <option value="constitution">Constitution</option>
+                          <option value="intelligence">Intelligence</option>
+                          <option value="wisdom">Wisdom</option>
+                          <option value="charisma">Charisma</option>
+                  </select>
+              </div>
+
+              <!-- Spellcasting stats -->
+              <div v-if="store.current.spellcasting_ability" class="spell-stats-row">
+                  <div class="spell-stat">
+                      <span class="spell-stat-val">{{ store.current.spellcasting_ability.toUpperCase().slice(0,3) }}</span>
+                      <span class="spell-stat-label">Ability</span>
+                  </div>
+                  <div class="spell-stat">
+                      <span class="spell-stat-val">{{ derived.spellSaveDC.value ?? '—' }}</span>
+                      <span class="spell-stat-label">Save DC</span>
+                  </div>
+                  <div class="spell-stat">
+                      <span class="spell-stat-val">{{ derived.spellAttackBonus.value !== null ? derived.signedModifier(derived.spellAttackBonus.value) : '—' }}</span>
+                      <span class="spell-stat-label">Attack Bonus</span>
+                  </div>
+              </div>
+              <p v-else class="spell-no-ability">
+              No spellcasting ability set.
+              <button class="btn-link" @click="activeTab = 'personality'">Set it in character details.</button>
+              </p>
+
                 <div class="tab-toolbar"><span class="tab-count">{{ spells.length }} spell{{ spells.length!==1?'s':'' }}</span><button class="btn btn-ghost btn-sm" @click="startAddSpell">+ Add Spell</button></div>
                 <div v-if="spellsLoading" class="skeleton" style="height:40px;margin-top:8px" />
                 <template v-else-if="spells.length">
@@ -359,8 +560,24 @@ const SAVES = [
               </div>
 
               <div v-if="activeTab==='feats'" class="tab-panel">
-                <div class="tab-toolbar"><span class="tab-count">Features & Feats</span><button class="btn btn-ghost btn-sm">+ Add Feature</button></div>
-                <p class="empty-tab">No features or feats added yet.</p>
+                  <div class="tab-toolbar">
+                      <span class="tab-count">{{ feats.length }} feature{{ feats.length !== 1 ? 's' : '' }}</span>
+                      <button class="btn btn-ghost btn-sm" @click="startAddFeature('none')">+ Add Feature</button>
+                  </div>
+                  <template v-if="feats.length">
+                      <div v-for="f in feats" :key="f.id" class="feature-row">
+                          <div class="feature-info">
+                              <span class="feature-name">{{ f.name }}</span>
+                              <span v-if="f.source" class="feature-source">{{ f.source }}</span>
+                          </div>
+                          <p v-if="f.description" class="feature-desc">{{ f.description }}</p>
+                          <div class="row-actions">
+                              <button class="icon-btn" @click="startEditFeature(f)">✎</button>
+                              <button class="icon-btn danger" @click="deleteFeature(f.id)">✕</button>
+                          </div>
+                      </div>
+                  </template>
+                  <p v-else class="empty-tab">No features or feats added yet.</p>
               </div>
 
               <div v-if="activeTab==='inventory'" class="tab-panel">
@@ -446,6 +663,41 @@ const SAVES = [
       </div>
     </div>
 
+    <!-- Feature modal -->
+    <div v-if="showFeatureForm" class="modal-overlay" @click.self="showFeatureForm=false">
+        <div class="modal">
+            <h3 class="modal-title">{{ editingFeature ? 'Edit Feature' : 'Add Feature' }}</h3>
+            <div class="modal-form">
+                <label class="field-label">Name *</label>
+                <input v-model="featureDraft.name" class="input" type="text" />
+
+                <div class="modal-row" style="grid-template-columns:1fr 1fr">
+                    <div>
+                        <label class="field-label">Type</label>
+                        <select v-model="featureDraft.action_type" class="input">
+                            <option value="none">Feature / Feat</option>
+                            <option value="action">Action</option>
+                            <option value="bonus_action">Bonus Action</option>
+                            <option value="reaction">Reaction</option>
+                            <option value="free">Free Action</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="field-label">Source</label>
+                        <input v-model="featureDraft.source" class="input" type="text" placeholder="e.g. Fighter 1" />
+                    </div>
+                </div>
+
+                <label class="field-label">Description</label>
+                <textarea v-model="featureDraft.description" class="input textarea" rows="4" />
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" @click="showFeatureForm=false">Cancel</button>
+                <button class="btn btn-primary" :disabled="!featureDraft.name" @click="saveFeature">Save</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Spell modal -->
     <div v-if="showSpellForm" class="modal-overlay" @click.self="showSpellForm=false">
       <div class="modal">
@@ -453,15 +705,54 @@ const SAVES = [
         <div class="modal-form">
           <label class="field-label">Name *</label><input v-model="spellDraft.name" class="input" type="text" />
           <div class="modal-row">
-            <div><label class="field-label">Level (0=Cantrip)</label><input v-model.number="spellDraft.level" class="input" type="number" min="0" max="9" /></div>
-            <div><label class="field-label">School</label><input v-model="spellDraft.school" class="input" type="text" /></div>
+              <div>
+                  <label class="field-label">Level</label>
+                  <select v-model.number="spellDraft.level" class="input">
+                      <option value="0">Cantrip</option>
+                      <option v-for="l in 9" :key="l" :value="l">Level {{ l }}</option>
+                  </select>
+              </div>
+              <div>
+                  <label class="field-label">School</label>
+                  <select v-model="spellDraft.school" class="input">
+                      <option value="">— Select —</option>
+                      <option>Abjuration</option>
+                      <option>Conjuration</option>
+                      <option>Divination</option>
+                      <option>Enchantment</option>
+                      <option>Evocation</option>
+                      <option>Illusion</option>
+                      <option>Necromancy</option>
+                      <option>Transmutation</option>
+                  </select>
+              </div>
           </div>
           <div class="modal-row">
-            <div><label class="field-label">Casting Time</label><input v-model="spellDraft.casting_time" class="input" type="text" /></div>
+              <div>
+                  <label class="field-label">Casting Time</label>
+                  <select v-model="spellDraft.casting_time" class="input">
+                      <option value="">— Select —</option>
+                      <option>1 action</option>
+                      <option>1 bonus action</option>
+                      <option>1 reaction</option>
+                      <option>1 minute</option>
+                      <option>10 minutes</option>
+                      <option>1 hour</option>
+                      <option>8 hours</option>
+                      <option>24 hours</option>
+                  </select>
+              </div>
             <div><label class="field-label">Range</label><input v-model="spellDraft.range" class="input" type="text" /></div>
           </div>
           <div class="modal-row">
-            <div><label class="field-label">Components</label><input v-model="spellDraft.components" class="input" type="text" /></div>
+              <div>
+                  <label class="field-label">Components</label>
+                  <div class="component-checks">
+                      <label class="check-label"><input type="checkbox" :checked="spellDraft.components.includes('V')" @change="toggleComponent('V')" /> V</label>
+                      <label class="check-label"><input type="checkbox" :checked="spellDraft.components.includes('S')" @change="toggleComponent('S')" /> S</label>
+                      <label class="check-label"><input type="checkbox" :checked="spellDraft.components.includes('M')" @change="toggleComponent('M')" /> M</label>
+                  </div>
+              </div>
             <div><label class="field-label">Duration</label><input v-model="spellDraft.duration" class="input" type="text" /></div>
           </div>
           <label class="field-label">Description</label><textarea v-model="spellDraft.description" class="input textarea" rows="3" />
@@ -486,6 +777,15 @@ const SAVES = [
 .identity-name{font-family:var(--font-display);font-size:18px;font-weight:600;letter-spacing:.04em}
 .identity-sub{font-family:var(--font-body);font-size:13px;color:var(--text-secondary);margin-top:1px}
 .identity-stat{text-align:center;padding:0 10px;flex-shrink:0}
+.identity-level-inline {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent-gold-dim); border: 1px solid var(--accent-gold);
+  font-family: var(--font-display); font-size: 11px; font-weight: 700;
+  color: var(--accent-gold); margin-left: 2px; vertical-align: middle;
+}
+.identity-xp { font-family: var(--font-display); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+.level-btn { padding: 5px 10px; font-size: 10px; flex-shrink: 0; }
 .istat-val{display:block;font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--accent-gold);line-height:1}
 .istat-label{display:block;font-family:var(--font-display);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px}
 .hp-bar-zone{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 20px;background:var(--bg-card);border-bottom:1px solid var(--border)}
@@ -510,9 +810,11 @@ const SAVES = [
 .death-dot{width:11px;height:11px;border-radius:50%;border:1px solid var(--border-light);background:transparent}
 .death-dot.success.filled{background:var(--hp-high);border-color:var(--hp-high)}
 .death-dot.failure.filled{background:var(--accent-red-bright);border-color:var(--accent-red-bright)}
+.death-dot { cursor: pointer; transition: transform .15s, background .15s; }
+.death-dot:hover { transform: scale(1.3); }
 .rest-zone{display:flex;gap:6px;margin-left:auto;flex-shrink:0}
 .rest-btn{padding:6px 12px;font-size:10px}
-.quickstats-bar{display:flex;align-items:center;flex-wrap:wrap;padding:6px 20px;background:var(--bg-surface);border-bottom:1px solid var(--border);gap:0;overflow-x:auto;justify-content:center}
+.quickstats-bar{display:flex;align-items:center;flex-wrap:wrap;padding:8px 20px;background:var(--bg-surface);border-bottom:1px solid var(--border);gap:0;overflow-x:auto;justify-content:center}
 .quickstat{text-align:center;padding:0 14px}
 .qs-val{display:block;font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text-primary);line-height:1}
 .qs-label{display:block;font-family:var(--font-display);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px}
@@ -586,6 +888,44 @@ const SAVES = [
 .electrum{color:#7ecece;font-weight:600}
 .gold{color:var(--accent-gold);font-weight:600}
 .platinum{color:#e5e4e2;font-weight:600}
+.feature-section-header {
+  font-family: var(--font-display); font-size: 9px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-muted);
+  border-bottom: 1px solid var(--border); padding: 3px 0; margin: 6px 0 3px;
+}
+.feature-row {
+  padding: 6px 4px; border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+  transition: background .1s;
+}
+.feature-row:hover { background: var(--bg-surface); }
+.feature-info { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.feature-name { font-family: var(--font-body); font-size: 14px; flex: 1; }
+.feature-source { font-family: var(--font-display); font-size: 9px; letter-spacing: .06em; color: var(--text-muted); text-transform: uppercase; }
+.feature-desc { font-family: var(--font-body); font-size: 12px; color: var(--text-secondary); font-style: italic; line-height: 1.4; padding: 0 2px; }
+
+.spell-stats-row {
+  display: flex; gap: 0; background: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  margin-bottom: 6px; overflow: hidden;
+}
+.spell-stat { flex: 1; text-align: center; padding: 8px 4px; border-right: 1px solid var(--border); }
+.spell-stat:last-child { border-right: none; }
+.spell-stat-val { display: block; font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--accent-gold); }
+.spell-stat-label { display: block; font-family: var(--font-display); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+.spell-no-ability { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); font-style: italic; }
+.spell-ability-edit {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.spell-ability-label {
+  font-family: var(--font-display); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text-muted); flex-shrink: 0;
+}
+.spell-ability-select { width: 140px; padding: 5px 8px; font-size: 13px; }
+.btn-link { background: none; border: none; color: var(--accent-gold-dim); font-family: var(--font-body); font-size: 13px; cursor: pointer; text-decoration: underline; padding: 0; }
+.btn-link:hover { color: var(--accent-gold); }
 .spell-group{margin-bottom:6px}
 .spell-level-header{font-family:var(--font-display);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);padding:3px 0;margin-bottom:3px}
 .spell-row{display:flex;align-items:center;gap:6px;padding:4px 3px;border-radius:2px;transition:background .1s}
@@ -594,6 +934,9 @@ const SAVES = [
 .spell-prepared.prepared{color:var(--accent-gold)}
 .spell-name{font-family:var(--font-body);font-size:15px;flex:1}
 .spell-meta{font-family:var(--font-display);font-size:9px;color:var(--text-muted);letter-spacing:.06em}
+.component-checks { display: flex; gap: 12px; margin-top: 4px; }
+select.input { cursor: pointer; }
+select.input option { background: var(--bg-card); color: var(--text-primary); }
 .row-actions{display:flex;gap:3px;flex-shrink:0}
 .icon-btn{width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--border);border-radius:2px;color:var(--text-muted);font-size:10px;cursor:pointer;transition:all .15s}
 .icon-btn:hover{border-color:var(--accent-gold-dim);color:var(--accent-gold)}

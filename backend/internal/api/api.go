@@ -117,6 +117,14 @@ func (a *API) Routes() *chi.Mux {
 					r.Put("/", a.handleUpsertSpellSlot)
 					r.Post("/use", a.handleUseSpellSlot)
 				})
+
+				// Features
+				r.Route("/features", func(r chi.Router) {
+					r.Get("/", a.handleListFeatures)
+					r.Post("/", a.handleCreateFeature)
+					r.Patch("/{featureID}", a.handleUpdateFeature)
+					r.Delete("/{featureID}", a.handleDeleteFeature)
+				})
 			})
 		})
 

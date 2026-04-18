@@ -64,19 +64,17 @@ func (s *CharacterService) Heal(ctx context.Context, id uuid.UUID, amount int) (
 	})
 }
 
-// Temp HP does not stack, we would update and take max buff
+// Temp HP does not stack
 func (s *CharacterService) AddTempHP(ctx context.Context, id uuid.UUID, amount int) (db.Character, error) {
 	char, err := s.queries.GetCharacter(ctx, id)
 	if err != nil {
 		return db.Character{}, fmt.Errorf("character not found: %w", err)
 	}
 
-	newTempHP := amount
-
 	return s.queries.UpdateCharacterHP(ctx, db.UpdateCharacterHPParams{
 		ID: id,
 		CurrentHp: char.CurrentHp,
-		TempHp: int32(newTempHP),
+		TempHp: int32(amount),
 	})
 }
 

@@ -84,6 +84,16 @@ export function useCharacter(character: Character) {
         : 0
     )
 
+    const spellAttackBonus = computed(() => {
+        const ability = character.spellcasting_ability as AbilityKey
+        if (!ability || !modifiers.value[ability] === undefined) return null
+        return modifiers.value[ability] + proficiencyBonus.value
+    })
+
+    const spellSaveDC = computed(() =>
+        spellAttackBonus.value !== null ? 8 + spellAttackBonus.value : null
+    )
+
     return {
         proficiencyBonus,
         modifiers,
@@ -94,5 +104,7 @@ export function useCharacter(character: Character) {
         hpPercentage,
         signedModifier,
         abilityModifier,
+        spellAttackBonus,
+        spellSaveDC,
     }
 }

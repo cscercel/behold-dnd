@@ -81,6 +81,7 @@ type Character struct {
 	Notes                string             `json:"notes"`
 	CreatedAt            pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SpellcastingAbility  string             `json:"spellcasting_ability"`
 }
 
 type CombatEncounter struct {
@@ -115,6 +116,7 @@ type Feature struct {
 	Source      string             `json:"source"`
 	Description string             `json:"description"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ActionType  string             `json:"action_type"`
 }
 
 type InventoryItem struct {

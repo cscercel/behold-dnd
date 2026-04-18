@@ -27,7 +27,7 @@ INSERT INTO characters (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 )
-RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability
 `
 
 type CreateCharacterParams struct {
@@ -129,6 +129,7 @@ func (q *Queries) CreateCharacter(ctx context.Context, arg CreateCharacterParams
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SpellcastingAbility,
 	)
 	return i, err
 }
@@ -144,7 +145,7 @@ func (q *Queries) DeleteCharacter(ctx context.Context, id uuid.UUID) error {
 }
 
 const getCharacter = `-- name: GetCharacter :one
-SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at FROM characters
+SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability FROM characters
 WHERE id = $1
 `
 
@@ -223,12 +224,13 @@ func (q *Queries) GetCharacter(ctx context.Context, id uuid.UUID) (Character, er
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SpellcastingAbility,
 	)
 	return i, err
 }
 
 const listCharacters = `-- name: ListCharacters :many
-SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at FROM characters
+SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability FROM characters
 ORDER BY name
 `
 
@@ -313,6 +315,7 @@ func (q *Queries) ListCharacters(ctx context.Context) ([]Character, error) {
 			&i.Notes,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.SpellcastingAbility,
 		); err != nil {
 			return nil, err
 		}
@@ -325,7 +328,7 @@ func (q *Queries) ListCharacters(ctx context.Context) ([]Character, error) {
 }
 
 const listMyCharacters = `-- name: ListMyCharacters :many
-SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at FROM characters
+SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability FROM characters
 WHERE owner_id = $1
 ORDER BY name
 `
@@ -411,6 +414,7 @@ func (q *Queries) ListMyCharacters(ctx context.Context, ownerID pgtype.UUID) ([]
 			&i.Notes,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.SpellcastingAbility,
 		); err != nil {
 			return nil, err
 		}
@@ -423,7 +427,7 @@ func (q *Queries) ListMyCharacters(ctx context.Context, ownerID pgtype.UUID) ([]
 }
 
 const listNPCs = `-- name: ListNPCs :many
-SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at FROM characters
+SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability FROM characters
 WHERE is_npc = TRUE
 ORDER BY name
 `
@@ -509,6 +513,7 @@ func (q *Queries) ListNPCs(ctx context.Context) ([]Character, error) {
 			&i.Notes,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.SpellcastingAbility,
 		); err != nil {
 			return nil, err
 		}
@@ -521,7 +526,7 @@ func (q *Queries) ListNPCs(ctx context.Context) ([]Character, error) {
 }
 
 const listPlayerCharacters = `-- name: ListPlayerCharacters :many
-SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at FROM characters
+SELECT id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability FROM characters
 WHERE is_npc = FALSE
 ORDER BY name
 `
@@ -607,6 +612,7 @@ func (q *Queries) ListPlayerCharacters(ctx context.Context) ([]Character, error)
 			&i.Notes,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.SpellcastingAbility,
 		); err != nil {
 			return nil, err
 		}
@@ -629,7 +635,7 @@ SET
     conditions              = '{}',
     updated_at              = NOW()
 WHERE id = $1
-RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability
 `
 
 func (q *Queries) LongRest(ctx context.Context, id uuid.UUID) (Character, error) {
@@ -707,6 +713,7 @@ func (q *Queries) LongRest(ctx context.Context, id uuid.UUID) (Character, error)
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SpellcastingAbility,
 	)
 	return i, err
 }
@@ -718,7 +725,7 @@ SET
     death_save_failures     = 0,
     updated_at              = NOW()
 WHERE id = $1
-RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability
 `
 
 func (q *Queries) ResetDeathSaves(ctx context.Context, id uuid.UUID) (Character, error) {
@@ -796,6 +803,7 @@ func (q *Queries) ResetDeathSaves(ctx context.Context, id uuid.UUID) (Character,
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SpellcastingAbility,
 	)
 	return i, err
 }
@@ -808,7 +816,7 @@ SET
     temp_hp                 = 0,
     updated_at              = NOW()
 WHERE id = $1
-RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability
 `
 
 type ShortRestParams struct {
@@ -892,6 +900,7 @@ func (q *Queries) ShortRest(ctx context.Context, arg ShortRestParams) (Character
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SpellcastingAbility,
 	)
 	return i, err
 }
@@ -947,23 +956,24 @@ SET
     training_weapons       = COALESCE($46, training_weapons),
     training_tools         = COALESCE($47, training_tools),
     training_languages     = COALESCE($48, training_languages),
-    copper                 = COALESCE($49, copper),
-    silver                 = COALESCE($50, silver),
-    electrum               = COALESCE($51, electrum),
-    gold                   = COALESCE($52, gold),
-    platinum               = COALESCE($53, platinum),
-    conditions             = COALESCE($54, conditions),
-    resistances            = COALESCE($55, resistances),
-    vulnerabilities        = COALESCE($56, vulnerabilities),
-    immunities             = COALESCE($57, immunities),
-    personality_traits     = COALESCE($58, personality_traits),
-    ideals                 = COALESCE($59, ideals),
-    bonds                  = COALESCE($60, bonds),
-    flaws                  = COALESCE($61, flaws),
-    notes                  = COALESCE($62, notes),
+    spellcasting_ability   = COALESCE($49, spellcasting_ability),
+    copper                 = COALESCE($50, copper),
+    silver                 = COALESCE($51, silver),
+    electrum               = COALESCE($52, electrum),
+    gold                   = COALESCE($53, gold),
+    platinum               = COALESCE($54, platinum),
+    conditions             = COALESCE($55, conditions),
+    resistances            = COALESCE($56, resistances),
+    vulnerabilities        = COALESCE($57, vulnerabilities),
+    immunities             = COALESCE($58, immunities),
+    personality_traits     = COALESCE($59, personality_traits),
+    ideals                 = COALESCE($60, ideals),
+    bonds                  = COALESCE($61, bonds),
+    flaws                  = COALESCE($62, flaws),
+    notes                  = COALESCE($63, notes),
     updated_at             = NOW()
-WHERE id = $63
-RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+WHERE id = $64
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability
 `
 
 type UpdateCharacterParams struct {
@@ -1015,6 +1025,7 @@ type UpdateCharacterParams struct {
 	TrainingWeapons      []string  `json:"training_weapons"`
 	TrainingTools        []string  `json:"training_tools"`
 	TrainingLanguages    []string  `json:"training_languages"`
+	SpellcastingAbility  *string   `json:"spellcasting_ability"`
 	Copper               *int32    `json:"copper"`
 	Silver               *int32    `json:"silver"`
 	Electrum             *int32    `json:"electrum"`
@@ -1082,6 +1093,7 @@ func (q *Queries) UpdateCharacter(ctx context.Context, arg UpdateCharacterParams
 		arg.TrainingWeapons,
 		arg.TrainingTools,
 		arg.TrainingLanguages,
+		arg.SpellcastingAbility,
 		arg.Copper,
 		arg.Silver,
 		arg.Electrum,
@@ -1171,6 +1183,7 @@ func (q *Queries) UpdateCharacter(ctx context.Context, arg UpdateCharacterParams
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SpellcastingAbility,
 	)
 	return i, err
 }
@@ -1182,7 +1195,7 @@ SET
     temp_hp    = $3,
     updated_at = NOW()
 WHERE id = $1
-RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability
 `
 
 type UpdateCharacterHPParams struct {
@@ -1266,6 +1279,7 @@ func (q *Queries) UpdateCharacterHP(ctx context.Context, arg UpdateCharacterHPPa
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SpellcastingAbility,
 	)
 	return i, err
 }
@@ -1276,7 +1290,7 @@ SET
     conditions = $2,
     updated_at = NOW()
 WHERE id = $1
-RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability
 `
 
 type UpdateConditionsParams struct {
@@ -1359,6 +1373,7 @@ func (q *Queries) UpdateConditions(ctx context.Context, arg UpdateConditionsPara
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SpellcastingAbility,
 	)
 	return i, err
 }
@@ -1370,7 +1385,7 @@ SET
     death_save_failures     = $3,
     updated_at              = NOW()
 WHERE id = $1
-RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability
 `
 
 type UpdateDeathSavesParams struct {
@@ -1454,6 +1469,7 @@ func (q *Queries) UpdateDeathSaves(ctx context.Context, arg UpdateDeathSavesPara
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SpellcastingAbility,
 	)
 	return i, err
 }

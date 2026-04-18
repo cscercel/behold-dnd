@@ -98,6 +98,7 @@ SET
     training_weapons       = COALESCE(sqlc.narg('training_weapons'), training_weapons),
     training_tools         = COALESCE(sqlc.narg('training_tools'), training_tools),
     training_languages     = COALESCE(sqlc.narg('training_languages'), training_languages),
+    spellcasting_ability   = COALESCE(sqlc.narg('spellcasting_ability'), spellcasting_ability),
     copper                 = COALESCE(sqlc.narg('copper'), copper),
     silver                 = COALESCE(sqlc.narg('silver'), silver),
     electrum               = COALESCE(sqlc.narg('electrum'), electrum),

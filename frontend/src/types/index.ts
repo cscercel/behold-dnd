@@ -71,6 +71,7 @@ export interface Character {
   training_weapons: string[]
   training_tools: string[]
   training_languages: string[]
+  spellcasting_ability: string
 
   // Currency
   copper: number
@@ -158,6 +159,18 @@ export interface CombatParticipant {
   notes: string
 }
 
+export type ActionType = 'none' | 'action' | 'bonus_action' | 'reaction' | 'free'
+
+export interface Feature {
+    id: string
+    character_id: string
+    name: string
+    source: string
+    description: string
+    action_type: ActionType
+    created_at: string
+}    
+
 // Partial update payloads — all fields optional
 export type UpdateCharacterPayload = Partial<Omit<Character,
   'id' | 'owner_id' | 'created_at' | 'updated_at'
@@ -169,4 +182,8 @@ export type UpdateInventoryItemPayload = Partial<Omit<InventoryItem,
 
 export type UpdateSpellPayload = Partial<Omit<Spell,
   'id' | 'character_id' | 'created_at'
+>>
+
+export type UpdateFeaturePayload = Partial<Omit<Feature,
+    'id' | 'character_id' | 'created_at'
 >>

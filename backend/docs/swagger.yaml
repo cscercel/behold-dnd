@@ -130,6 +130,8 @@ definitions:
         type: integer
       speed:
         type: integer
+      spellcasting_ability:
+        type: string
       strength:
         type: integer
       temp_hp:
@@ -230,6 +232,19 @@ definitions:
       speed:
         type: integer
     type: object
+  github_com_cscercel_behold-dnd_internal_db.CreateFeatureParams:
+    properties:
+      action_type:
+        type: string
+      character_id:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      source:
+        type: string
+    type: object
   github_com_cscercel_behold-dnd_internal_db.CreateInventoryItemParams:
     properties:
       character_id:
@@ -272,6 +287,23 @@ definitions:
       range:
         type: string
       school:
+        type: string
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.Feature:
+    properties:
+      action_type:
+        type: string
+      character_id:
+        type: string
+      created_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      source:
         type: string
     type: object
   github_com_cscercel_behold-dnd_internal_db.InventoryItem:
@@ -457,6 +489,8 @@ definitions:
         type: integer
       speed:
         type: integer
+      spellcasting_ability:
+        type: string
       strength:
         type: integer
       training_armor:
@@ -483,6 +517,19 @@ definitions:
         type: integer
       xp:
         type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpdateFeatureParams:
+    properties:
+      action_type:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      source:
+        type: string
     type: object
   github_com_cscercel_behold-dnd_internal_db.UpdateInventoryItemParams:
     properties:
@@ -1101,6 +1148,221 @@ paths:
       summary: Record a death saving throw
       tags:
       - characters
+  /characters/{id}/features:
+    get:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Feature'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all features for a character
+      tags:
+      - features
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Feature data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CreateFeatureParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Feature'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a feature for a character
+      tags:
+      - features
+  /characters/{id}/features/{featureID}:
+    delete:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Feature ID
+        in: path
+        name: featureID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a feature
+      tags:
+      - features
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Feature ID
+        in: path
+        name: featureID
+        required: true
+        type: string
+      - description: Feature data
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateFeatureParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Feature'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a feature
+      tags:
+      - features
   /characters/{id}/heal:
     post:
       consumes:

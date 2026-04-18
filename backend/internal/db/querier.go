@@ -16,12 +16,14 @@ type Querier interface {
 	CountAttunedItems(ctx context.Context, characterID uuid.UUID) (int64, error)
 	CreateCharacter(ctx context.Context, arg CreateCharacterParams) (Character, error)
 	CreateEncounter(ctx context.Context, name string) (CombatEncounter, error)
+	CreateFeature(ctx context.Context, arg CreateFeatureParams) (Feature, error)
 	CreateInventoryItem(ctx context.Context, arg CreateInventoryItemParams) (InventoryItem, error)
 	CreateSpell(ctx context.Context, arg CreateSpellParams) (Spell, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeactivateParticipant(ctx context.Context, id uuid.UUID) (CombatParticipant, error)
 	DeleteCharacter(ctx context.Context, id uuid.UUID) error
 	DeleteEncounter(ctx context.Context, id uuid.UUID) error
+	DeleteFeature(ctx context.Context, id uuid.UUID) error
 	DeleteInventoryItem(ctx context.Context, id uuid.UUID) error
 	DeleteSpell(ctx context.Context, id uuid.UUID) error
 	EndEncounter(ctx context.Context, id uuid.UUID) (CombatEncounter, error)
@@ -36,6 +38,8 @@ type Querier interface {
 	ListActiveParticipants(ctx context.Context, encounterID uuid.UUID) ([]CombatParticipant, error)
 	ListCharacters(ctx context.Context) ([]Character, error)
 	ListEncounters(ctx context.Context) ([]CombatEncounter, error)
+	ListFeatures(ctx context.Context, characterID uuid.UUID) ([]Feature, error)
+	ListFeaturesByActionType(ctx context.Context, arg ListFeaturesByActionTypeParams) ([]Feature, error)
 	ListInventoryItems(ctx context.Context, characterID uuid.UUID) ([]InventoryItem, error)
 	ListMyCharacters(ctx context.Context, ownerID pgtype.UUID) ([]Character, error)
 	ListNPCs(ctx context.Context) ([]Character, error)
@@ -58,6 +62,7 @@ type Querier interface {
 	UpdateCharacterHP(ctx context.Context, arg UpdateCharacterHPParams) (Character, error)
 	UpdateConditions(ctx context.Context, arg UpdateConditionsParams) (Character, error)
 	UpdateDeathSaves(ctx context.Context, arg UpdateDeathSavesParams) (Character, error)
+	UpdateFeature(ctx context.Context, arg UpdateFeatureParams) (Feature, error)
 	UpdateInventoryItem(ctx context.Context, arg UpdateInventoryItemParams) (InventoryItem, error)
 	UpdateParticipantConditions(ctx context.Context, arg UpdateParticipantConditionsParams) (CombatParticipant, error)
 	UpdateParticipantHP(ctx context.Context, arg UpdateParticipantHPParams) (CombatParticipant, error)
