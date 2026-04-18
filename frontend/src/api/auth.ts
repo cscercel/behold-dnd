@@ -1,4 +1,5 @@
 import { client } from './client'
+import router from '@/router'
 import type { User } from '@/types'
 
 export const authAPI = {

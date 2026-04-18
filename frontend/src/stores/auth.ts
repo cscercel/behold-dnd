@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User } from '@/types'
 import { authAPI } from '@/api/auth'
+import router from '@/router'
 
 
 export const useAuthStore = defineStore('auth', () => {
@@ -27,6 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     user.value = null
     localStorage.removeItem('token')
+    router.push({ name: 'login' }) // Go back to login page
   }
 
   return { token, user, isAuthenticated, isDM, login, fetchMe, logout }
