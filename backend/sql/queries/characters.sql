@@ -23,18 +23,37 @@ ORDER BY name;
 
 -- name: CreateCharacter :one
 INSERT INTO characters (
-    owner_id,
-    is_npc,
-    name,
-    race,
-    class,
-    level,
-    max_hp,
-    current_hp,
-    armor_class,
-    speed
+    owner_id, is_npc,
+    name, race, class, level, background, alignment, xp,
+    strength, dexterity, constitution, intelligence, wisdom, charisma,
+    save_prof_strength, save_prof_dexterity, save_prof_constitution,
+    save_prof_intelligence, save_prof_wisdom, save_prof_charisma,
+    skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics,
+    skill_deception, skill_history, skill_insight, skill_intimidation,
+    skill_investigation, skill_medicine, skill_nature, skill_perception,
+    skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand,
+    skill_stealth, skill_survival,
+    max_hp, current_hp, temp_hp, armor_class, speed,
+    hit_dice_type, hit_dice_remaining,
+    inspiration, attunement_slots,
+    training_armor, training_weapons, training_tools, training_languages,
+    copper, silver, electrum, gold, platinum,
+    conditions, resistances, vulnerabilities, immunities,
+    personality_traits, ideals, bonds, flaws, notes,
+    spellcasting_ability
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+    $1,  $2,  $3,  $4,  $5,  $6,  $7,  $8,  $9,
+    $10, $11, $12, $13, $14, $15,
+    $16, $17, $18, $19, $20, $21,
+    $22, $23, $24, $25, $26, $27, $28, $29, $30,
+    $31, $32, $33, $34, $35, $36, $37, $38, $39,
+    $40, $41, $42, $43, $44, $45, $46,
+    $47, $48,
+    $49, $50, $51, $52,
+    $53, $54, $55, $56, $57,
+    $58, $59, $60, $61,
+    $62, $63, $64, $65, $66,
+    $67
 )
 RETURNING *;
 

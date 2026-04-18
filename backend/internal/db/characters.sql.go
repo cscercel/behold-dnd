@@ -14,33 +14,109 @@ import (
 
 const createCharacter = `-- name: CreateCharacter :one
 INSERT INTO characters (
-    owner_id,
-    is_npc,
-    name,
-    race,
-    class,
-    level,
-    max_hp,
-    current_hp,
-    armor_class,
-    speed
+    owner_id, is_npc,
+    name, race, class, level, background, alignment, xp,
+    strength, dexterity, constitution, intelligence, wisdom, charisma,
+    save_prof_strength, save_prof_dexterity, save_prof_constitution,
+    save_prof_intelligence, save_prof_wisdom, save_prof_charisma,
+    skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics,
+    skill_deception, skill_history, skill_insight, skill_intimidation,
+    skill_investigation, skill_medicine, skill_nature, skill_perception,
+    skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand,
+    skill_stealth, skill_survival,
+    max_hp, current_hp, temp_hp, armor_class, speed,
+    hit_dice_type, hit_dice_remaining,
+    inspiration, attunement_slots,
+    training_armor, training_weapons, training_tools, training_languages,
+    copper, silver, electrum, gold, platinum,
+    conditions, resistances, vulnerabilities, immunities,
+    personality_traits, ideals, bonds, flaws, notes,
+    spellcasting_ability
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+    $1,  $2,  $3,  $4,  $5,  $6,  $7,  $8,  $9,
+    $10, $11, $12, $13, $14, $15,
+    $16, $17, $18, $19, $20, $21,
+    $22, $23, $24, $25, $26, $27, $28, $29, $30,
+    $31, $32, $33, $34, $35, $36, $37, $38, $39,
+    $40, $41, $42, $43, $44, $45, $46,
+    $47, $48,
+    $49, $50, $51, $52,
+    $53, $54, $55, $56, $57,
+    $58, $59, $60, $61,
+    $62, $63, $64, $65, $66,
+    $67
 )
 RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at, spellcasting_ability
 `
 
 type CreateCharacterParams struct {
-	OwnerID    pgtype.UUID `json:"owner_id"`
-	IsNpc      bool        `json:"is_npc"`
-	Name       string      `json:"name"`
-	Race       string      `json:"race"`
-	Class      string      `json:"class"`
-	Level      int32       `json:"level"`
-	MaxHp      int32       `json:"max_hp"`
-	CurrentHp  int32       `json:"current_hp"`
-	ArmorClass int32       `json:"armor_class"`
-	Speed      int32       `json:"speed"`
+	OwnerID              pgtype.UUID `json:"owner_id"`
+	IsNpc                bool        `json:"is_npc"`
+	Name                 string      `json:"name"`
+	Race                 string      `json:"race"`
+	Class                string      `json:"class"`
+	Level                int32       `json:"level"`
+	Background           string      `json:"background"`
+	Alignment            string      `json:"alignment"`
+	Xp                   int32       `json:"xp"`
+	Strength             int32       `json:"strength"`
+	Dexterity            int32       `json:"dexterity"`
+	Constitution         int32       `json:"constitution"`
+	Intelligence         int32       `json:"intelligence"`
+	Wisdom               int32       `json:"wisdom"`
+	Charisma             int32       `json:"charisma"`
+	SaveProfStrength     bool        `json:"save_prof_strength"`
+	SaveProfDexterity    bool        `json:"save_prof_dexterity"`
+	SaveProfConstitution bool        `json:"save_prof_constitution"`
+	SaveProfIntelligence bool        `json:"save_prof_intelligence"`
+	SaveProfWisdom       bool        `json:"save_prof_wisdom"`
+	SaveProfCharisma     bool        `json:"save_prof_charisma"`
+	SkillAcrobatics      int32       `json:"skill_acrobatics"`
+	SkillAnimalHandling  int32       `json:"skill_animal_handling"`
+	SkillArcana          int32       `json:"skill_arcana"`
+	SkillAthletics       int32       `json:"skill_athletics"`
+	SkillDeception       int32       `json:"skill_deception"`
+	SkillHistory         int32       `json:"skill_history"`
+	SkillInsight         int32       `json:"skill_insight"`
+	SkillIntimidation    int32       `json:"skill_intimidation"`
+	SkillInvestigation   int32       `json:"skill_investigation"`
+	SkillMedicine        int32       `json:"skill_medicine"`
+	SkillNature          int32       `json:"skill_nature"`
+	SkillPerception      int32       `json:"skill_perception"`
+	SkillPerformance     int32       `json:"skill_performance"`
+	SkillPersuasion      int32       `json:"skill_persuasion"`
+	SkillReligion        int32       `json:"skill_religion"`
+	SkillSleightOfHand   int32       `json:"skill_sleight_of_hand"`
+	SkillStealth         int32       `json:"skill_stealth"`
+	SkillSurvival        int32       `json:"skill_survival"`
+	MaxHp                int32       `json:"max_hp"`
+	CurrentHp            int32       `json:"current_hp"`
+	TempHp               int32       `json:"temp_hp"`
+	ArmorClass           int32       `json:"armor_class"`
+	Speed                int32       `json:"speed"`
+	HitDiceType          int32       `json:"hit_dice_type"`
+	HitDiceRemaining     int32       `json:"hit_dice_remaining"`
+	Inspiration          bool        `json:"inspiration"`
+	AttunementSlots      int32       `json:"attunement_slots"`
+	TrainingArmor        []string    `json:"training_armor"`
+	TrainingWeapons      []string    `json:"training_weapons"`
+	TrainingTools        []string    `json:"training_tools"`
+	TrainingLanguages    []string    `json:"training_languages"`
+	Copper               int32       `json:"copper"`
+	Silver               int32       `json:"silver"`
+	Electrum             int32       `json:"electrum"`
+	Gold                 int32       `json:"gold"`
+	Platinum             int32       `json:"platinum"`
+	Conditions           []string    `json:"conditions"`
+	Resistances          []string    `json:"resistances"`
+	Vulnerabilities      []string    `json:"vulnerabilities"`
+	Immunities           []string    `json:"immunities"`
+	PersonalityTraits    string      `json:"personality_traits"`
+	Ideals               string      `json:"ideals"`
+	Bonds                string      `json:"bonds"`
+	Flaws                string      `json:"flaws"`
+	Notes                string      `json:"notes"`
+	SpellcastingAbility  string      `json:"spellcasting_ability"`
 }
 
 func (q *Queries) CreateCharacter(ctx context.Context, arg CreateCharacterParams) (Character, error) {
@@ -51,10 +127,67 @@ func (q *Queries) CreateCharacter(ctx context.Context, arg CreateCharacterParams
 		arg.Race,
 		arg.Class,
 		arg.Level,
+		arg.Background,
+		arg.Alignment,
+		arg.Xp,
+		arg.Strength,
+		arg.Dexterity,
+		arg.Constitution,
+		arg.Intelligence,
+		arg.Wisdom,
+		arg.Charisma,
+		arg.SaveProfStrength,
+		arg.SaveProfDexterity,
+		arg.SaveProfConstitution,
+		arg.SaveProfIntelligence,
+		arg.SaveProfWisdom,
+		arg.SaveProfCharisma,
+		arg.SkillAcrobatics,
+		arg.SkillAnimalHandling,
+		arg.SkillArcana,
+		arg.SkillAthletics,
+		arg.SkillDeception,
+		arg.SkillHistory,
+		arg.SkillInsight,
+		arg.SkillIntimidation,
+		arg.SkillInvestigation,
+		arg.SkillMedicine,
+		arg.SkillNature,
+		arg.SkillPerception,
+		arg.SkillPerformance,
+		arg.SkillPersuasion,
+		arg.SkillReligion,
+		arg.SkillSleightOfHand,
+		arg.SkillStealth,
+		arg.SkillSurvival,
 		arg.MaxHp,
 		arg.CurrentHp,
+		arg.TempHp,
 		arg.ArmorClass,
 		arg.Speed,
+		arg.HitDiceType,
+		arg.HitDiceRemaining,
+		arg.Inspiration,
+		arg.AttunementSlots,
+		arg.TrainingArmor,
+		arg.TrainingWeapons,
+		arg.TrainingTools,
+		arg.TrainingLanguages,
+		arg.Copper,
+		arg.Silver,
+		arg.Electrum,
+		arg.Gold,
+		arg.Platinum,
+		arg.Conditions,
+		arg.Resistances,
+		arg.Vulnerabilities,
+		arg.Immunities,
+		arg.PersonalityTraits,
+		arg.Ideals,
+		arg.Bonds,
+		arg.Flaws,
+		arg.Notes,
+		arg.SpellcastingAbility,
 	)
 	var i Character
 	err := row.Scan(

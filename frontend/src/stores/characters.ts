@@ -34,6 +34,12 @@ export const useCharactersStore = defineStore('characters', () => {
     }
   }
 
+  async function create(data: Partial<Character>) {
+    const created = await characterAPI.create(data)
+    characters.value.push(created)
+    return created
+  }
+
   async function update(id: string, payload: UpdateCharacterPayload) {
     const updated = await characterAPI.update(id, payload)
     current.value = updated
@@ -79,6 +85,7 @@ export const useCharactersStore = defineStore('characters', () => {
     error,
     fetchAll,
     fetchOne,
+    create,
     update,
     applyDamage,
     heal,
