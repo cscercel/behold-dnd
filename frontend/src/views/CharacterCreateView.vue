@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCharactersStore } from '@/stores/characters'
+import { featuresAPI } from '@/api/features'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -13,11 +14,13 @@ const TOTAL_STEPS = 6
 const saving = ref(false)
 const error = ref<string | null>(null)
 
-// ── Form data ────────────────────────────────────────────────
 const form = ref({
   // Step 1 — Identity
   name: '',
   race: '',
+  raceCustom: '',
+  classSelect: '',
+  classCustom: '',
   class: '',
   level: 1,
   background: '',
@@ -89,7 +92,13 @@ const form = ref({
 
 // ── Step validation ──────────────────────────────────────────
 const canProceed = computed(() => {
-  if (step.value === 1) return form.value.name.trim() !== '' && form.value.class.trim() !== ''
+  if (step.value === 1) {
+    const hasName = form.value.name.trim() !== ''
+    const hasClass = form.value.classSelect === 'custom'
+      ? form.value.classCustom.trim() !== ''
+      : form.value.classSelect !== ''
+    return hasName && hasClass
+  }
   return true
 })
 
@@ -97,6 +106,14 @@ const canProceed = computed(() => {
 function mod(score: number): string {
   const m = Math.floor((score - 10) / 2)
   return m >= 0 ? `+${m}` : `${m}`
+}
+
+// ── Class change handler ─────────────────────────────────────
+function onClassChange() {
+  if (form.value.classSelect !== 'custom') {
+    form.value.class = form.value.classSelect
+    syncHitDice()
+  }
 }
 
 // ── Skill cycle helper ───────────────────────────────────────
@@ -117,29 +134,31 @@ function toggleTraining(arr: string[], value: string) {
   else arr.splice(idx, 1)
 }
 
-// ── HP sync — when max_hp changes on step 4, keep current in sync ──
+// ── HP sync ──────────────────────────────────────────────────
 function syncHP() {
   form.value.current_hp = form.value.max_hp
 }
 
-// ── Hit dice — default to level ─────────────────────────────
+// ── Hit dice sync ────────────────────────────────────────────
 function syncHitDice() {
   form.value.hit_dice_remaining = form.value.level
 }
 
 // ── Submit ───────────────────────────────────────────────────
 async function submit() {
+  // Resolve custom race/class
+  if (form.value.race === 'custom') form.value.race = form.value.raceCustom
+  if (form.value.classSelect === 'custom') form.value.class = form.value.classCustom
+  else form.value.class = form.value.classSelect
+
   saving.value = true
   error.value = null
   try {
     const payload = {
       ...form.value,
-      // Players always own their characters; NPCs have no owner
       owner_id: form.value.is_npc ? null : auth.user?.id,
-      // Ensure current_hp matches max on creation
       current_hp: form.value.max_hp,
       temp_hp: 0,
-      // Empty arrays need to be set
       conditions: [],
       resistances: [],
       vulnerabilities: [],
@@ -149,7 +168,12 @@ async function submit() {
       death_save_successes: 0,
       death_save_failures: 0,
     }
+
     const created = await store.create(payload)
+
+    // Seed base actions every character has
+    await Promise.all(BASE_ACTIONS.map(a => featuresAPI.create(created.id, a)))
+
     router.push({ name: 'character-sheet', params: { id: created.id } })
   } catch (e: any) {
     error.value = e.message ?? 'Failed to create character'
@@ -227,10 +251,29 @@ const SKILLS = [
   { label: 'Survival',        field: 'skill_survival',         ability: 'WIS' },
 ] as const
 
-const ARMOR_OPTIONS   = ['Light Armor', 'Medium Armor', 'Heavy Armor', 'Shields']
-const WEAPON_OPTIONS  = ['Simple Weapons', 'Martial Weapons', 'Hand Crossbows', 'Longswords', 'Rapiers', 'Shortswords']
-const TOOL_OPTIONS    = ["Thieves' Tools", "Artisan's Tools", 'Herbalism Kit', 'Musical Instrument', 'Navigator\'s Tools', 'Poisoner\'s Kit']
-const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Goblin', 'Halfling', 'Orc', 'Abyssal', 'Celestial', 'Draconic', 'Deep Speech', 'Infernal', 'Primordial', 'Sylvan', 'Undercommon']
+const ARMOR_OPTIONS    = ['Light Armor', 'Medium Armor', 'Heavy Armor', 'Shields']
+const WEAPON_OPTIONS   = ['Simple Weapons', 'Martial Weapons', 'Hand Crossbows', 'Longswords', 'Rapiers', 'Shortswords']
+const TOOL_OPTIONS     = ["Thieves' Tools", "Artisan's Tools", 'Herbalism Kit', 'Musical Instrument', "Navigator's Tools", "Poisoner's Kit"]
+const LANGUAGE_OPTIONS = ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Goblin', 'Halfling', 'Orc', 'Abyssal', 'Celestial', 'Draconic', 'Deep Speech', 'Infernal', 'Primordial', 'Sylvan', 'Undercommon']
+
+const BASE_ACTIONS = [
+  // Actions
+  { name: 'Attack',          action_type: 'action',       source: 'Basic Rules', description: 'Make one melee or ranged attack, or grapple.' },
+  { name: 'Cast a Spell',    action_type: 'action',       source: 'Basic Rules', description: 'Cast a spell with a casting time of 1 action.' },
+  { name: 'Dash',            action_type: 'action',       source: 'Basic Rules', description: 'Gain extra movement equal to your speed for the turn.' },
+  { name: 'Disengage',       action_type: 'action',       source: 'Basic Rules', description: 'Your movement does not provoke opportunity attacks for the rest of the turn.' },
+  { name: 'Dodge',           action_type: 'action',       source: 'Basic Rules', description: 'Until the start of your next turn, attacks against you have disadvantage and you have advantage on Dexterity saving throws.' },
+  { name: 'Help',            action_type: 'action',       source: 'Basic Rules', description: 'Give an ally advantage on their next ability check or attack roll against a creature within 5ft of you.' },
+  { name: 'Hide',            action_type: 'action',       source: 'Basic Rules', description: 'Make a Stealth check to hide. Requires obscurement from enemies.' },
+  { name: 'Ready',           action_type: 'action',       source: 'Basic Rules', description: 'Prepare a trigger and a reaction to use when the trigger occurs before the start of your next turn.' },
+  { name: 'Search',          action_type: 'action',       source: 'Basic Rules', description: 'Devote your attention to finding something. Make a Perception or Investigation check.' },
+  { name: 'Use an Object',   action_type: 'action',       source: 'Basic Rules', description: 'Interact with a second object or use a special object feature.' },
+  // Bonus actions
+  { name: 'Off-Hand Attack', action_type: 'bonus_action', source: 'Basic Rules', description: 'When you take the Attack action with a light melee weapon, you can use your bonus action to attack with a different light melee weapon in your other hand. No ability modifier is added to damage unless it is negative.' },
+  // Reactions
+  { name: 'Opportunity Attack', action_type: 'reaction', source: 'Basic Rules', description: 'When a hostile creature you can see moves out of your reach, make one melee attack against it.' },
+  { name: 'Ready Trigger',      action_type: 'reaction', source: 'Basic Rules', description: 'Execute the action you prepared with the Ready action when your chosen trigger occurs.' },
+]
 </script>
 
 <template>
@@ -298,15 +341,31 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
               <option v-for="r in RACES" :key="r">{{ r }}</option>
               <option value="custom">Other / Custom</option>
             </select>
+            <input
+              v-if="form.race === 'custom'"
+              v-model="form.raceCustom"
+              class="input"
+              style="margin-top:6px"
+              type="text"
+              placeholder="Enter race..."
+            />
           </div>
 
           <div class="field">
             <label class="field-label">Class *</label>
-            <select v-model="form.class" class="input" @change="syncHitDice">
+            <select v-model="form.classSelect" class="input" @change="onClassChange">
               <option value="">— Select Class —</option>
               <option v-for="c in CLASSES" :key="c">{{ c }}</option>
               <option value="custom">Other / Custom</option>
             </select>
+            <input
+              v-if="form.classSelect === 'custom'"
+              v-model="form.classCustom"
+              class="input"
+              style="margin-top:6px"
+              type="text"
+              placeholder="Enter class..."
+            />
           </div>
 
           <div class="field field-sm">
@@ -356,16 +415,11 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
       <!-- ── Step 3: Skills & Saves ── -->
       <div v-if="step === 3" class="step-content fade-in">
         <div class="two-col">
-          <!-- Saving throws -->
           <div class="sub-panel">
             <h3 class="sub-panel-title">Saving Throws</h3>
-            <p class="step-hint">Check the abilities you're proficient in.</p>
+            <p class="step-hint">Check the abilities you are proficient in.</p>
             <div class="save-list">
-              <label
-                v-for="save in SAVES"
-                :key="save.key"
-                class="save-check-row"
-              >
+              <label v-for="save in SAVES" :key="save.key" class="save-check-row">
                 <input
                   type="checkbox"
                   :checked="(form as any)[save.field]"
@@ -377,16 +431,11 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
             </div>
           </div>
 
-          <!-- Skills -->
           <div class="sub-panel">
             <h3 class="sub-panel-title">Skills</h3>
             <p class="step-hint">Click to cycle: None → Proficient (●) → Expertise (E)</p>
             <div class="skill-list">
-              <div
-                v-for="skill in SKILLS"
-                :key="skill.field"
-                class="skill-create-row"
-              >
+              <div v-for="skill in SKILLS" :key="skill.field" class="skill-create-row">
                 <span
                   class="skill-prof-btn"
                   :class="`level-${(form as any)[skill.field]}`"
@@ -431,7 +480,6 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
           </div>
         </div>
 
-        <!-- HP preview -->
         <div class="combat-preview">
           <div class="preview-stat"><span class="preview-val">{{ form.max_hp }}</span><span class="preview-label">HP</span></div>
           <div class="preview-stat"><span class="preview-val">{{ form.armor_class }}</span><span class="preview-label">AC</span></div>
@@ -500,7 +548,7 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
 
       <!-- ── Step 6: Personality ── -->
       <div v-if="step === 6" class="step-content fade-in">
-        <p class="step-hint">These are all optional — you can fill them in later on the character sheet.</p>
+        <p class="step-hint">All optional — you can fill these in later on the character sheet.</p>
         <div class="personality-form">
           <div class="field">
             <label class="field-label">Personality Traits</label>
@@ -524,14 +572,15 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
           </div>
         </div>
 
-        <!-- Character summary -->
         <div class="ornament" style="margin: 20px 0" />
+
+        <!-- Summary -->
         <div class="summary-card">
           <h3 class="summary-title">Summary</h3>
           <div class="summary-grid">
             <div class="summary-item"><span class="summary-label">Name</span><span class="summary-val">{{ form.name || '—' }}</span></div>
-            <div class="summary-item"><span class="summary-label">Class</span><span class="summary-val">{{ form.class || '—' }} {{ form.level }}</span></div>
-            <div class="summary-item"><span class="summary-label">Race</span><span class="summary-val">{{ form.race || '—' }}</span></div>
+            <div class="summary-item"><span class="summary-label">Class</span><span class="summary-val">{{ (form.classSelect === 'custom' ? form.classCustom : form.classSelect) || '—' }} {{ form.level }}</span></div>
+            <div class="summary-item"><span class="summary-label">Race</span><span class="summary-val">{{ (form.race === 'custom' ? form.raceCustom : form.race) || '—' }}</span></div>
             <div class="summary-item"><span class="summary-label">HP</span><span class="summary-val">{{ form.max_hp }}</span></div>
             <div class="summary-item"><span class="summary-label">AC</span><span class="summary-val">{{ form.armor_class }}</span></div>
             <div class="summary-item"><span class="summary-label">Speed</span><span class="summary-val">{{ form.speed }}ft</span></div>
@@ -542,18 +591,17 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
             <div class="summary-item"><span class="summary-label">WIS</span><span class="summary-val">{{ form.wisdom }} ({{ mod(form.wisdom) }})</span></div>
             <div class="summary-item"><span class="summary-label">CHA</span><span class="summary-val">{{ form.charisma }} ({{ mod(form.charisma) }})</span></div>
           </div>
+          <p style="margin-top:10px;font-family:var(--font-display);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)">
+            Base actions (Attack, Dash, Dodge, etc.) will be added automatically.
+          </p>
         </div>
 
         <p v-if="error" class="create-error">{{ error }}</p>
       </div>
 
-      <!-- Navigation buttons -->
+      <!-- Navigation -->
       <div class="step-nav">
-        <button
-          v-if="step > 1"
-          class="btn btn-ghost"
-          @click="step--"
-        >← Previous</button>
+        <button v-if="step > 1" class="btn btn-ghost" @click="step--">← Previous</button>
         <div style="flex:1" />
         <button
           v-if="step < TOTAL_STEPS"
@@ -564,11 +612,9 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
         <button
           v-else
           class="btn btn-primary"
-          :disabled="saving || !form.name || !form.class"
+          :disabled="saving || !form.name || (!form.classSelect && !form.classCustom)"
           @click="submit"
-        >
-          {{ saving ? 'Creating...' : '⚔ Create Character' }}
-        </button>
+        >{{ saving ? 'Creating...' : '⚔ Create Character' }}</button>
       </div>
     </main>
   </div>
@@ -594,31 +640,21 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
 }
 .create-sub { font-family: var(--font-body); font-style: italic; color: var(--text-secondary); font-size: 16px; }
 
-/* Progress */
 .progress-bar { height: 3px; background: var(--bg-card); border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--accent-gold); border-radius: 2px; transition: width .4s ease; }
 
-/* Step indicators */
 .step-indicators { display: flex; justify-content: space-between; margin-bottom: 28px; }
 .step-indicator { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: default; flex: 1; }
 .step-indicator.done { cursor: pointer; }
-.step-dot {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-size: 11px; font-weight: 600;
-  border: 1px solid var(--border-light); background: var(--bg-card); color: var(--text-muted);
-  transition: all .2s;
-}
+.step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 11px; font-weight: 600; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--text-muted); transition: all .2s; }
 .step-indicator.active .step-dot { background: var(--accent-gold); border-color: var(--accent-gold); color: #0a0c10; }
 .step-indicator.done .step-dot { background: var(--accent-gold-dim); border-color: var(--accent-gold-dim); color: var(--accent-gold); }
 .step-label { font-family: var(--font-display); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); text-align: center; }
 .step-indicator.active .step-label { color: var(--accent-gold); }
 
-/* Step content */
 .step-content { min-height: 320px; }
 .step-hint { font-family: var(--font-body); font-style: italic; font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
 
-/* NPC toggle */
 .npc-toggle-row { margin-bottom: 20px; }
 .toggle-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-family: var(--font-body); font-size: 15px; color: var(--text-secondary); }
 .toggle-track { width: 36px; height: 20px; border-radius: 10px; background: var(--border-light); position: relative; transition: background .2s; flex-shrink: 0; }
@@ -626,77 +662,51 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
 .toggle-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--text-muted); position: absolute; top: 3px; left: 3px; transition: transform .2s, background .2s; }
 .toggle-track.active .toggle-thumb { transform: translateX(16px); background: var(--accent-gold); }
 
-/* Form grid */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .field { display: flex; flex-direction: column; gap: 5px; }
 .field-wide { grid-column: span 2; }
 .field-sm { max-width: 140px; }
 .field-label { font-family: var(--font-display); font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
 
-/* Ability scores */
 .ability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.ability-card {
-  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
-  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 12px;
-  transition: border-color .2s;
-}
+.ability-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 12px; transition: border-color .2s; }
 .ability-card:focus-within { border-color: var(--accent-gold-dim); }
 .ability-abbr { font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: .1em; color: var(--text-muted); }
 .ability-full { font-family: var(--font-body); font-size: 12px; color: var(--text-muted); }
-.ability-input {
-  width: 70px; padding: 8px; text-align: center;
-  background: var(--bg-input); border: 1px solid var(--border-light); border-radius: var(--radius-sm);
-  color: var(--text-primary); font-family: var(--font-display); font-size: 24px; font-weight: 600;
-  outline: none; transition: border-color .2s;
-}
+.ability-input { width: 70px; padding: 8px; text-align: center; background: var(--bg-input); border: 1px solid var(--border-light); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-display); font-size: 24px; font-weight: 600; outline: none; transition: border-color .2s; }
 .ability-input:focus { border-color: var(--accent-gold-dim); }
 .ability-mod { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--accent-gold); }
 
-/* Two col layout */
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .sub-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
 .sub-panel-title { font-family: var(--font-display); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
 
-/* Saves */
 .save-list { display: flex; flex-direction: column; gap: 6px; }
 .save-check-row { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px; border-radius: 2px; transition: background .1s; }
 .save-check-row:hover { background: var(--bg-surface); }
 .prof-checkbox { accent-color: var(--accent-gold); width: 13px; height: 13px; cursor: pointer; }
 .save-check-label { font-family: var(--font-body); font-size: 14px; color: var(--text-secondary); }
 
-/* Skills */
 .skill-list { display: flex; flex-direction: column; gap: 2px; }
 .skill-create-row { display: flex; align-items: center; gap: 6px; padding: 3px 2px; border-radius: 2px; transition: background .1s; }
 .skill-create-row:hover { background: var(--bg-surface); }
-.skill-prof-btn {
-  width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px; cursor: pointer; border: 1px solid var(--border-light); color: var(--text-muted);
-  transition: all .15s; user-select: none;
-}
+.skill-prof-btn { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; cursor: pointer; border: 1px solid var(--border-light); color: var(--text-muted); transition: all .15s; user-select: none; }
 .skill-prof-btn.level-1 { background: var(--accent-gold-dim); border-color: var(--accent-gold); color: var(--accent-gold); }
 .skill-prof-btn.level-2 { background: var(--accent-gold); border-color: var(--accent-gold); color: #000; }
 .skill-create-name { font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); flex: 1; }
 .skill-create-ability { font-family: var(--font-display); font-size: 9px; color: var(--text-muted); letter-spacing: .06em; }
 
-/* Combat preview */
-.combat-preview {
-  display: flex; gap: 0; margin-top: 20px;
-  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  overflow: hidden;
-}
+.combat-preview { display: flex; gap: 0; margin-top: 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
 .preview-stat { flex: 1; text-align: center; padding: 12px; border-right: 1px solid var(--border); }
 .preview-stat:last-child { border-right: none; }
 .preview-val { display: block; font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--accent-gold); line-height: 1; }
 .preview-label { display: block; font-family: var(--font-display); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
 
-/* Training */
 .training-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
 .training-group { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; }
 .check-option { display: flex; align-items: center; gap: 8px; cursor: pointer; font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); padding: 3px 0; }
 .check-option:hover { color: var(--text-primary); }
 
-/* Currency */
 .currency-form { display: flex; gap: 10px; }
 .currency-field { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .currency-label { font-family: var(--font-display); font-size: 11px; font-weight: 600; letter-spacing: .08em; }
@@ -707,11 +717,9 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
 .gold     { color: var(--accent-gold); }
 .platinum { color: #e5e4e2; }
 
-/* Personality */
 .personality-form { display: flex; flex-direction: column; gap: 12px; }
 .textarea { resize: vertical; font-family: var(--font-body); line-height: 1.5; }
 
-/* Summary */
 .summary-card { background: var(--bg-card); border: 1px solid var(--border-gold); border-radius: var(--radius-md); padding: 16px; }
 .summary-title { font-family: var(--font-display); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
 .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
@@ -719,7 +727,6 @@ const LANGUAGE_OPTIONS= ['Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Go
 .summary-label { font-family: var(--font-display); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
 .summary-val { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-primary); }
 
-/* Nav */
 .step-nav { display: flex; align-items: center; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
 
 .create-error { color: var(--accent-red-bright); font-family: var(--font-body); font-size: 14px; margin-top: 12px; text-align: center; padding: 8px; background: rgba(139,26,26,.1); border: 1px solid var(--accent-red); border-radius: var(--radius-sm); }
