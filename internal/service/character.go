@@ -8,7 +8,6 @@ import (
 	"github.com/cscercel/behold-dnd/internal/db"
 )
 
-
 type CharacterService struct {
 	queries *db.Queries
 }
