@@ -168,3 +168,17 @@ func (s *CharacterService) UpdateCharacterDeathSave(
 		DeathSaveFailures: int32(failures),
 	})
 }
+
+func (s *CharacterService) UpdateConditions(
+	ctx context.Context, characterID uuid.UUID, conditions []string,
+) (db.Character, error) {
+}
+
+func (s *CharacterService) LongRest(ctx context.Context, characterID uuid.UUID) (db.Character, error) {
+}
+
+func (s *CharacterService) ShortRest(ctx context.Context, characterID uuid.UUID) (db.Character, error) {
+}
+
+func (s *CharacterService) DeleteCharacter(ctx context.Context, characterID uuid.UUID) (db.Character, error) {
+}
