@@ -100,16 +100,26 @@ SELECT * FROM characters
 WHERE is_npc = TRUE
 ORDER BY name;
 
--- name: UpdateCharacter :one
+-- name: UpdateCharacterInfo :one
 UPDATE characters
 SET
     name                   = COALESCE(sqlc.narg('name'), name),
     race                   = COALESCE(sqlc.narg('race'), race),
-    class                  = COALESCE(sqlc.narg('class'), class),
-    level                  = COALESCE(sqlc.narg('level'), level),
     background             = COALESCE(sqlc.narg('background'), background),
     alignment              = COALESCE(sqlc.narg('alignment'), alignment),
-    xp                     = COALESCE(sqlc.narg('xp'), xp),
+    inspiration            = COALESCE(sqlc.narg('inspiration'), inspiration),
+    speed                  = COALESCE(sqlc.narg('speed'), speed),
+    ideals                 = COALESCE(sqlc.narg('ideals'), ideals),
+    bonds                  = COALESCE(sqlc.narg('bonds'), bonds),
+    flaws                  = COALESCE(sqlc.narg('flaws'), flaws),
+    notes                  = COALESCE(sqlc.narg('notes'), notes),
+    updated_at             = NOW()
+WHERE id = sqlc.arg('id')
+RETURNING *;
+
+-- name: UpdateCharacterAbilityScores :one
+UPDATE characters
+SET
     strength               = COALESCE(sqlc.narg('strength'), strength),
     dexterity              = COALESCE(sqlc.narg('dexterity'), dexterity),
     constitution           = COALESCE(sqlc.narg('constitution'), constitution),
@@ -122,6 +132,13 @@ SET
     save_prof_intelligence = COALESCE(sqlc.narg('save_prof_intelligence'), save_prof_intelligence),
     save_prof_wisdom       = COALESCE(sqlc.narg('save_prof_wisdom'), save_prof_wisdom),
     save_prof_charisma     = COALESCE(sqlc.narg('save_prof_charisma'), save_prof_charisma),
+    updated_at             = NOW()
+WHERE id = sqlc.arg('id')
+RETURNING *;
+
+-- name: UpdateCharacterSkills :one
+UPDATE characters
+SET
     skill_acrobatics       = COALESCE(sqlc.narg('skill_acrobatics'), skill_acrobatics),
     skill_animal_handling  = COALESCE(sqlc.narg('skill_animal_handling'), skill_animal_handling),
     skill_arcana           = COALESCE(sqlc.narg('skill_arcana'), skill_arcana),
@@ -140,32 +157,49 @@ SET
     skill_sleight_of_hand  = COALESCE(sqlc.narg('skill_sleight_of_hand'), skill_sleight_of_hand),
     skill_stealth          = COALESCE(sqlc.narg('skill_stealth'), skill_stealth),
     skill_survival         = COALESCE(sqlc.narg('skill_survival'), skill_survival),
-    armor_class            = COALESCE(sqlc.narg('armor_class'), armor_class),
-    speed                  = COALESCE(sqlc.narg('speed'), speed),
+    updated_at             = NOW()
+WHERE id = sqlc.arg('id')
+RETURNING *;
+
+-- name: UpdateCharacterLevel :one
+UPDATE characters
+SET
+    class                  = COALESCE(sqlc.narg('class'), class),
+    level                  = COALESCE(sqlc.narg('level'), level),
+    xp                     = COALESCE(sqlc.narg('xp'), xp),
     max_hp                 = COALESCE(sqlc.narg('max_hp'), max_hp),
     hit_dice_type          = COALESCE(sqlc.narg('hit_dice_type'), hit_dice_type),
     hit_dice_remaining     = COALESCE(sqlc.narg('hit_dice_remaining'), hit_dice_remaining),
-    inspiration            = COALESCE(sqlc.narg('inspiration'), inspiration),
+    updated_at             = NOW()
+WHERE id = sqlc.arg('id')
+RETURNING *;
+
+-- name: UpdateCharacterTraining :one
+UPDATE characters
+SET
+    armor_class            = COALESCE(sqlc.narg('armor_class'), armor_class),
     attunement_slots       = COALESCE(sqlc.narg('attunement_slots'), attunement_slots),
     training_armor         = COALESCE(sqlc.narg('training_armor'), training_armor),
     training_weapons       = COALESCE(sqlc.narg('training_weapons'), training_weapons),
     training_tools         = COALESCE(sqlc.narg('training_tools'), training_tools),
     training_languages     = COALESCE(sqlc.narg('training_languages'), training_languages),
     spellcasting_ability   = COALESCE(sqlc.narg('spellcasting_ability'), spellcasting_ability),
+    resistances            = COALESCE(sqlc.narg('resistances'), resistances),
+    vulnerabilities        = COALESCE(sqlc.narg('vulnerabilities'), vulnerabilities),
+    immunities             = COALESCE(sqlc.narg('immunities'), immunities),
+    updated_at             = NOW()
+WHERE id = sqlc.arg('id')
+RETURNING *;
+
+-- name: UpdateCharacterCurrency :one
+UPDATE characters
+SET
     copper                 = COALESCE(sqlc.narg('copper'), copper),
     silver                 = COALESCE(sqlc.narg('silver'), silver),
     electrum               = COALESCE(sqlc.narg('electrum'), electrum),
     gold                   = COALESCE(sqlc.narg('gold'), gold),
     platinum               = COALESCE(sqlc.narg('platinum'), platinum),
     conditions             = COALESCE(sqlc.narg('conditions'), conditions),
-    resistances            = COALESCE(sqlc.narg('resistances'), resistances),
-    vulnerabilities        = COALESCE(sqlc.narg('vulnerabilities'), vulnerabilities),
-    immunities             = COALESCE(sqlc.narg('immunities'), immunities),
-    personality_traits     = COALESCE(sqlc.narg('personality_traits'), personality_traits),
-    ideals                 = COALESCE(sqlc.narg('ideals'), ideals),
-    bonds                  = COALESCE(sqlc.narg('bonds'), bonds),
-    flaws                  = COALESCE(sqlc.narg('flaws'), flaws),
-    notes                  = COALESCE(sqlc.narg('notes'), notes),
     updated_at             = NOW()
 WHERE id = sqlc.arg('id')
 RETURNING *;

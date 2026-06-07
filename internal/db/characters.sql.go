@@ -1226,85 +1226,27 @@ func (q *Queries) ShortRest(ctx context.Context, arg ShortRestParams) (Character
 	return i, err
 }
 
-const updateCharacter = `-- name: UpdateCharacter :one
+const updateCharacterAbilityScores = `-- name: UpdateCharacterAbilityScores :one
 UPDATE characters
 SET
-    name                   = COALESCE($1, name),
-    race                   = COALESCE($2, race),
-    class                  = COALESCE($3, class),
-    level                  = COALESCE($4, level),
-    background             = COALESCE($5, background),
-    alignment              = COALESCE($6, alignment),
-    xp                     = COALESCE($7, xp),
-    strength               = COALESCE($8, strength),
-    dexterity              = COALESCE($9, dexterity),
-    constitution           = COALESCE($10, constitution),
-    intelligence           = COALESCE($11, intelligence),
-    wisdom                 = COALESCE($12, wisdom),
-    charisma               = COALESCE($13, charisma),
-    save_prof_strength     = COALESCE($14, save_prof_strength),
-    save_prof_dexterity    = COALESCE($15, save_prof_dexterity),
-    save_prof_constitution = COALESCE($16, save_prof_constitution),
-    save_prof_intelligence = COALESCE($17, save_prof_intelligence),
-    save_prof_wisdom       = COALESCE($18, save_prof_wisdom),
-    save_prof_charisma     = COALESCE($19, save_prof_charisma),
-    skill_acrobatics       = COALESCE($20, skill_acrobatics),
-    skill_animal_handling  = COALESCE($21, skill_animal_handling),
-    skill_arcana           = COALESCE($22, skill_arcana),
-    skill_athletics        = COALESCE($23, skill_athletics),
-    skill_deception        = COALESCE($24, skill_deception),
-    skill_history          = COALESCE($25, skill_history),
-    skill_insight          = COALESCE($26, skill_insight),
-    skill_intimidation     = COALESCE($27, skill_intimidation),
-    skill_investigation    = COALESCE($28, skill_investigation),
-    skill_medicine         = COALESCE($29, skill_medicine),
-    skill_nature           = COALESCE($30, skill_nature),
-    skill_perception       = COALESCE($31, skill_perception),
-    skill_performance      = COALESCE($32, skill_performance),
-    skill_persuasion       = COALESCE($33, skill_persuasion),
-    skill_religion         = COALESCE($34, skill_religion),
-    skill_sleight_of_hand  = COALESCE($35, skill_sleight_of_hand),
-    skill_stealth          = COALESCE($36, skill_stealth),
-    skill_survival         = COALESCE($37, skill_survival),
-    armor_class            = COALESCE($38, armor_class),
-    speed                  = COALESCE($39, speed),
-    max_hp                 = COALESCE($40, max_hp),
-    hit_dice_type          = COALESCE($41, hit_dice_type),
-    hit_dice_remaining     = COALESCE($42, hit_dice_remaining),
-    inspiration            = COALESCE($43, inspiration),
-    attunement_slots       = COALESCE($44, attunement_slots),
-    training_armor         = COALESCE($45, training_armor),
-    training_weapons       = COALESCE($46, training_weapons),
-    training_tools         = COALESCE($47, training_tools),
-    training_languages     = COALESCE($48, training_languages),
-    spellcasting_ability   = COALESCE($49, spellcasting_ability),
-    copper                 = COALESCE($50, copper),
-    silver                 = COALESCE($51, silver),
-    electrum               = COALESCE($52, electrum),
-    gold                   = COALESCE($53, gold),
-    platinum               = COALESCE($54, platinum),
-    conditions             = COALESCE($55, conditions),
-    resistances            = COALESCE($56, resistances),
-    vulnerabilities        = COALESCE($57, vulnerabilities),
-    immunities             = COALESCE($58, immunities),
-    personality_traits     = COALESCE($59, personality_traits),
-    ideals                 = COALESCE($60, ideals),
-    bonds                  = COALESCE($61, bonds),
-    flaws                  = COALESCE($62, flaws),
-    notes                  = COALESCE($63, notes),
+    strength               = COALESCE($1, strength),
+    dexterity              = COALESCE($2, dexterity),
+    constitution           = COALESCE($3, constitution),
+    intelligence           = COALESCE($4, intelligence),
+    wisdom                 = COALESCE($5, wisdom),
+    charisma               = COALESCE($6, charisma),
+    save_prof_strength     = COALESCE($7, save_prof_strength),
+    save_prof_dexterity    = COALESCE($8, save_prof_dexterity),
+    save_prof_constitution = COALESCE($9, save_prof_constitution),
+    save_prof_intelligence = COALESCE($10, save_prof_intelligence),
+    save_prof_wisdom       = COALESCE($11, save_prof_wisdom),
+    save_prof_charisma     = COALESCE($12, save_prof_charisma),
     updated_at             = NOW()
-WHERE id = $64
+WHERE id = $13
 RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, spellcasting_ability, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
 `
 
-type UpdateCharacterParams struct {
-	Name                 *string   `json:"name"`
-	Race                 *string   `json:"race"`
-	Class                *string   `json:"class"`
-	Level                *int32    `json:"level"`
-	Background           *string   `json:"background"`
-	Alignment            *string   `json:"alignment"`
-	Xp                   *int32    `json:"xp"`
+type UpdateCharacterAbilityScoresParams struct {
 	Strength             *int32    `json:"strength"`
 	Dexterity            *int32    `json:"dexterity"`
 	Constitution         *int32    `json:"constitution"`
@@ -1317,62 +1259,11 @@ type UpdateCharacterParams struct {
 	SaveProfIntelligence *bool     `json:"save_prof_intelligence"`
 	SaveProfWisdom       *bool     `json:"save_prof_wisdom"`
 	SaveProfCharisma     *bool     `json:"save_prof_charisma"`
-	SkillAcrobatics      *int32    `json:"skill_acrobatics"`
-	SkillAnimalHandling  *int32    `json:"skill_animal_handling"`
-	SkillArcana          *int32    `json:"skill_arcana"`
-	SkillAthletics       *int32    `json:"skill_athletics"`
-	SkillDeception       *int32    `json:"skill_deception"`
-	SkillHistory         *int32    `json:"skill_history"`
-	SkillInsight         *int32    `json:"skill_insight"`
-	SkillIntimidation    *int32    `json:"skill_intimidation"`
-	SkillInvestigation   *int32    `json:"skill_investigation"`
-	SkillMedicine        *int32    `json:"skill_medicine"`
-	SkillNature          *int32    `json:"skill_nature"`
-	SkillPerception      *int32    `json:"skill_perception"`
-	SkillPerformance     *int32    `json:"skill_performance"`
-	SkillPersuasion      *int32    `json:"skill_persuasion"`
-	SkillReligion        *int32    `json:"skill_religion"`
-	SkillSleightOfHand   *int32    `json:"skill_sleight_of_hand"`
-	SkillStealth         *int32    `json:"skill_stealth"`
-	SkillSurvival        *int32    `json:"skill_survival"`
-	ArmorClass           *int32    `json:"armor_class"`
-	Speed                *int32    `json:"speed"`
-	MaxHp                *int32    `json:"max_hp"`
-	HitDiceType          *int32    `json:"hit_dice_type"`
-	HitDiceRemaining     *int32    `json:"hit_dice_remaining"`
-	Inspiration          *bool     `json:"inspiration"`
-	AttunementSlots      *int32    `json:"attunement_slots"`
-	TrainingArmor        []string  `json:"training_armor"`
-	TrainingWeapons      []string  `json:"training_weapons"`
-	TrainingTools        []string  `json:"training_tools"`
-	TrainingLanguages    []string  `json:"training_languages"`
-	SpellcastingAbility  *string   `json:"spellcasting_ability"`
-	Copper               *int32    `json:"copper"`
-	Silver               *int32    `json:"silver"`
-	Electrum             *int32    `json:"electrum"`
-	Gold                 *int32    `json:"gold"`
-	Platinum             *int32    `json:"platinum"`
-	Conditions           []string  `json:"conditions"`
-	Resistances          []string  `json:"resistances"`
-	Vulnerabilities      []string  `json:"vulnerabilities"`
-	Immunities           []string  `json:"immunities"`
-	PersonalityTraits    *string   `json:"personality_traits"`
-	Ideals               *string   `json:"ideals"`
-	Bonds                *string   `json:"bonds"`
-	Flaws                *string   `json:"flaws"`
-	Notes                *string   `json:"notes"`
 	ID                   uuid.UUID `json:"id"`
 }
 
-func (q *Queries) UpdateCharacter(ctx context.Context, arg UpdateCharacterParams) (Character, error) {
-	row := q.db.QueryRow(ctx, updateCharacter,
-		arg.Name,
-		arg.Race,
-		arg.Class,
-		arg.Level,
-		arg.Background,
-		arg.Alignment,
-		arg.Xp,
+func (q *Queries) UpdateCharacterAbilityScores(ctx context.Context, arg UpdateCharacterAbilityScoresParams) (Character, error) {
+	row := q.db.QueryRow(ctx, updateCharacterAbilityScores,
 		arg.Strength,
 		arg.Dexterity,
 		arg.Constitution,
@@ -1385,50 +1276,118 @@ func (q *Queries) UpdateCharacter(ctx context.Context, arg UpdateCharacterParams
 		arg.SaveProfIntelligence,
 		arg.SaveProfWisdom,
 		arg.SaveProfCharisma,
-		arg.SkillAcrobatics,
-		arg.SkillAnimalHandling,
-		arg.SkillArcana,
-		arg.SkillAthletics,
-		arg.SkillDeception,
-		arg.SkillHistory,
-		arg.SkillInsight,
-		arg.SkillIntimidation,
-		arg.SkillInvestigation,
-		arg.SkillMedicine,
-		arg.SkillNature,
-		arg.SkillPerception,
-		arg.SkillPerformance,
-		arg.SkillPersuasion,
-		arg.SkillReligion,
-		arg.SkillSleightOfHand,
-		arg.SkillStealth,
-		arg.SkillSurvival,
-		arg.ArmorClass,
-		arg.Speed,
-		arg.MaxHp,
-		arg.HitDiceType,
-		arg.HitDiceRemaining,
-		arg.Inspiration,
-		arg.AttunementSlots,
-		arg.TrainingArmor,
-		arg.TrainingWeapons,
-		arg.TrainingTools,
-		arg.TrainingLanguages,
-		arg.SpellcastingAbility,
+		arg.ID,
+	)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.SpellcastingAbility,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateCharacterCurrency = `-- name: UpdateCharacterCurrency :one
+UPDATE characters
+SET
+    copper                 = COALESCE($1, copper),
+    silver                 = COALESCE($2, silver),
+    electrum               = COALESCE($3, electrum),
+    gold                   = COALESCE($4, gold),
+    platinum               = COALESCE($5, platinum),
+    conditions             = COALESCE($6, conditions),
+    updated_at             = NOW()
+WHERE id = $7
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, spellcasting_ability, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+type UpdateCharacterCurrencyParams struct {
+	Copper     *int32    `json:"copper"`
+	Silver     *int32    `json:"silver"`
+	Electrum   *int32    `json:"electrum"`
+	Gold       *int32    `json:"gold"`
+	Platinum   *int32    `json:"platinum"`
+	Conditions []string  `json:"conditions"`
+	ID         uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateCharacterCurrency(ctx context.Context, arg UpdateCharacterCurrencyParams) (Character, error) {
+	row := q.db.QueryRow(ctx, updateCharacterCurrency,
 		arg.Copper,
 		arg.Silver,
 		arg.Electrum,
 		arg.Gold,
 		arg.Platinum,
 		arg.Conditions,
-		arg.Resistances,
-		arg.Vulnerabilities,
-		arg.Immunities,
-		arg.PersonalityTraits,
-		arg.Ideals,
-		arg.Bonds,
-		arg.Flaws,
-		arg.Notes,
 		arg.ID,
 	)
 	var i Character
@@ -1527,6 +1486,514 @@ type UpdateCharacterHPParams struct {
 
 func (q *Queries) UpdateCharacterHP(ctx context.Context, arg UpdateCharacterHPParams) (Character, error) {
 	row := q.db.QueryRow(ctx, updateCharacterHP, arg.ID, arg.CurrentHp, arg.TempHp)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.SpellcastingAbility,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateCharacterInfo = `-- name: UpdateCharacterInfo :one
+UPDATE characters
+SET
+    name                   = COALESCE($1, name),
+    race                   = COALESCE($2, race),
+    background             = COALESCE($3, background),
+    alignment              = COALESCE($4, alignment),
+    inspiration            = COALESCE($5, inspiration),
+    speed                  = COALESCE($6, speed),
+    ideals                 = COALESCE($7, ideals),
+    bonds                  = COALESCE($8, bonds),
+    flaws                  = COALESCE($9, flaws),
+    notes                  = COALESCE($10, notes),
+    updated_at             = NOW()
+WHERE id = $11
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, spellcasting_ability, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+type UpdateCharacterInfoParams struct {
+	Name        *string   `json:"name"`
+	Race        *string   `json:"race"`
+	Background  *string   `json:"background"`
+	Alignment   *string   `json:"alignment"`
+	Inspiration *bool     `json:"inspiration"`
+	Speed       *int32    `json:"speed"`
+	Ideals      *string   `json:"ideals"`
+	Bonds       *string   `json:"bonds"`
+	Flaws       *string   `json:"flaws"`
+	Notes       *string   `json:"notes"`
+	ID          uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateCharacterInfo(ctx context.Context, arg UpdateCharacterInfoParams) (Character, error) {
+	row := q.db.QueryRow(ctx, updateCharacterInfo,
+		arg.Name,
+		arg.Race,
+		arg.Background,
+		arg.Alignment,
+		arg.Inspiration,
+		arg.Speed,
+		arg.Ideals,
+		arg.Bonds,
+		arg.Flaws,
+		arg.Notes,
+		arg.ID,
+	)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.SpellcastingAbility,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateCharacterLevel = `-- name: UpdateCharacterLevel :one
+UPDATE characters
+SET
+    class                  = COALESCE($1, class),
+    level                  = COALESCE($2, level),
+    xp                     = COALESCE($3, xp),
+    max_hp                 = COALESCE($4, max_hp),
+    hit_dice_type          = COALESCE($5, hit_dice_type),
+    hit_dice_remaining     = COALESCE($6, hit_dice_remaining),
+    updated_at             = NOW()
+WHERE id = $7
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, spellcasting_ability, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+type UpdateCharacterLevelParams struct {
+	Class            *string   `json:"class"`
+	Level            *int32    `json:"level"`
+	Xp               *int32    `json:"xp"`
+	MaxHp            *int32    `json:"max_hp"`
+	HitDiceType      *int32    `json:"hit_dice_type"`
+	HitDiceRemaining *int32    `json:"hit_dice_remaining"`
+	ID               uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateCharacterLevel(ctx context.Context, arg UpdateCharacterLevelParams) (Character, error) {
+	row := q.db.QueryRow(ctx, updateCharacterLevel,
+		arg.Class,
+		arg.Level,
+		arg.Xp,
+		arg.MaxHp,
+		arg.HitDiceType,
+		arg.HitDiceRemaining,
+		arg.ID,
+	)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.SpellcastingAbility,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateCharacterSkills = `-- name: UpdateCharacterSkills :one
+UPDATE characters
+SET
+    skill_acrobatics       = COALESCE($1, skill_acrobatics),
+    skill_animal_handling  = COALESCE($2, skill_animal_handling),
+    skill_arcana           = COALESCE($3, skill_arcana),
+    skill_athletics        = COALESCE($4, skill_athletics),
+    skill_deception        = COALESCE($5, skill_deception),
+    skill_history          = COALESCE($6, skill_history),
+    skill_insight          = COALESCE($7, skill_insight),
+    skill_intimidation     = COALESCE($8, skill_intimidation),
+    skill_investigation    = COALESCE($9, skill_investigation),
+    skill_medicine         = COALESCE($10, skill_medicine),
+    skill_nature           = COALESCE($11, skill_nature),
+    skill_perception       = COALESCE($12, skill_perception),
+    skill_performance      = COALESCE($13, skill_performance),
+    skill_persuasion       = COALESCE($14, skill_persuasion),
+    skill_religion         = COALESCE($15, skill_religion),
+    skill_sleight_of_hand  = COALESCE($16, skill_sleight_of_hand),
+    skill_stealth          = COALESCE($17, skill_stealth),
+    skill_survival         = COALESCE($18, skill_survival),
+    updated_at             = NOW()
+WHERE id = $19
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, spellcasting_ability, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+type UpdateCharacterSkillsParams struct {
+	SkillAcrobatics     *int32    `json:"skill_acrobatics"`
+	SkillAnimalHandling *int32    `json:"skill_animal_handling"`
+	SkillArcana         *int32    `json:"skill_arcana"`
+	SkillAthletics      *int32    `json:"skill_athletics"`
+	SkillDeception      *int32    `json:"skill_deception"`
+	SkillHistory        *int32    `json:"skill_history"`
+	SkillInsight        *int32    `json:"skill_insight"`
+	SkillIntimidation   *int32    `json:"skill_intimidation"`
+	SkillInvestigation  *int32    `json:"skill_investigation"`
+	SkillMedicine       *int32    `json:"skill_medicine"`
+	SkillNature         *int32    `json:"skill_nature"`
+	SkillPerception     *int32    `json:"skill_perception"`
+	SkillPerformance    *int32    `json:"skill_performance"`
+	SkillPersuasion     *int32    `json:"skill_persuasion"`
+	SkillReligion       *int32    `json:"skill_religion"`
+	SkillSleightOfHand  *int32    `json:"skill_sleight_of_hand"`
+	SkillStealth        *int32    `json:"skill_stealth"`
+	SkillSurvival       *int32    `json:"skill_survival"`
+	ID                  uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateCharacterSkills(ctx context.Context, arg UpdateCharacterSkillsParams) (Character, error) {
+	row := q.db.QueryRow(ctx, updateCharacterSkills,
+		arg.SkillAcrobatics,
+		arg.SkillAnimalHandling,
+		arg.SkillArcana,
+		arg.SkillAthletics,
+		arg.SkillDeception,
+		arg.SkillHistory,
+		arg.SkillInsight,
+		arg.SkillIntimidation,
+		arg.SkillInvestigation,
+		arg.SkillMedicine,
+		arg.SkillNature,
+		arg.SkillPerception,
+		arg.SkillPerformance,
+		arg.SkillPersuasion,
+		arg.SkillReligion,
+		arg.SkillSleightOfHand,
+		arg.SkillStealth,
+		arg.SkillSurvival,
+		arg.ID,
+	)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.IsNpc,
+		&i.Name,
+		&i.Race,
+		&i.Class,
+		&i.Level,
+		&i.Background,
+		&i.Alignment,
+		&i.Xp,
+		&i.Strength,
+		&i.Dexterity,
+		&i.Constitution,
+		&i.Intelligence,
+		&i.Wisdom,
+		&i.Charisma,
+		&i.SaveProfStrength,
+		&i.SaveProfDexterity,
+		&i.SaveProfConstitution,
+		&i.SaveProfIntelligence,
+		&i.SaveProfWisdom,
+		&i.SaveProfCharisma,
+		&i.SkillAcrobatics,
+		&i.SkillAnimalHandling,
+		&i.SkillArcana,
+		&i.SkillAthletics,
+		&i.SkillDeception,
+		&i.SkillHistory,
+		&i.SkillInsight,
+		&i.SkillIntimidation,
+		&i.SkillInvestigation,
+		&i.SkillMedicine,
+		&i.SkillNature,
+		&i.SkillPerception,
+		&i.SkillPerformance,
+		&i.SkillPersuasion,
+		&i.SkillReligion,
+		&i.SkillSleightOfHand,
+		&i.SkillStealth,
+		&i.SkillSurvival,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.ArmorClass,
+		&i.Speed,
+		&i.HitDiceType,
+		&i.HitDiceRemaining,
+		&i.DeathSaveSuccesses,
+		&i.DeathSaveFailures,
+		&i.SpellcastingAbility,
+		&i.Inspiration,
+		&i.TrainingArmor,
+		&i.TrainingWeapons,
+		&i.TrainingTools,
+		&i.TrainingLanguages,
+		&i.AttunementSlots,
+		&i.Copper,
+		&i.Silver,
+		&i.Electrum,
+		&i.Gold,
+		&i.Platinum,
+		&i.Conditions,
+		&i.Resistances,
+		&i.Vulnerabilities,
+		&i.Immunities,
+		&i.PersonalityTraits,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateCharacterTraining = `-- name: UpdateCharacterTraining :one
+UPDATE characters
+SET
+    armor_class            = COALESCE($1, armor_class),
+    attunement_slots       = COALESCE($2, attunement_slots),
+    training_armor         = COALESCE($3, training_armor),
+    training_weapons       = COALESCE($4, training_weapons),
+    training_tools         = COALESCE($5, training_tools),
+    training_languages     = COALESCE($6, training_languages),
+    spellcasting_ability   = COALESCE($7, spellcasting_ability),
+    resistances            = COALESCE($8, resistances),
+    vulnerabilities        = COALESCE($9, vulnerabilities),
+    immunities             = COALESCE($10, immunities),
+    updated_at             = NOW()
+WHERE id = $11
+RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, spellcasting_ability, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
+`
+
+type UpdateCharacterTrainingParams struct {
+	ArmorClass          *int32    `json:"armor_class"`
+	AttunementSlots     *int32    `json:"attunement_slots"`
+	TrainingArmor       []string  `json:"training_armor"`
+	TrainingWeapons     []string  `json:"training_weapons"`
+	TrainingTools       []string  `json:"training_tools"`
+	TrainingLanguages   []string  `json:"training_languages"`
+	SpellcastingAbility *string   `json:"spellcasting_ability"`
+	Resistances         []string  `json:"resistances"`
+	Vulnerabilities     []string  `json:"vulnerabilities"`
+	Immunities          []string  `json:"immunities"`
+	ID                  uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateCharacterTraining(ctx context.Context, arg UpdateCharacterTrainingParams) (Character, error) {
+	row := q.db.QueryRow(ctx, updateCharacterTraining,
+		arg.ArmorClass,
+		arg.AttunementSlots,
+		arg.TrainingArmor,
+		arg.TrainingWeapons,
+		arg.TrainingTools,
+		arg.TrainingLanguages,
+		arg.SpellcastingAbility,
+		arg.Resistances,
+		arg.Vulnerabilities,
+		arg.Immunities,
+		arg.ID,
+	)
 	var i Character
 	err := row.Scan(
 		&i.ID,

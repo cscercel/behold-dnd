@@ -70,10 +70,65 @@ func (s *CharacterService) ListNPCs(ctx context.Context) ([]db.Character, error)
 	return npcs, nil
 }
 
-func (s *CharacterService) UpdateCharacter(
-	ctx context.Context, characterData db.UpdateCharacterParams,
+func (s *CharacterService) UpdateCharacterInfo(
+	ctx context.Context, characterData db.UpdateCharacterInfoParams,
 ) (db.Character, error) {
-	character, err := s.queries.UpdateCharacter(ctx, characterData)
+	character, err := s.queries.UpdateCharacterInfo(ctx, characterData)
+	if err != nil {
+		return db.Character{}, fmt.Errorf("failed to update character: %w", err)
+	}
+
+	return character, nil
+}
+
+func (s *CharacterService) UpdateCharacterAbilityScores(
+	ctx context.Context, characterData db.UpdateCharacterAbilityScoresParams,
+) (db.Character, error) {
+	character, err := s.queries.UpdateCharacterAbilityScores(ctx, characterData)
+	if err != nil {
+		return db.Character{}, fmt.Errorf("failed to update character: %w", err)
+	}
+
+	return character, nil
+}
+
+func (s *CharacterService) UpdateCharacterSkills(
+	ctx context.Context, characterData db.UpdateCharacterSkillsParams,
+) (db.Character, error) {
+	character, err := s.queries.UpdateCharacterSkills(ctx, characterData)
+	if err != nil {
+		return db.Character{}, fmt.Errorf("failed to update character: %w", err)
+	}
+
+	return character, nil
+}
+
+func (s *CharacterService) UpdateCharacterLevel(
+	ctx context.Context, characterData db.UpdateCharacterLevelParams,
+) (db.Character, error) {
+	character, err := s.queries.UpdateCharacterLevel(ctx, characterData)
+	if err != nil {
+		return db.Character{}, fmt.Errorf("failed to update character: %w", err)
+	}
+
+	return character, nil
+}
+
+func (s *CharacterService) UpdateCharacterTraining(
+	ctx context.Context, characterData db.UpdateCharacterTrainingParams,
+) (db.Character, error) {
+	character, err := s.queries.UpdateCharacterTraining(ctx, characterData)
+	if err != nil {
+		return db.Character{}, fmt.Errorf("failed to update character: %w", err)
+	}
+
+	return character, nil
+}
+
+func (s *CharacterService) UpdateCharacterCurrency(
+	ctx context.Context, characterData db.UpdateCharacterCurrencyParams,
+) (db.Character, error) {
+	character, err := s.queries.UpdateCharacterCurrency(ctx, characterData)
 	if err != nil {
 		return db.Character{}, fmt.Errorf("failed to update character: %w", err)
 	}
@@ -172,13 +227,45 @@ func (s *CharacterService) UpdateCharacterDeathSave(
 func (s *CharacterService) UpdateConditions(
 	ctx context.Context, characterID uuid.UUID, conditions []string,
 ) (db.Character, error) {
+	character, err := s.queries.UpdateConditions(ctx, db.UpdateConditionsParams{
+		ID: characterID,
+		Conditions: conditions,
+	})
+	if err != nil {
+		return db.Character{}, fmt.Errorf("failed to update character conditions: %w", err)
+	}
+
+	return character, nil
 }
 
 func (s *CharacterService) LongRest(ctx context.Context, characterID uuid.UUID) (db.Character, error) {
+	character, err := s.queries.LongRest(ctx, characterID)
+	if err != nil {
+		return db.Character{}, fmt.Errorf("failed to long rest: %w", err)
+	}
+
+	return character, nil
 }
 
-func (s *CharacterService) ShortRest(ctx context.Context, characterID uuid.UUID) (db.Character, error) {
+func (s *CharacterService) ShortRest(
+	ctx context.Context, characterID uuid.UUID, hit_dice_rolled, hp int32,
+) (db.Character, error) {
+	character, err := s.queries.ShortRest(ctx, db.ShortRestParams{
+		ID: characterID,
+		HitDiceRemaining: hit_dice_rolled,
+		CurrentHp: hp,
+	})
+	if err != nil {
+		return db.Character{}, fmt.Errorf("failed to short rest: %w", err)
+	}
+
+	return character, nil
 }
 
-func (s *CharacterService) DeleteCharacter(ctx context.Context, characterID uuid.UUID) (db.Character, error) {
+func (s *CharacterService) DeleteCharacter(ctx context.Context, characterID uuid.UUID) error {
+	if err := s.queries.DeleteCharacter(ctx, characterID); err != nil {
+		return fmt.Errorf("failed to delete character: %w")
+	}
+
+	return nil
 }

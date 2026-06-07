@@ -2,9 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/cscercel/behold-dnd/internal/db"
 	_ "github.com/cscercel/behold-dnd/internal/db" // ONLY required for Swagger to pick up db interfaces
@@ -110,15 +108,100 @@ func (h *CharacterHandler) handleListNPCs(w http.ResponseWriter, r *http.Request
 	respondWithJSON(w, http.StatusOK, npcs)
 }
 
-func (h *CharacterHandler) handleUpdateCharacter(w http.ResponseWriter, r *http.Request) {
-	var body db.UpdateCharacterParams
+func (h *CharacterHandler) handleUpdateCharacterInfo(w http.ResponseWriter, r *http.Request) {
+	var body db.UpdateCharacterInfoParams
 	
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
-	character, err := h.service.UpdateCharacter(r.Context(), body)
+	character, err := h.service.UpdateCharacterInfo(r.Context(), body)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not update player", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, character)
+}
+
+func (h *CharacterHandler) handleUpdateCharacterAbilityScores(w http.ResponseWriter, r *http.Request) {
+	var body db.UpdateCharacterAbilityScoresParams
+	
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
+		return
+	}
+
+	character, err := h.service.UpdateCharacterAbilityScores(r.Context(), body)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not update player", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, character)
+}
+
+func (h *CharacterHandler) handleUpdateCharacterSkills(w http.ResponseWriter, r *http.Request) {
+	var body db.UpdateCharacterSkillsParams
+	
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
+		return
+	}
+
+	character, err := h.service.UpdateCharacterSkills(r.Context(), body)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not update player", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, character)
+}
+
+func (h *CharacterHandler) handleUpdateCharacterLevel(w http.ResponseWriter, r *http.Request) {
+	var body db.UpdateCharacterLevelParams
+	
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
+		return
+	}
+
+	character, err := h.service.UpdateCharacterLevel(r.Context(), body)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not update player", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, character)
+}
+
+func (h *CharacterHandler) handleUpdateCharacterTraining(w http.ResponseWriter, r *http.Request) {
+	var body db.UpdateCharacterTrainingParams
+	
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
+		return
+	}
+
+	character, err := h.service.UpdateCharacterTraining(r.Context(), body)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not update player", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, character)
+}
+
+func (h *CharacterHandler) handleUpdateCharacterCurrency(w http.ResponseWriter, r *http.Request) {
+	var body db.UpdateCharacterCurrencyParams
+	
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
+		return
+	}
+
+	character, err := h.service.UpdateCharacterCurrency(r.Context(), body)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "could not update player", err)
 		return
@@ -228,13 +311,83 @@ func (h *CharacterHandler) handleUpdateCharacterDeathSave(w http.ResponseWriter,
 }
 
 func (h *CharacterHandler) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
+	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
+		return
+	}
+
+	var body struct {
+		Conditions	[]string `json:"conditions"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
+		return
+	}
+
+	character, err := h.service.UpdateConditions(r.Context(), characterID, body.Conditions)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not update character conditions", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, character)
 }
 
 func (h *CharacterHandler) handleLongRest(w http.ResponseWriter, r *http.Request) {
+	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
+		return
+	}
+
+	character, err := h.service.LongRest(r.Context(), characterID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not long rest character", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, character)
 }
 
 func (h *CharacterHandler) handleShortRest(w http.ResponseWriter, r *http.Request) {
+	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
+		return
+	}
+
+	var body struct {
+		HitDiceRemaining int32	`json:"hit_dice_remaining"`
+		CurrentHp	int32	`json:"current_hp"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
+		return
+	}
+
+	character, err := h.service.ShortRest(r.Context(), characterID, body.HitDiceRemaining, body.CurrentHp)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not short rest character", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, character)
 }
 
 func (h *CharacterHandler) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
+	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
+		return
+	}
+
+	if err := h.service.DeleteCharacter(r.Context(), characterID); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "failed to delete character", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusNoContent, "")
 }
