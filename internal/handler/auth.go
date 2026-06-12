@@ -4,9 +4,24 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/cscercel/behold-dnd/internal/middleware"
+	"github.com/cscercel/behold-dnd/internal/db"
+	_ "github.com/cscercel/behold-dnd/internal/db" // ONLY required for Swagger to pick up db interfaces
+	"github.com/cscercel/behold-dnd/internal/service"
+	"github.com/go-chi/chi/v5"
 )
 
+type AuthHandler struct {
+	service	*service.AuthService
+}
+
+func NewAuthHandler(service *service.AuthService) *AuthHandler {
+	return &AuthHandler{service: service}
+}
+
+func (h *AuthHandler) RegisterRoutes(r chi.Router, authMiddleware func(http.Handler) http.Handler) {
+	r.Route("/auth", func(r chi.Router) {
+	})
+}
 
 // @Summary      Register a new user
 // @Tags         auth
