@@ -1,3 +1,8 @@
+-- name: CreateEncounter :one
+INSERT INTO combat_encounters (name)
+VALUES ($1)
+RETURNING *;
+
 -- name: GetEncounter :one
 SELECT * FROM combat_encounters
 WHERE id = $1;
@@ -10,11 +15,6 @@ ORDER BY created_at DESC;
 SELECT * FROM combat_encounters
 WHERE is_active = TRUE
 LIMIT 1;
-
--- name: CreateEncounter :one
-INSERT INTO combat_encounters (name)
-VALUES ($1)
-RETURNING *;
 
 -- name: StartEncounter :one
 UPDATE combat_encounters
