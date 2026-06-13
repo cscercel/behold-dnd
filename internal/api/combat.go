@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/cscercel/behold-dnd/internal/db"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
@@ -61,7 +61,7 @@ func (a *API) handleGetActiveEncounter(w http.ResponseWriter, r *http.Request) {
 // @Router       /combat [post]
 func (a *API) handleCreateEncounter(w http.ResponseWriter, r *http.Request) {
 	var body struct {
-		Name	string	`json:"name"`
+		Name string `json:"name"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -211,7 +211,6 @@ func (a *API) handleDeleteEncounter(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-
 // @Summary      List participants in an encounter
 // @Tags         combat
 // @Produce      json
@@ -260,8 +259,8 @@ func (a *API) handleAddParticipant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		CharacterID	string	`json:"character_id"`
-		Initiative	int32	`json:"initiative"`
+		CharacterID string `json:"character_id"`
+		Initiative  int32  `json:"initiative"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -340,7 +339,7 @@ func (a *API) handleParticipantDamage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Amount	int	`json:"amount"`
+		Amount int `json:"amount"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
 		respondError(w, http.StatusBadRequest, "amount must be a positive number")
@@ -354,7 +353,6 @@ func (a *API) handleParticipantDamage(w http.ResponseWriter, r *http.Request) {
 	}
 	respondJSON(w, http.StatusOK, participant)
 }
-
 
 // @Summary      Heal a participant
 // @Tags         combat
@@ -378,7 +376,7 @@ func (a *API) handleParticipantHeal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Amount	int	`json:"amount"`
+		Amount int `json:"amount"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
 		respondError(w, http.StatusBadRequest, "amount must be a positive number")
@@ -415,7 +413,7 @@ func (a *API) handleParticipantTempHP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Amount	int32	`json:"amount"`
+		Amount int32 `json:"amount"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
 		respondError(w, http.StatusBadRequest, "amount must be a positive number")
@@ -423,7 +421,7 @@ func (a *API) handleParticipantTempHP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	participant, err := a.queries.UpdateParticipantTempHP(r.Context(), db.UpdateParticipantTempHPParams{
-		ID: participantID,
+		ID:     participantID,
 		TempHp: body.Amount,
 	})
 	if err != nil {
@@ -456,7 +454,7 @@ func (a *API) handleParticipantInitiative(w http.ResponseWriter, r *http.Request
 	}
 
 	var body struct {
-		Initiative	int32	`json:"initiative"`
+		Initiative int32 `json:"initiative"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Initiative <= 0 {
 		respondError(w, http.StatusBadRequest, "initiative must be a positive number")
@@ -464,7 +462,7 @@ func (a *API) handleParticipantInitiative(w http.ResponseWriter, r *http.Request
 	}
 
 	participant, err := a.queries.UpdateParticipantInitiative(r.Context(), db.UpdateParticipantInitiativeParams{
-		ID: participantID,
+		ID:         participantID,
 		Initiative: body.Initiative,
 	})
 	if err != nil {
@@ -497,7 +495,7 @@ func (a *API) handleParticipantConditions(w http.ResponseWriter, r *http.Request
 	}
 
 	var body struct {
-		Conditions	[]string	`json:"conditions"`
+		Conditions []string `json:"conditions"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -505,7 +503,7 @@ func (a *API) handleParticipantConditions(w http.ResponseWriter, r *http.Request
 	}
 
 	participant, err := a.queries.UpdateParticipantConditions(r.Context(), db.UpdateParticipantConditionsParams{
-		ID: participantID,
+		ID:         participantID,
 		Conditions: body.Conditions,
 	})
 	if err != nil {
@@ -568,6 +566,6 @@ func (a *API) handleDeactivateParticipant(w http.ResponseWriter, r *http.Request
 		respondError(w, http.StatusInternalServerError, "failed to deactivate participant")
 		return
 	}
-	
+
 	respondJSON(w, http.StatusOK, participant)
 }

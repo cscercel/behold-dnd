@@ -1,19 +1,15 @@
 package main
 
-
 import (
 	"context"
-	"fmt"
+	"time"
 	"log"
 	"net/http"
-
 
 	"github.com/cscercel/behold-dnd/internal/api"
 	"github.com/cscercel/behold-dnd/internal/config"
 	"github.com/cscercel/behold-dnd/internal/database"
-
 )
-
 
 // @title           Behold D&D API
 // @version         1.0.0
@@ -48,10 +44,17 @@ func main() {
 	a := api.New(pool, cfg)
 	router := a.Routes()
 
-	addr := fmt.Sprintf(":%s", cfg.Port)
-	log.Printf("Behold DnD server listening on %s", addr)
+	// Start server
+	srv := &http.Server{
+		Addr:              ":" + cfg.Port,
+		Handler:           router,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+	}
 
-	if err := http.ListenAndServe(addr, router); err != nil {
+	log.Printf("server running on port: %v", cfg.Port)
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
 }

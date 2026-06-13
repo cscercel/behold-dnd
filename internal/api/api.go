@@ -2,42 +2,41 @@ package api
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/cors"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/cscercel/behold-dnd/internal/config"
 	"github.com/cscercel/behold-dnd/internal/db"
-	"github.com/cscercel/behold-dnd/internal/service"
 	appMiddleware "github.com/cscercel/behold-dnd/internal/middleware"
+	"github.com/cscercel/behold-dnd/internal/service"
 
 	_ "github.com/cscercel/behold-dnd/docs"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-
 type API struct {
-	queries				*db.Queries
-	pool				*pgxpool.Pool
-	allowedOrigins		[]string
-	authService			*service.AuthService
-	characterService	*service.CharacterService
-	inventoryService	*service.InventoryService
-	spellService		*service.SpellService
-	combatService		*service.CombatService
+	queries          *db.Queries
+	pool             *pgxpool.Pool
+	allowedOrigins   []string
+	authService      *service.AuthService
+	characterService *service.CharacterService
+	inventoryService *service.InventoryService
+	spellService     *service.SpellService
+	combatService    *service.CombatService
 }
 
 func New(pool *pgxpool.Pool, cfg *config.Config) *API {
 	queries := db.New(pool)
 	return &API{
-		queries: queries,
-		pool: pool,
-		allowedOrigins: []string{cfg.FrontendURL},
-		authService: service.NewAuthService(queries, cfg.JWTSecret, cfg.JWTExpiryHours, cfg.RegistrationCode),
+		queries:          queries,
+		pool:             pool,
+		allowedOrigins:   []string{cfg.FrontendURL},
+		authService:      service.NewAuthService(queries, cfg.JWTSecret, cfg.JWTExpiryHours, cfg.RegistrationCode),
 		characterService: service.NewCharacterService(queries),
 		inventoryService: service.NewInventoryService(queries),
-		spellService: service.NewSpellService(queries),
-		combatService: service.NewCombatService(queries),
+		spellService:     service.NewSpellService(queries),
+		combatService:    service.NewCombatService(queries),
 	}
 }
 
@@ -50,7 +49,7 @@ func (a *API) Routes() *chi.Mux {
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
-		MaxAge:           300, 
+		MaxAge:           300,
 	}))
 
 	r.Use(chiMiddleware.Logger)
@@ -64,7 +63,6 @@ func (a *API) Routes() *chi.Mux {
 	r.Get("/health", a.handleHealth)
 	r.Post("/auth/register", a.handleRegister)
 	r.Post("/auth/login", a.handleLogin)
-
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
@@ -86,7 +84,6 @@ func (a *API) Routes() *chi.Mux {
 				r.Patch("/level", a.handleUpdateCharacterLevel)
 				r.Patch("/training", a.handleUpdateCharacterTraining)
 				r.Patch("/currency", a.handleUpdateCharacterCurrency)
-
 
 				// Game mechanics
 				r.Post("/damage", a.handleDamage)
@@ -130,7 +127,7 @@ func (a *API) Routes() *chi.Mux {
 			r.Use(appMiddleware.RequireDM)
 			r.Get("/players", a.handleListPlayerCharacters)
 			r.Get("/npcs", a.handleListNPCs)
-			
+
 			// Combat Routes
 			r.Route("/combat", func(r chi.Router) {
 				r.Get("/", a.handleListEncounters)

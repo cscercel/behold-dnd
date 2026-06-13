@@ -7,7 +7,6 @@ import (
 	"github.com/cscercel/behold-dnd/internal/middleware"
 )
 
-
 // @Summary      Register a new user
 // @Tags         auth
 // @Accept       json
@@ -19,11 +18,11 @@ import (
 // @Router       /auth/register [post]
 func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
 	var body struct {
-		Username 			string `json:"username"`
-		Email				string	`json:"email"`
-		Password			string	`json:"password"`
-		Role				string	`json:"role"`
-		RegistrationCode	string	`json:"registration_code"`
+		Username         string `json:"username"`
+		Email            string `json:"email"`
+		Password         string `json:"password"`
+		Role             string `json:"role"`
+		RegistrationCode string `json:"registration_code"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -42,10 +41,10 @@ func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondJSON(w, http.StatusCreated, map[string]any{
-		"id":	user.ID,
-		"username":	user.Username,
-		"email": user.Email,
-		"role": user.Role,
+		"id":         user.ID,
+		"username":   user.Username,
+		"email":      user.Email,
+		"role":       user.Role,
 		"created_at": user.CreatedAt,
 	})
 }
@@ -60,8 +59,8 @@ func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
 // @Router       /auth/login [post]
 func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var body struct {
-		Email		string	`json:"email"`
-		Password	string	`json:"password"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -77,10 +76,10 @@ func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, map[string]any{
 		"token": token,
 		"user": map[string]any{
-			"id": user.ID,
+			"id":       user.ID,
 			"username": user.Username,
-			"email": user.Email,
-			"role": user.Role,
+			"email":    user.Email,
+			"role":     user.Role,
 		},
 	})
 }
@@ -106,9 +105,9 @@ func (a *API) handleMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondJSON(w, http.StatusOK, map[string]any{
-		"id": user.ID,
+		"id":       user.ID,
 		"username": user.Username,
-		"email": user.Email,
-		"role": user.Role,
+		"email":    user.Email,
+		"role":     user.Role,
 	})
 }

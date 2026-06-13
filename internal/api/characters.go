@@ -161,7 +161,7 @@ func (a *API) handleUpdateCharacterInfo(w http.ResponseWriter, r *http.Request) 
 		respondError(w, http.StatusForbidden, "you do not own this character")
 		return
 	}
-	
+
 	var params db.UpdateCharacterInfoParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -204,7 +204,7 @@ func (a *API) handleUpdateCharacterAbilityScores(w http.ResponseWriter, r *http.
 		respondError(w, http.StatusForbidden, "you do not own this character")
 		return
 	}
-	
+
 	var params db.UpdateCharacterAbilityScoresParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -247,7 +247,7 @@ func (a *API) handleUpdateCharacterSkills(w http.ResponseWriter, r *http.Request
 		respondError(w, http.StatusForbidden, "you do not own this character")
 		return
 	}
-	
+
 	var params db.UpdateCharacterSkillsParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -290,7 +290,7 @@ func (a *API) handleUpdateCharacterLevel(w http.ResponseWriter, r *http.Request)
 		respondError(w, http.StatusForbidden, "you do not own this character")
 		return
 	}
-	
+
 	var params db.UpdateCharacterLevelParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -333,7 +333,7 @@ func (a *API) handleUpdateCharacterTraining(w http.ResponseWriter, r *http.Reque
 		respondError(w, http.StatusForbidden, "you do not own this character")
 		return
 	}
-	
+
 	var params db.UpdateCharacterTrainingParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -376,7 +376,7 @@ func (a *API) handleUpdateCharacterCurrency(w http.ResponseWriter, r *http.Reque
 		respondError(w, http.StatusForbidden, "you do not own this character")
 		return
 	}
-	
+
 	var params db.UpdateCharacterCurrencyParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -426,7 +426,6 @@ func (a *API) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-
 // @Summary      Deal damage to a character
 // @Tags         characters
 // @Accept       json
@@ -454,7 +453,7 @@ func (a *API) handleDamage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Amount	int	`json:"amount"`
+		Amount int `json:"amount"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
@@ -498,7 +497,7 @@ func (a *API) handleHeal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Amount	int	`json:"amount"`
+		Amount int `json:"amount"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
@@ -542,7 +541,7 @@ func (a *API) handleTempHP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Amount	int	`json:"amount"`
+		Amount int `json:"amount"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
@@ -586,7 +585,7 @@ func (a *API) handleDeathSave(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Success	bool `json:"success"`
+		Success bool `json:"success"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -669,8 +668,8 @@ func (a *API) handleShortRest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		HitDiceRemaining	int	`json:"hit_dice_remaining"`
-		CurrentHp			int	`json:"current_hp"`
+		HitDiceRemaining int `json:"hit_dice_remaining"`
+		CurrentHp        int `json:"current_hp"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -679,9 +678,9 @@ func (a *API) handleShortRest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	character, err := a.queries.ShortRest(r.Context(), db.ShortRestParams{
-		ID:	id,
+		ID:               id,
 		HitDiceRemaining: int32(body.HitDiceRemaining),
-		CurrentHp: int32(body.CurrentHp),
+		CurrentHp:        int32(body.CurrentHp),
 	})
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "failed to apply long rest")
@@ -718,7 +717,7 @@ func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Conditions []string	`json:"conditions"`
+		Conditions []string `json:"conditions"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -727,7 +726,7 @@ func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	character, err := a.queries.UpdateConditions(r.Context(), db.UpdateConditionsParams{
-		ID:	id,
+		ID:         id,
 		Conditions: body.Conditions,
 	})
 	if err != nil {
@@ -742,7 +741,6 @@ func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 func (a *API) requireCharacterAccess(r *http.Request, characterID uuid.UUID) (db.GetCharacterRow, error) {
 	character, err := a.queries.GetCharacter(r.Context(), characterID)
 	if err != nil {
-		fmt.Printf("GetCharacter error: %v\n", err)
 		return db.GetCharacterRow{}, fmt.Errorf("not found")
 	}
 

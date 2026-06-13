@@ -1,4 +1,4 @@
-package service 
+package service
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 )
 
 type CombatService struct {
-	queries	*db.Queries
+	queries *db.Queries
 }
 
 func NewCombatService(queries *db.Queries) *CombatService {
@@ -21,7 +21,7 @@ func (s *CombatService) AddCharacterToEncounter(
 	ctx context.Context,
 	encounterID uuid.UUID,
 	characterID uuid.UUID,
-	initiative	int32,
+	initiative int32,
 ) (db.CombatParticipant, error) {
 	character, err := s.queries.GetCharacter(ctx, characterID)
 	if err != nil {
@@ -31,13 +31,13 @@ func (s *CombatService) AddCharacterToEncounter(
 	return s.queries.AddParticipant(ctx, db.AddParticipantParams{
 		EncounterID: encounterID,
 		CharacterID: characterID,
-		Name: character.Name,
-		Initiative: initiative,
-		CurrentHp: character.CurrentHp,
-		MaxHp: character.MaxHp,
-		TempHp: character.TempHp,
-		ArmorClass: character.ArmorClass,
-		Speed: character.Speed,
+		Name:        character.Name,
+		Initiative:  initiative,
+		CurrentHp:   character.CurrentHp,
+		MaxHp:       character.MaxHp,
+		TempHp:      character.TempHp,
+		ArmorClass:  character.ArmorClass,
+		Speed:       character.Speed,
 	})
 }
 
@@ -46,7 +46,7 @@ func (s *CombatService) AddCharacterToEncounter(
 func (s *CombatService) ApplyDamageToParticipant(
 	ctx context.Context,
 	participantID uuid.UUID,
-	amount	int,
+	amount int,
 ) (db.CombatParticipant, error) {
 	p, err := s.queries.GetParticipant(ctx, participantID)
 	if err != nil {
@@ -68,11 +68,11 @@ func (s *CombatService) ApplyDamageToParticipant(
 	}
 
 	// Apply rest to real HP up until it reaches 0
-	currentHP = max(currentHP - amount, 0)
-	
+	currentHP = max(currentHP-amount, 0)
+
 	// Update temp HP
 	p, err = s.queries.UpdateParticipantTempHP(ctx, db.UpdateParticipantTempHPParams{
-		ID: participantID,
+		ID:     participantID,
 		TempHp: int32(tempHP),
 	})
 	if err != nil {
@@ -81,7 +81,7 @@ func (s *CombatService) ApplyDamageToParticipant(
 
 	// Update current HP
 	p, err = s.queries.UpdateParticipantHP(ctx, db.UpdateParticipantHPParams{
-		ID: participantID,
+		ID:        participantID,
 		CurrentHp: int32(currentHP),
 	})
 	if err != nil {
@@ -110,10 +110,10 @@ func (s *CombatService) HealParticipant(
 		return db.CombatParticipant{}, fmt.Errorf("participant not found: %w", err)
 	}
 
-	newHP := min(int(p.CurrentHp) + amount, int(p.MaxHp))
+	newHP := min(int(p.CurrentHp)+amount, int(p.MaxHp))
 
 	p, err = s.queries.UpdateParticipantHP(ctx, db.UpdateParticipantHPParams{
-		ID:	participantID,
+		ID:        participantID,
 		CurrentHp: int32(newHP),
 	})
 	if err != nil {

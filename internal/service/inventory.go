@@ -8,9 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type InventoryService struct {
-	queries	*db.Queries
+	queries *db.Queries
 }
 
 func NewInventoryService(queries *db.Queries) *InventoryService {
@@ -48,7 +47,7 @@ func (s *InventoryService) AttuneItem(ctx context.Context, characterID uuid.UUID
 	attuned := true
 
 	return s.queries.UpdateInventoryItem(ctx, db.UpdateInventoryItemParams{
-		ID:	itemID,
+		ID:        itemID,
 		IsAttuned: &attuned,
 	})
 }
@@ -68,7 +67,7 @@ func (s *InventoryService) UnattuneItem(ctx context.Context, characterID uuid.UU
 	attuned := false
 
 	return s.queries.UpdateInventoryItem(ctx, db.UpdateInventoryItemParams{
-		ID:	itemID,
+		ID:        itemID,
 		IsAttuned: &attuned,
 	})
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 // @Summary      List spells for a character
 // @Tags         spells
 // @Produce      json
@@ -95,7 +94,7 @@ func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, "invalid spell id")
 		return
 	}
-	
+
 	var params db.UpdateSpellParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -191,7 +190,7 @@ func (a *API) handleListSpellSlots(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusInternalServerError, "failed to list spell slots")
 		return
 	}
-	
+
 	respondJSON(w, http.StatusOK, slots)
 }
 
@@ -231,7 +230,6 @@ func (a *API) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
 
 	respondJSON(w, http.StatusOK, slot)
 }
-
 
 // @Summary      Use a spell slot
 // @Tags         spells

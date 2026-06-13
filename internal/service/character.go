@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/cscercel/behold-dnd/internal/db"
+	"github.com/google/uuid"
 )
-
 
 type CharacterService struct {
 	queries *db.Queries
@@ -39,12 +38,12 @@ func (s *CharacterService) ApplyDamage(ctx context.Context, id uuid.UUID, amount
 	}
 
 	// Apply rest to real HP up until it reaches 0
-	currentHP = max(currentHP - amount, 0)
+	currentHP = max(currentHP-amount, 0)
 
 	return s.queries.UpdateCharacterHP(ctx, db.UpdateCharacterHPParams{
-		ID:	id,
+		ID:        id,
 		CurrentHp: int32(currentHP),
-		TempHp: int32(tempHP),
+		TempHp:    int32(tempHP),
 	})
 }
 
@@ -55,12 +54,12 @@ func (s *CharacterService) Heal(ctx context.Context, id uuid.UUID, amount int) (
 		return db.Character{}, fmt.Errorf("character not found: %w", err)
 	}
 
-	newHP := min(int(char.CurrentHp) + amount, int(char.MaxHp))
+	newHP := min(int(char.CurrentHp)+amount, int(char.MaxHp))
 
 	return s.queries.UpdateCharacterHP(ctx, db.UpdateCharacterHPParams{
-		ID:	id,
+		ID:        id,
 		CurrentHp: int32(newHP),
-		TempHp: char.TempHp,
+		TempHp:    char.TempHp,
 	})
 }
 
@@ -74,9 +73,9 @@ func (s *CharacterService) AddTempHP(ctx context.Context, id uuid.UUID, amount i
 	newTempHP := amount
 
 	return s.queries.UpdateCharacterHP(ctx, db.UpdateCharacterHPParams{
-		ID: id,
+		ID:        id,
 		CurrentHp: char.CurrentHp,
-		TempHp: int32(newTempHP),
+		TempHp:    int32(newTempHP),
 	})
 }
 
@@ -91,14 +90,14 @@ func (s *CharacterService) RecordDeathSave(ctx context.Context, id uuid.UUID, su
 	failures := int(char.DeathSaveFailures)
 
 	if success {
-		successes = min(successes + 1, 3)
+		successes = min(successes+1, 3)
 	} else {
-		failures = min(failures + 1, 3)
+		failures = min(failures+1, 3)
 	}
 
 	return s.queries.UpdateDeathSaves(ctx, db.UpdateDeathSavesParams{
-		ID:	id,
+		ID:                 id,
 		DeathSaveSuccesses: int32(successes),
-		DeathSaveFailures: int32(failures),
+		DeathSaveFailures:  int32(failures),
 	})
 }

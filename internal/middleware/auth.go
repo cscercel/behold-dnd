@@ -1,12 +1,12 @@
 package middleware
 
 import (
-    "context"
-    "net/http"
-    "strings"
+	"context"
+	"net/http"
+	"strings"
 
-    "github.com/cscercel/behold-dnd/internal/service"
-    "github.com/google/uuid"
+	"github.com/cscercel/behold-dnd/internal/service"
+	"github.com/google/uuid"
 )
 
 // prevent collisions with keys from other packages
@@ -14,7 +14,7 @@ type contextKey string
 
 const (
 	ContextKeyUserID contextKey = "user_id"
-	ContextKeyRole contextKey = "role"
+	ContextKeyRole   contextKey = "role"
 )
 
 func Authenticate(authService *service.AuthService) func(http.Handler) http.Handler {

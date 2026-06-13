@@ -1,38 +1,37 @@
 package service
 
 import (
-    "context"
-    "fmt"
-    "time"
+	"context"
+	"fmt"
+	"time"
 
-    "github.com/cscercel/behold-dnd/internal/db"
-    "github.com/golang-jwt/jwt/v5"
-    "github.com/google/uuid"
-    "golang.org/x/crypto/bcrypt"
+	"github.com/cscercel/behold-dnd/internal/db"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
-
 type AuthService struct {
-	queries				*db.Queries
-	jwtSecret			[]byte
-	jwtExpiryHours		int
-	registrationCode	string
+	queries          *db.Queries
+	jwtSecret        []byte
+	jwtExpiryHours   int
+	registrationCode string
 }
 
 func NewAuthService(queries *db.Queries, jwtSecret string, jwtExpiryHours int, registrationCode string) *AuthService {
 	return &AuthService{
-		queries: queries,
-		jwtSecret: []byte(jwtSecret),
-		jwtExpiryHours: jwtExpiryHours,
-		registrationCode: registrationCode,		
+		queries:          queries,
+		jwtSecret:        []byte(jwtSecret),
+		jwtExpiryHours:   jwtExpiryHours,
+		registrationCode: registrationCode,
 	}
 }
 
 // Claims is the payload embeded inside the JWT token
 // User ID and role are enough to make every auth decision
 type Claims struct {
-	UserID	uuid.UUID	`json:"user_id"`
-	Role	string		`json:"role"`
+	UserID uuid.UUID `json:"user_id"`
+	Role   string    `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -54,10 +53,10 @@ func (s *AuthService) Register(ctx context.Context, username, email, password, r
 	}
 
 	user, err := s.queries.CreateUser(ctx, db.CreateUserParams{
-		Username: username,
-		Email: email,
+		Username:       username,
+		Email:          email,
 		HashedPassword: string(hash),
-		Role: role,
+		Role:           role,
 	})
 	if err != nil {
 		return db.User{}, fmt.Errorf("failed to create user: %w", err)
@@ -106,14 +105,14 @@ func (s *AuthService) ValidateToken(tokenString string) (*Claims, error) {
 func (s *AuthService) generateToken(user db.User) (string, error) {
 	claims := &Claims{
 		UserID: user.ID,
-		Role: user.Role,
+		Role:   user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(s.jwtExpiryHours) * time.Hour)),
-			IssuedAt: jwt.NewNumericDate(time.Now()),
-			Subject: user.ID.String(),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Subject:   user.ID.String(),
 		},
 	}
-	
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(s.jwtSecret)
 }

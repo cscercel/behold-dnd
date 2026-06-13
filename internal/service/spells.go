@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 
-    "github.com/cscercel/behold-dnd/internal/db"
-    "github.com/google/uuid"
+	"github.com/cscercel/behold-dnd/internal/db"
+	"github.com/google/uuid"
 )
-
 
 type SpellService struct {
 	queries *db.Queries
@@ -20,7 +19,7 @@ func NewSpellService(queries *db.Queries) *SpellService {
 func (s *SpellService) UseSlot(ctx context.Context, characterID uuid.UUID, level int32) (db.SpellSlot, error) {
 	slot, err := s.queries.UseSpellSlot(ctx, db.UseSpellSlotParams{
 		CharacterID: characterID,
-		SpellLevel:	level,
+		SpellLevel:  level,
 	})
 	if err != nil {
 		return db.SpellSlot{}, fmt.Errorf("no spell slots remaining at level %d", level)

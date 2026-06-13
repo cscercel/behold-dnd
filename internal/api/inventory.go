@@ -61,7 +61,7 @@ func (a *API) handleCreateInventoryItem(w http.ResponseWriter, r *http.Request) 
 		respondError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	
+
 	// Assign item to character
 	params.CharacterID = characterID
 
@@ -100,7 +100,7 @@ func (a *API) handleUpdateInventoryItem(w http.ResponseWriter, r *http.Request) 
 		respondError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	
+
 	params.ID = itemID
 
 	item, err := a.queries.UpdateInventoryItem(r.Context(), params)
@@ -171,7 +171,6 @@ func (a *API) handleAttuneItem(w http.ResponseWriter, r *http.Request) {
 
 	respondJSON(w, http.StatusOK, item)
 }
-
 
 // @Summary      Remove attunement from a magic item
 // @Tags         inventory
