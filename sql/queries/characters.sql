@@ -46,12 +46,12 @@ SELECT
     FLOOR((wisdom - 10) / 2.0) AS wisdom_modifier,
     FLOOR((charisma - 10) / 2.0) AS charisma_modifier,
 
-    FLOOR((strength - 10) / 2.0) + save_prof_strength * CEILING(1 + level / 4.0) AS strength_saving_throw_modifier,
-    FLOOR((dexterity - 10) / 2.0) + save_prof_dexterity * CEILING(1 + level / 4.0) AS dexterity_saving_throw_modifier,
-    FLOOR((constitution - 10) / 2.0) + save_prof_constitution * CEILING(1 + level / 4.0) AS constitution_saving_throw_modifier,
-    FLOOR((intelligence - 10) / 2.0) + save_prof_intelligence * CEILING(1 + level / 4.0) AS intelligence_saving_throw_modifier,
-    FLOOR((wisdom - 10) / 2.0) + save_prof_wisdom * CEILING(1 + level / 4.0) AS wisdom_saving_throw_modifier,
-    FLOOR((charisma - 10) / 2.0) + save_prof_charisma * CEILING(1 + level / 4.0) AS charisma_saving_throw_modifier,
+    FLOOR((strength - 10) / 2.0) + save_prof_strength::int * CEILING(1 + level / 4.0) AS strength_saving_throw_modifier,
+    FLOOR((dexterity - 10) / 2.0) + save_prof_dexterity::int * CEILING(1 + level / 4.0) AS dexterity_saving_throw_modifier,
+    FLOOR((constitution - 10) / 2.0) + save_prof_constitution::int * CEILING(1 + level / 4.0) AS constitution_saving_throw_modifier,
+    FLOOR((intelligence - 10) / 2.0) + save_prof_intelligence::int * CEILING(1 + level / 4.0) AS intelligence_saving_throw_modifier,
+    FLOOR((wisdom - 10) / 2.0) + save_prof_wisdom::int * CEILING(1 + level / 4.0) AS wisdom_saving_throw_modifier,
+    FLOOR((charisma - 10) / 2.0) + save_prof_charisma::int * CEILING(1 + level / 4.0) AS charisma_saving_throw_modifier,
 
     FLOOR((dexterity - 10) / 2.0) + skill_acrobatics * CEILING(1 + level / 4.0) AS skill_acrobatics_modifier,
     FLOOR((wisdom - 10) / 2.0) + skill_animal_handling * CEILING(1 + level / 4.0) AS skill_animal_handling_modifier,

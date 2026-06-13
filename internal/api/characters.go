@@ -742,6 +742,7 @@ func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 func (a *API) requireCharacterAccess(r *http.Request, characterID uuid.UUID) (db.GetCharacterRow, error) {
 	character, err := a.queries.GetCharacter(r.Context(), characterID)
 	if err != nil {
+		fmt.Printf("GetCharacter error: %v\n", err)
 		return db.GetCharacterRow{}, fmt.Errorf("not found")
 	}
 
