@@ -91,6 +91,23 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (string
 	return token, user_no_pwd, nil
 }
 
+func (s *AuthService) GetUser(ctx context.Context, userID uuid.UUID) (db.CreateUserRow, error) {
+	user, err := s.queries.GetUserByID(ctx, userID)
+	if err != nil {
+		return db.CreateUserRow{}, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	user_no_pwd := db.CreateUserRow{
+		ID: user.ID,
+		Email: user.Email,
+		Role: user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	return user_no_pwd, nil
+}
+
 func (s *AuthService) ValidateToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

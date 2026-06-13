@@ -2,10 +2,11 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
-	"github.com/cscercel/behold-dnd/internal/db"
 	_ "github.com/cscercel/behold-dnd/internal/db" // ONLY required for Swagger to pick up db interfaces
+	"github.com/cscercel/behold-dnd/internal/middleware"
 	"github.com/cscercel/behold-dnd/internal/service"
 	"github.com/go-chi/chi/v5"
 )
@@ -20,6 +21,16 @@ func NewAuthHandler(service *service.AuthService) *AuthHandler {
 
 func (h *AuthHandler) RegisterRoutes(r chi.Router, authMiddleware func(http.Handler) http.Handler) {
 	r.Route("/auth", func(r chi.Router) {
+		// Public Routes
+		r.Post("/register", h.handleRegister)
+		r.Post("/login", h.handleLogin)
+
+		// Private Routes
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Authenticate(h.service))
+
+			r.Get("/me", h.handleMe)
+		})
 	})
 }
 
@@ -32,37 +43,30 @@ func (h *AuthHandler) RegisterRoutes(r chi.Router, authMiddleware func(http.Hand
 // @Failure      400  {object}  object{error=string}
 // @Failure      401  {object}  object{error=string}
 // @Router       /auth/register [post]
-func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	var body struct {
-		Username 			string `json:"username"`
 		Email				string	`json:"email"`
 		Password			string	`json:"password"`
 		Role				string	`json:"role"`
 		RegistrationCode	string	`json:"registration_code"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
-	if body.Username == "" || body.Email == "" || body.Password == "" || body.Role == "" {
-		respondError(w, http.StatusBadRequest, "username, email, password and role are missing")
+	if body.Email == "" || body.Password == "" || body.Role == "" {
+		respondWithError(w, http.StatusBadRequest, "email, password and role are missing", fmt.Errorf(""))
 		return
 	}
 
-	user, err := a.authService.Register(r.Context(), body.Username, body.Email, body.Password, body.Role, body.RegistrationCode)
+	user, err := h.service.Register(r.Context(), body.Email, body.Password, body.Role, body.RegistrationCode)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, "failed to register", err)
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, map[string]any{
-		"id":	user.ID,
-		"username":	user.Username,
-		"email": user.Email,
-		"role": user.Role,
-		"created_at": user.CreatedAt,
-	})
+	respondWithJSON(w, http.StatusCreated, user)
 }
 
 // @Summary      Login
@@ -73,27 +77,26 @@ func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object}  object{token=string}
 // @Failure      401  {object}  object{error=string}
 // @Router       /auth/login [post]
-func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Email		string	`json:"email"`
 		Password	string	`json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
-	token, user, err := a.authService.Login(r.Context(), body.Email, body.Password)
+	token, user, err := h.service.Login(r.Context(), body.Email, body.Password)
 	if err != nil {
-		respondError(w, http.StatusUnauthorized, err.Error())
+		respondWithError(w, http.StatusUnauthorized, "failed to login", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, map[string]any{
+	respondWithJSON(w, http.StatusOK, map[string]any{
 		"token": token,
 		"user": map[string]any{
 			"id": user.ID,
-			"username": user.Username,
 			"email": user.Email,
 			"role": user.Role,
 		},
@@ -107,23 +110,18 @@ func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object}  object{id=string,username=string,email=string,role=string}
 // @Failure      401  {object}  object{error=string}
 // @Router       /auth/me [get]
-func (a *API) handleMe(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) handleMe(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {
-		respondError(w, http.StatusUnauthorized, "not authenticated")
+		respondWithError(w, http.StatusUnauthorized, "not authenticated", fmt.Errorf(""))
 		return
 	}
 
-	user, err := a.queries.GetUserByID(r.Context(), userID)
+	user, err := h.service.GetUser(r.Context(), userID)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "user not found")
+		respondWithError(w, http.StatusNotFound, "user not found", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, map[string]any{
-		"id": user.ID,
-		"username": user.Username,
-		"email": user.Email,
-		"role": user.Role,
-	})
+	respondWithJSON(w, http.StatusOK, user)
 }
