@@ -1,0 +1,3785 @@
+basePath: /
+definitions:
+  github_com_cscercel_behold-dnd_internal_db.Character:
+    properties:
+      alignment:
+        type: string
+      armor_class:
+        type: integer
+      attunement_slots:
+        type: integer
+      background:
+        type: string
+      bonds:
+        type: string
+      charisma:
+        type: integer
+      class:
+        type: string
+      conditions:
+        items:
+          type: string
+        type: array
+      constitution:
+        type: integer
+      copper:
+        type: integer
+      created_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      current_hp:
+        type: integer
+      death_save_failures:
+        type: integer
+      death_save_successes:
+        type: integer
+      dexterity:
+        type: integer
+      electrum:
+        type: integer
+      flaws:
+        type: string
+      gold:
+        type: integer
+      hit_dice_remaining:
+        type: integer
+      hit_dice_type:
+        type: integer
+      id:
+        type: string
+      ideals:
+        type: string
+      immunities:
+        items:
+          type: string
+        type: array
+      inspiration:
+        type: boolean
+      intelligence:
+        type: integer
+      is_npc:
+        type: boolean
+      level:
+        type: integer
+      max_hp:
+        type: integer
+      name:
+        type: string
+      notes:
+        type: string
+      owner_id:
+        type: string
+      personality_traits:
+        type: string
+      platinum:
+        type: integer
+      race:
+        type: string
+      resistances:
+        items:
+          type: string
+        type: array
+      save_prof_charisma:
+        type: boolean
+      save_prof_constitution:
+        type: boolean
+      save_prof_dexterity:
+        type: boolean
+      save_prof_intelligence:
+        type: boolean
+      save_prof_strength:
+        type: boolean
+      save_prof_wisdom:
+        type: boolean
+      silver:
+        type: integer
+      skill_acrobatics:
+        type: integer
+      skill_animal_handling:
+        type: integer
+      skill_arcana:
+        type: integer
+      skill_athletics:
+        type: integer
+      skill_deception:
+        type: integer
+      skill_history:
+        type: integer
+      skill_insight:
+        type: integer
+      skill_intimidation:
+        type: integer
+      skill_investigation:
+        type: integer
+      skill_medicine:
+        type: integer
+      skill_nature:
+        type: integer
+      skill_perception:
+        type: integer
+      skill_performance:
+        type: integer
+      skill_persuasion:
+        type: integer
+      skill_religion:
+        type: integer
+      skill_sleight_of_hand:
+        type: integer
+      skill_stealth:
+        type: integer
+      skill_survival:
+        type: integer
+      speed:
+        type: integer
+      spellcasting_ability:
+        type: string
+      strength:
+        type: integer
+      temp_hp:
+        type: integer
+      training_armor:
+        items:
+          type: string
+        type: array
+      training_languages:
+        items:
+          type: string
+        type: array
+      training_tools:
+        items:
+          type: string
+        type: array
+      training_weapons:
+        items:
+          type: string
+        type: array
+      updated_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      vulnerabilities:
+        items:
+          type: string
+        type: array
+      wisdom:
+        type: integer
+      xp:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.CombatEncounter:
+    properties:
+      created_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      round:
+        type: integer
+      updated_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.CombatParticipant:
+    properties:
+      armor_class:
+        type: integer
+      character_id:
+        type: string
+      concentration:
+        type: boolean
+      conditions:
+        items:
+          type: string
+        type: array
+      created_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      current_hp:
+        type: integer
+      encounter_id:
+        type: string
+      id:
+        type: string
+      initiative:
+        type: integer
+      is_active:
+        type: boolean
+      max_hp:
+        type: integer
+      name:
+        type: string
+      notes:
+        type: string
+      speed:
+        type: integer
+      temp_hp:
+        type: integer
+      updated_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.CreateCharacterParams:
+    properties:
+      alignment:
+        type: string
+      armor_class:
+        type: integer
+      attunement_slots:
+        type: integer
+      background:
+        type: string
+      bonds:
+        type: string
+      charisma:
+        type: integer
+      class:
+        type: string
+      conditions:
+        items:
+          type: string
+        type: array
+      constitution:
+        type: integer
+      copper:
+        type: integer
+      current_hp:
+        type: integer
+      dexterity:
+        type: integer
+      electrum:
+        type: integer
+      flaws:
+        type: string
+      gold:
+        type: integer
+      hit_dice_remaining:
+        type: integer
+      hit_dice_type:
+        type: integer
+      ideals:
+        type: string
+      immunities:
+        items:
+          type: string
+        type: array
+      inspiration:
+        type: boolean
+      intelligence:
+        type: integer
+      is_npc:
+        type: boolean
+      level:
+        type: integer
+      max_hp:
+        type: integer
+      name:
+        type: string
+      notes:
+        type: string
+      owner_id:
+        type: string
+      personality_traits:
+        type: string
+      platinum:
+        type: integer
+      race:
+        type: string
+      resistances:
+        items:
+          type: string
+        type: array
+      save_prof_charisma:
+        type: boolean
+      save_prof_constitution:
+        type: boolean
+      save_prof_dexterity:
+        type: boolean
+      save_prof_intelligence:
+        type: boolean
+      save_prof_strength:
+        type: boolean
+      save_prof_wisdom:
+        type: boolean
+      silver:
+        type: integer
+      skill_acrobatics:
+        type: integer
+      skill_animal_handling:
+        type: integer
+      skill_arcana:
+        type: integer
+      skill_athletics:
+        type: integer
+      skill_deception:
+        type: integer
+      skill_history:
+        type: integer
+      skill_insight:
+        type: integer
+      skill_intimidation:
+        type: integer
+      skill_investigation:
+        type: integer
+      skill_medicine:
+        type: integer
+      skill_nature:
+        type: integer
+      skill_perception:
+        type: integer
+      skill_performance:
+        type: integer
+      skill_persuasion:
+        type: integer
+      skill_religion:
+        type: integer
+      skill_sleight_of_hand:
+        type: integer
+      skill_stealth:
+        type: integer
+      skill_survival:
+        type: integer
+      speed:
+        type: integer
+      spellcasting_ability:
+        type: string
+      strength:
+        type: integer
+      temp_hp:
+        type: integer
+      training_armor:
+        items:
+          type: string
+        type: array
+      training_languages:
+        items:
+          type: string
+        type: array
+      training_tools:
+        items:
+          type: string
+        type: array
+      training_weapons:
+        items:
+          type: string
+        type: array
+      vulnerabilities:
+        items:
+          type: string
+        type: array
+      wisdom:
+        type: integer
+      xp:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.CreateInventoryItemParams:
+    properties:
+      character_id:
+        type: string
+      description:
+        type: string
+      is_attuned:
+        type: boolean
+      is_equipped:
+        type: boolean
+      name:
+        type: string
+      quantity:
+        type: integer
+      requires_attunement:
+        type: boolean
+      value:
+        type: integer
+      weight:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.CreateSpellParams:
+    properties:
+      casting_time:
+        type: string
+      character_id:
+        type: string
+      components:
+        type: string
+      description:
+        type: string
+      duration:
+        type: string
+      is_prepared:
+        type: boolean
+      level:
+        type: integer
+      name:
+        type: string
+      range:
+        type: string
+      school:
+        type: string
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.GetCharacterRow:
+    properties:
+      alignment:
+        type: string
+      armor_class:
+        type: integer
+      attunement_slots:
+        type: integer
+      background:
+        type: string
+      bonds:
+        type: string
+      charisma:
+        type: integer
+      charisma_modifier:
+        type: number
+      charisma_saving_throw_modifier:
+        type: integer
+      class:
+        type: string
+      conditions:
+        items:
+          type: string
+        type: array
+      constitution:
+        type: integer
+      constitution_modifier:
+        type: number
+      constitution_saving_throw_modifier:
+        type: integer
+      copper:
+        type: integer
+      created_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      current_hp:
+        type: integer
+      death_save_failures:
+        type: integer
+      death_save_successes:
+        type: integer
+      dexterity:
+        type: integer
+      dexterity_modifier:
+        type: number
+      dexterity_saving_throw_modifier:
+        type: integer
+      electrum:
+        type: integer
+      flaws:
+        type: string
+      gold:
+        type: integer
+      hit_dice_remaining:
+        type: integer
+      hit_dice_type:
+        type: integer
+      id:
+        type: string
+      ideals:
+        type: string
+      immunities:
+        items:
+          type: string
+        type: array
+      initiative:
+        type: number
+      inspiration:
+        type: boolean
+      intelligence:
+        type: integer
+      intelligence_modifier:
+        type: number
+      intelligence_saving_throw_modifier:
+        type: integer
+      is_npc:
+        type: boolean
+      level:
+        type: integer
+      max_hp:
+        type: integer
+      name:
+        type: string
+      notes:
+        type: string
+      owner_id:
+        type: string
+      passive_insight:
+        type: integer
+      passive_investigation:
+        type: integer
+      passive_perception:
+        type: integer
+      personality_traits:
+        type: string
+      platinum:
+        type: integer
+      proficiency_bonus:
+        type: number
+      race:
+        type: string
+      resistances:
+        items:
+          type: string
+        type: array
+      save_prof_charisma:
+        type: boolean
+      save_prof_constitution:
+        type: boolean
+      save_prof_dexterity:
+        type: boolean
+      save_prof_intelligence:
+        type: boolean
+      save_prof_strength:
+        type: boolean
+      save_prof_wisdom:
+        type: boolean
+      silver:
+        type: integer
+      skill_acrobatics:
+        type: integer
+      skill_acrobatics_modifier:
+        type: integer
+      skill_animal_handling:
+        type: integer
+      skill_animal_handling_modifier:
+        type: integer
+      skill_arcana:
+        type: integer
+      skill_arcana_modifier:
+        type: integer
+      skill_athletics:
+        type: integer
+      skill_athletics_modifier:
+        type: integer
+      skill_deception:
+        type: integer
+      skill_deception_modifier:
+        type: integer
+      skill_history:
+        type: integer
+      skill_history_modifier:
+        type: integer
+      skill_insight:
+        type: integer
+      skill_insight_modifier:
+        type: integer
+      skill_intimidation:
+        type: integer
+      skill_intimidation_modifier:
+        type: integer
+      skill_investigation:
+        type: integer
+      skill_investigation_modifier:
+        type: integer
+      skill_medicine:
+        type: integer
+      skill_medicine_modifier:
+        type: integer
+      skill_nature:
+        type: integer
+      skill_nature_modifier:
+        type: integer
+      skill_perception:
+        type: integer
+      skill_perception_modifier:
+        type: integer
+      skill_performance:
+        type: integer
+      skill_performance_modifier:
+        type: integer
+      skill_persuasion:
+        type: integer
+      skill_persuasion_modifier:
+        type: integer
+      skill_religion:
+        type: integer
+      skill_religion_modifier:
+        type: integer
+      skill_sleight_of_hand:
+        type: integer
+      skill_sleight_of_hand_modifier:
+        type: integer
+      skill_stealth:
+        type: integer
+      skill_stealth_modifier:
+        type: integer
+      skill_survival:
+        type: integer
+      skill_survival_modifier:
+        type: integer
+      speed:
+        type: integer
+      spellcasting_ability:
+        type: string
+      strength:
+        type: integer
+      strength_modifier:
+        type: number
+      strength_saving_throw_modifier:
+        type: integer
+      temp_hp:
+        type: integer
+      training_armor:
+        items:
+          type: string
+        type: array
+      training_languages:
+        items:
+          type: string
+        type: array
+      training_tools:
+        items:
+          type: string
+        type: array
+      training_weapons:
+        items:
+          type: string
+        type: array
+      updated_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      vulnerabilities:
+        items:
+          type: string
+        type: array
+      wisdom:
+        type: integer
+      wisdom_modifier:
+        type: number
+      wisdom_saving_throw_modifier:
+        type: integer
+      xp:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.InventoryItem:
+    properties:
+      character_id:
+        type: string
+      created_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      description:
+        type: string
+      id:
+        type: string
+      is_attuned:
+        type: boolean
+      is_equipped:
+        type: boolean
+      name:
+        type: string
+      quantity:
+        type: integer
+      requires_attunement:
+        type: boolean
+      value:
+        type: integer
+      weight:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.Spell:
+    properties:
+      casting_time:
+        type: string
+      character_id:
+        type: string
+      components:
+        type: string
+      created_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      description:
+        type: string
+      duration:
+        type: string
+      id:
+        type: string
+      is_prepared:
+        type: boolean
+      level:
+        type: integer
+      name:
+        type: string
+      range:
+        type: string
+      school:
+        type: string
+      updated_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.SpellSlot:
+    properties:
+      character_id:
+        type: string
+      created_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      id:
+        type: string
+      spell_level:
+        type: integer
+      total:
+        type: integer
+      updated_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      used:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpdateCharacterAbilityScoresParams:
+    properties:
+      charisma:
+        type: integer
+      constitution:
+        type: integer
+      dexterity:
+        type: integer
+      id:
+        type: string
+      intelligence:
+        type: integer
+      save_prof_charisma:
+        type: boolean
+      save_prof_constitution:
+        type: boolean
+      save_prof_dexterity:
+        type: boolean
+      save_prof_intelligence:
+        type: boolean
+      save_prof_strength:
+        type: boolean
+      save_prof_wisdom:
+        type: boolean
+      strength:
+        type: integer
+      wisdom:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpdateCharacterCurrencyParams:
+    properties:
+      conditions:
+        items:
+          type: string
+        type: array
+      copper:
+        type: integer
+      electrum:
+        type: integer
+      gold:
+        type: integer
+      id:
+        type: string
+      platinum:
+        type: integer
+      silver:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpdateCharacterInfoParams:
+    properties:
+      alignment:
+        type: string
+      background:
+        type: string
+      bonds:
+        type: string
+      flaws:
+        type: string
+      id:
+        type: string
+      ideals:
+        type: string
+      inspiration:
+        type: boolean
+      name:
+        type: string
+      notes:
+        type: string
+      race:
+        type: string
+      speed:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpdateCharacterLevelParams:
+    properties:
+      class:
+        type: string
+      hit_dice_remaining:
+        type: integer
+      hit_dice_type:
+        type: integer
+      id:
+        type: string
+      level:
+        type: integer
+      max_hp:
+        type: integer
+      xp:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpdateCharacterSkillsParams:
+    properties:
+      id:
+        type: string
+      skill_acrobatics:
+        type: integer
+      skill_animal_handling:
+        type: integer
+      skill_arcana:
+        type: integer
+      skill_athletics:
+        type: integer
+      skill_deception:
+        type: integer
+      skill_history:
+        type: integer
+      skill_insight:
+        type: integer
+      skill_intimidation:
+        type: integer
+      skill_investigation:
+        type: integer
+      skill_medicine:
+        type: integer
+      skill_nature:
+        type: integer
+      skill_perception:
+        type: integer
+      skill_performance:
+        type: integer
+      skill_persuasion:
+        type: integer
+      skill_religion:
+        type: integer
+      skill_sleight_of_hand:
+        type: integer
+      skill_stealth:
+        type: integer
+      skill_survival:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpdateCharacterTrainingParams:
+    properties:
+      armor_class:
+        type: integer
+      attunement_slots:
+        type: integer
+      id:
+        type: string
+      immunities:
+        items:
+          type: string
+        type: array
+      resistances:
+        items:
+          type: string
+        type: array
+      spellcasting_ability:
+        type: string
+      training_armor:
+        items:
+          type: string
+        type: array
+      training_languages:
+        items:
+          type: string
+        type: array
+      training_tools:
+        items:
+          type: string
+        type: array
+      training_weapons:
+        items:
+          type: string
+        type: array
+      vulnerabilities:
+        items:
+          type: string
+        type: array
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpdateInventoryItemParams:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      is_attuned:
+        type: boolean
+      is_equipped:
+        type: boolean
+      name:
+        type: string
+      quantity:
+        type: integer
+      requires_attunement:
+        type: boolean
+      value:
+        type: integer
+      weight:
+        type: integer
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpdateSpellParams:
+    properties:
+      casting_time:
+        type: string
+      components:
+        type: string
+      description:
+        type: string
+      duration:
+        type: string
+      id:
+        type: string
+      is_prepared:
+        type: boolean
+      level:
+        type: integer
+      name:
+        type: string
+      range:
+        type: string
+      school:
+        type: string
+    type: object
+  github_com_cscercel_behold-dnd_internal_db.UpsertSpellSlotParams:
+    properties:
+      character_id:
+        type: string
+      spell_level:
+        type: integer
+      total:
+        type: integer
+      used:
+        type: integer
+    type: object
+  pgtype.InfinityModifier:
+    enum:
+    - 1
+    - 0
+    - -1
+    format: int32
+    type: integer
+    x-enum-varnames:
+    - Infinity
+    - Finite
+    - NegativeInfinity
+  pgtype.Timestamptz:
+    properties:
+      infinityModifier:
+        $ref: '#/definitions/pgtype.InfinityModifier'
+      time:
+        type: string
+      valid:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for managing your D&D campaign characters, inventory, spells and
+    combat.
+  title: Behold D&D API
+  version: 1.0.0
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              token:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: Login
+      tags:
+      - auth
+  /auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              email:
+                type: string
+              id:
+                type: string
+              role:
+                type: string
+              username:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Registration details
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+            registration_code:
+              type: string
+            role:
+              type: string
+            username:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            properties:
+              email:
+                type: string
+              id:
+                type: string
+              role:
+                type: string
+              username:
+                type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /characters:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all characters
+      tags:
+      - characters
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CreateCharacterParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a character
+      tags:
+      - characters
+  /characters/{id}:
+    delete:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a character
+      tags:
+      - characters
+    get:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.GetCharacterRow'
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a character
+      tags:
+      - characters
+  /characters/{id}/ability-scores:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Character data
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateCharacterAbilityScoresParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a character's ability scores
+      tags:
+      - characters
+  /characters/{id}/conditions:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Conditions list
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            conditions:
+              items:
+                type: string
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update active conditions on a character
+      tags:
+      - characters
+  /characters/{id}/damage:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Damage amount
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            amount:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Deal damage to a character
+      tags:
+      - characters
+  /characters/{id}/death-save:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Death save result
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            success:
+              type: boolean
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Record a death saving throw
+      tags:
+      - characters
+  /characters/{id}/heal:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Heal amount
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            amount:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Heal a character
+      tags:
+      - characters
+  /characters/{id}/info:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Character data
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateCharacterInfoParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a character's info
+      tags:
+      - characters
+  /characters/{id}/inventory:
+    get:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.InventoryItem'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List inventory items for a character
+      tags:
+      - inventory
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CreateInventoryItemParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.InventoryItem'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add an item to a character's inventory
+      tags:
+      - inventory
+  /characters/{id}/inventory/{itemID}:
+    delete:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: itemID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete an inventory item
+      tags:
+      - inventory
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: itemID
+        required: true
+        type: string
+      - description: Item data
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateInventoryItemParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.InventoryItem'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an inventory item
+      tags:
+      - inventory
+  /characters/{id}/inventory/{itemID}/attune:
+    post:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: itemID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.InventoryItem'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Attune to a magic item
+      tags:
+      - inventory
+  /characters/{id}/inventory/{itemID}/unattune:
+    post:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: itemID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.InventoryItem'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove attunement from a magic item
+      tags:
+      - inventory
+  /characters/{id}/level:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Character data
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateCharacterLevelParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a character's level
+      tags:
+      - characters
+  /characters/{id}/long-rest:
+    post:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Long rest — restores HP, hit dice, resets death saves, conditions and
+        spell slots
+      tags:
+      - characters
+  /characters/{id}/short-rest:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Short rest details
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            hit_dice_used:
+              type: integer
+            hp_regained:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Short rest — spend hit dice to regain HP
+      tags:
+      - characters
+  /characters/{id}/skills:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Character data
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateCharacterCurrencyParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a character's currency
+      tags:
+      - characters
+  /characters/{id}/spell-slots:
+    get:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.SpellSlot'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List spell slots for a character
+      tags:
+      - spells
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Spell slot data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.UpsertSpellSlotParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.SpellSlot'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create or update a spell slot level
+      tags:
+      - spells
+  /characters/{id}/spell-slots/use:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Spell level to use
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            spell_level:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.SpellSlot'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Use a spell slot
+      tags:
+      - spells
+  /characters/{id}/spells:
+    get:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Spell'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List spells for a character
+      tags:
+      - spells
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Spell data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CreateSpellParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Spell'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add a spell to a character
+      tags:
+      - spells
+  /characters/{id}/spells/{spellID}:
+    delete:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Spell ID
+        in: path
+        name: spellID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a spell
+      tags:
+      - spells
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Spell ID
+        in: path
+        name: spellID
+        required: true
+        type: string
+      - description: Spell data
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateSpellParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Spell'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a spell
+      tags:
+      - spells
+  /characters/{id}/spells/{spellID}/toggle-prepared:
+    post:
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Spell ID
+        in: path
+        name: spellID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Spell'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Toggle a spell's prepared status
+      tags:
+      - spells
+  /characters/{id}/temp-hp:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Temp HP amount
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            amount:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add temporary HP to a character
+      tags:
+      - characters
+  /characters/{id}/training:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Character ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Character data
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.UpdateCharacterTrainingParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a character's training
+      tags:
+      - characters
+  /characters/npcs:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all NPCs (DM only)
+      tags:
+      - characters
+  /characters/players:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.Character'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all player characters (DM only)
+      tags:
+      - characters
+  /combat:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatEncounter'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all combat encounters
+      tags:
+      - combat
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Encounter name
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            name:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatEncounter'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a combat encounter
+      tags:
+      - combat
+  /combat/{encounterID}:
+    delete:
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a combat encounter
+      tags:
+      - combat
+    get:
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatEncounter'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a combat encounter
+      tags:
+      - combat
+  /combat/{encounterID}/end:
+    post:
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatEncounter'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: End a combat encounter
+      tags:
+      - combat
+  /combat/{encounterID}/next-round:
+    post:
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatEncounter'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Advance to the next round
+      tags:
+      - combat
+  /combat/{encounterID}/participants:
+    get:
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatParticipant'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List participants in an encounter
+      tags:
+      - combat
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      - description: Participant data. Provide character_id to copy stats from a character
+          sheet, or fill in fields manually.
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            armor_class:
+              type: integer
+            character_id:
+              type: string
+            current_hp:
+              type: integer
+            initiative:
+              type: integer
+            max_hp:
+              type: integer
+            name:
+              type: string
+            speed:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatParticipant'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add a participant to an encounter
+      tags:
+      - combat
+  /combat/{encounterID}/participants/{participantID}:
+    delete:
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      - description: Participant ID
+        in: path
+        name: participantID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove a participant from an encounter
+      tags:
+      - combat
+  /combat/{encounterID}/participants/{participantID}/conditions:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      - description: Participant ID
+        in: path
+        name: participantID
+        required: true
+        type: string
+      - description: Conditions list
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            conditions:
+              items:
+                type: string
+              type: array
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatParticipant'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update conditions on a participant
+      tags:
+      - combat
+  /combat/{encounterID}/participants/{participantID}/damage:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      - description: Participant ID
+        in: path
+        name: participantID
+        required: true
+        type: string
+      - description: Damage amount
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            amount:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatParticipant'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Deal damage to a participant
+      tags:
+      - combat
+  /combat/{encounterID}/participants/{participantID}/deactivate:
+    post:
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      - description: Participant ID
+        in: path
+        name: participantID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatParticipant'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Deactivate a participant (knocked out or fled)
+      tags:
+      - combat
+  /combat/{encounterID}/participants/{participantID}/heal:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      - description: Participant ID
+        in: path
+        name: participantID
+        required: true
+        type: string
+      - description: Heal amount
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            amount:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatParticipant'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Heal a participant
+      tags:
+      - combat
+  /combat/{encounterID}/participants/{participantID}/initiative:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      - description: Participant ID
+        in: path
+        name: participantID
+        required: true
+        type: string
+      - description: Initiative value
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            initiative:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatParticipant'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a participant's initiative
+      tags:
+      - combat
+  /combat/{encounterID}/participants/{participantID}/temp-hp:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      - description: Participant ID
+        in: path
+        name: participantID
+        required: true
+        type: string
+      - description: TempHP amount
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            amount:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatParticipant'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Give Temp HP to a participant
+      tags:
+      - combat
+  /combat/{encounterID}/participants/{participantID}/toggle-concentration:
+    post:
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      - description: Participant ID
+        in: path
+        name: participantID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatParticipant'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Toggle concentration for a participant
+      tags:
+      - combat
+  /combat/{encounterID}/start:
+    post:
+      parameters:
+      - description: Encounter ID
+        in: path
+        name: encounterID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatEncounter'
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Start a combat encounter
+      tags:
+      - combat
+  /combat/active:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_cscercel_behold-dnd_internal_db.CombatEncounter'
+        "401":
+          description: Unauthorized
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get the currently active encounter
+      tags:
+      - combat
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by your JWT token
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
