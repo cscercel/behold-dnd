@@ -1,0 +1,43 @@
+.page { padding: 32px; max-width: 1100px; margin: 0 auto; }
+.loading { display: flex; align-items: center; justify-content: center; height: 200px; color: var(--ash); }
+.header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
+.title { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--parchment); }
+.subtitle { font-size: 14px; color: var(--ash); margin-top: 4px; }
+.createBtn { display: flex; align-items: center; gap: 8px; background: var(--crimson); border: none; color: var(--parchment); padding: 10px 18px; border-radius: var(--radius); font-family: var(--font-display); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; transition: background var(--transition); }
+.createBtn:hover { background: var(--crimson-light); }
+.empty { text-align: center; padding: 80px 20px; color: var(--ash); }
+.emptyIcon { margin: 0 auto 16px; opacity: 0.3; display: block; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.card { display: flex; align-items: stretch; background: var(--stone); border: 1px solid var(--stone-border); border-radius: var(--radius-lg); cursor: pointer; overflow: hidden; transition: border-color var(--transition), transform var(--transition); }
+.card:hover { border-color: var(--gold-dim); transform: translateY(-2px); }
+.cardAccent { width: 4px; flex-shrink: 0; }
+.cardBody { flex: 1; padding: 16px; }
+.cardTop { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.charName { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--parchment); }
+.charMeta { font-size: 12px; color: var(--ash); margin-top: 3px; }
+.cardStats { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.stat { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ash-light); }
+.npcTag { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; }
+.deleteBtn { background: none; border: none; color: var(--stone-border); padding: 4px; border-radius: 3px; transition: color var(--transition); flex-shrink: 0; }
+.deleteBtn:hover { color: var(--crimson-light); }
+.chevron { color: var(--stone-border); align-self: center; margin-right: 12px; flex-shrink: 0; }
+
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal { background: var(--stone); border: 1px solid var(--stone-border); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+.modalTitle { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--parchment); margin-bottom: 24px; }
+.modalForm { display: flex; flex-direction: column; gap: 16px; }
+.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.formRow3 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 11px; font-weight: 500; color: var(--ash-light); text-transform: uppercase; letter-spacing: 0.05em; }
+.sectionLabel { font-size: 11px; font-weight: 600; color: var(--gold-dim); text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--stone-border); padding-bottom: 6px; }
+.abilityGrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.abilityField { display: flex; flex-direction: column; gap: 4px; }
+.abilityField label { font-size: 10px; font-weight: 700; color: var(--ash); text-align: center; letter-spacing: 0.08em; }
+.abilityField input { text-align: center; }
+.error { font-size: 13px; color: var(--crimson-light); }
+.modalActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.cancelBtn { background: var(--stone-mid); border: none; color: var(--ash-light); padding: 10px 20px; border-radius: var(--radius); font-size: 13px; }
+.cancelBtn:hover { color: var(--parchment); }
+.submitBtn { background: var(--crimson); border: none; color: var(--parchment); padding: 10px 20px; border-radius: var(--radius); font-family: var(--font-display); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; }
+.submitBtn:hover { background: var(--crimson-light); }
