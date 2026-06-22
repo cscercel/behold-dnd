@@ -7,7 +7,13 @@ import styles from './Login.module.css';
 
 export function Login() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [form, setForm] = useState({ username: '', email: '', password: '', registration_code: '' });
+  const [form, setForm] = useState({
+      username: '', 
+      email: '', 
+      password: '', 
+      registration_code: '',
+      role: '',
+    });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -22,7 +28,7 @@ export function Login() {
     try {
       const res = mode === 'login'
         ? await apiLogin(form.username, form.password)
-        : await apiRegister(form.username, form.email, form.password, form.registration_code);
+        : await apiRegister(form.username, form.email, form.password, form.registration_code, form.role);
       login(res.token);
       navigate('/characters');
     } catch (err: any) {
@@ -47,6 +53,7 @@ export function Login() {
           {mode === 'register' && <div className={styles.field}><label>Email</label><input type="email" value={form.email} onChange={set('email')} required placeholder="your@email.com" /></div>}
           <div className={styles.field}><label>Password</label><input type="password" value={form.password} onChange={set('password')} required placeholder="••••••••" /></div>
           {mode === 'register' && <div className={styles.field}><label>Registration Code</label><input value={form.registration_code} onChange={set('registration_code')} required placeholder="Provided by your DM" /></div>}
+          {mode === 'register' && <div className={styles.field}><label>Role</label><input value={form.role} onChange={set('role')} required placeholder="player/dm" /></div>}
           {error && <p className={styles.error}>{error}</p>}
           <button className={styles.submit} type="submit" disabled={loading}>
             {loading ? 'Loading…' : mode === 'login' ? 'Enter the Realm' : 'Join the Party'}

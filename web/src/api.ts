@@ -39,8 +39,8 @@ const del   = <T>(path: string)                 => req<T>('DELETE', path);
 // Auth
 export const login = (email: string, password: string) => 
     post<{token:string}>('/auth/login', { email, password });
-export const register = (username: string, email: string, password: string, registration_code: string) =>
-    post<{ token: string }>('/auth/register', { username, email, password, registration_code });
+export const register = (username: string, email: string, password: string, registration_code: string, role: string) =>
+    post<{ token: string }>('/auth/register', { username, email, password, registration_code, role });
 export const getMe    = () => get<any>('/auth/me');
 
 // Characters
