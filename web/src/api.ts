@@ -44,9 +44,9 @@ export const register = (username: string, email: string, password: string, regi
 export const getMe    = () => get<any>('/auth/me');
 
 // Characters
-export const listCharacters      = () => get<any[]>('/characters/');
+export const listCharacters      = () => get<any[]>('/characters');
 export const getCharacter        = (id: string) => get<any>(`/characters/${id}`);
-export const createCharacter     = (data: any)  => post<any>('/characters/', data);
+export const createCharacter     = (data: any)  => post<any>('/characters', data);
 export const deleteCharacter     = (id: string) => del<any>(`/characters/${id}`);
 export const updateCharacterInfo = (id: string, data: any) => patch<any>(`/characters/${id}/info`, data);
 export const applyDamage         = (id: string, amount: number) => post<any>(`/characters/${id}/damage`, { amount });
@@ -60,8 +60,8 @@ export const updateConditions    = (id: string, conditions: string[]) =>
     put<any>(`/characters/${id}/conditions`, { conditions });
 
 // Inventory
-export const listInventory       = (id: string) => get<any[]>(`/characters/${id}/inventory/`);
-export const createInventoryItem = (id: string, data: any) => post<any>(`/characters/${id}/inventory/`, data);
+export const listInventory       = (id: string) => get<any[]>(`/characters/${id}/inventory`);
+export const createInventoryItem = (id: string, data: any) => post<any>(`/characters/${id}/inventory`, data);
 export const updateInventoryItem = (id: string, itemId: string, data: any) =>
     patch<any>(`/characters/${id}/inventory/${itemId}`, data);
 export const deleteInventoryItem = (id: string, itemId: string) =>
@@ -72,19 +72,19 @@ export const unattuneItem        = (id: string, itemId: string) =>
     post<any>(`/characters/${id}/inventory/${itemId}/unattune`);
 
 // Spells
-export const listSpells          = (id: string) => get<any[]>(`/characters/${id}/spells/`);
-export const createSpell         = (id: string, data: any) => post<any>(`/characters/${id}/spells/`, data);
+export const listSpells          = (id: string) => get<any[]>(`/characters/${id}/spells`);
+export const createSpell         = (id: string, data: any) => post<any>(`/characters/${id}/spells`, data);
 export const deleteSpell         = (id: string, spellId: string) =>
     del<any>(`/characters/${id}/spells/${spellId}`);
 export const toggleSpellPrepared = (id: string, spellId: string) =>
     post<any>(`/characters/${id}/spells/${spellId}/toggle-prepared`);
-export const listSpellSlots      = (id: string) => get<any[]>(`/characters/${id}/spell-slots/`);
+export const listSpellSlots      = (id: string) => get<any[]>(`/characters/${id}/spell-slots`);
 export const useSpellSlot        = (id: string, spell_level: number) =>
     post<any>(`/characters/${id}/spell-slots/use`, { spell_level });
 
 // Combat
-export const listEncounters    = () => get<any[]>('/combat/');
-export const createEncounter   = (name: string) => post<any>('/combat/', { name });
+export const listEncounters    = () => get<any[]>('/combat');
+export const createEncounter   = (name: string) => post<any>('/combat', { name });
 export const getActiveEncounter= () => get<any>('/combat/active');
 export const startEncounter    = (id: string) => post<any>(`/combat/${id}/start`);
 export const endEncounter      = (id: string) => post<any>(`/combat/${id}/end`);
