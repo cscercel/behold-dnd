@@ -267,7 +267,7 @@ func (a *API) handleAddParticipant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if body.CharacterID != "" {
+	if body.CharacterID == "" {
 		respondError(w, http.StatusBadRequest, "character_id is required")
 		return
 	}
