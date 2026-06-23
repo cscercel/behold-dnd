@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/cscercel/behold-dnd/internal/middleware"
@@ -25,22 +26,22 @@ func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
 		RegistrationCode string `json:"registration_code"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
 	if body.Username == "" || body.Email == "" || body.Password == "" || body.Role == "" {
-		respondError(w, http.StatusBadRequest, "username, email, password and role are missing")
+		respondWithError(w, http.StatusBadRequest, "username, email, password and role are missing", fmt.Errorf(""))
 		return
 	}
 
 	user, err := a.authService.Register(r.Context(), body.Username, body.Email, body.Password, body.Role, body.RegistrationCode)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, "failed to register", err)
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, map[string]any{
+	respondWithJSON(w, http.StatusCreated, map[string]any{
 		"id":         user.ID,
 		"username":   user.Username,
 		"email":      user.Email,
@@ -63,17 +64,17 @@ func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
 	token, user, err := a.authService.Login(r.Context(), body.Email, body.Password)
 	if err != nil {
-		respondError(w, http.StatusUnauthorized, err.Error())
+		respondWithError(w, http.StatusUnauthorized, "failed to login", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, map[string]any{
+	respondWithJSON(w, http.StatusOK, map[string]any{
 		"token": token,
 		"user": map[string]any{
 			"id":       user.ID,
@@ -94,17 +95,17 @@ func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleMe(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {
-		respondError(w, http.StatusUnauthorized, "not authenticated")
+		respondWithError(w, http.StatusUnauthorized, "not authenticated", fmt.Errorf(""))
 		return
 	}
 
 	user, err := a.queries.GetUserByID(r.Context(), userID)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "user not found")
+		respondWithError(w, http.StatusNotFound, "user not found", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, map[string]any{
+	respondWithJSON(w, http.StatusOK, map[string]any{
 		"id":       user.ID,
 		"username": user.Username,
 		"email":    user.Email,

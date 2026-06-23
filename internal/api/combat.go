@@ -21,11 +21,11 @@ import (
 func (a *API) handleListEncounters(w http.ResponseWriter, r *http.Request) {
 	encounters, err := a.queries.ListEncounters(r.Context())
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to list encounters")
+		respondWithError(w, http.StatusInternalServerError, "failed to list encounters", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, encounters)
+	respondWithJSON(w, http.StatusOK, encounters)
 }
 
 // @Summary      Get the currently active encounter
@@ -40,11 +40,11 @@ func (a *API) handleListEncounters(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleGetActiveEncounter(w http.ResponseWriter, r *http.Request) {
 	encounter, err := a.queries.GetActiveEncounter(r.Context())
 	if err != nil {
-		respondError(w, http.StatusNotFound, "no active encounter")
+		respondWithError(w, http.StatusNotFound, "no active encounter", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, encounter)
+	respondWithJSON(w, http.StatusOK, encounter)
 }
 
 // @Summary      Create a combat encounter
@@ -64,17 +64,17 @@ func (a *API) handleCreateEncounter(w http.ResponseWriter, r *http.Request) {
 		Name string `json:"name"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
 	encounter, err := a.queries.CreateEncounter(r.Context(), body.Name)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to create encounter")
+		respondWithError(w, http.StatusInternalServerError, "failed to create encounter", err)
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, encounter)
+	respondWithJSON(w, http.StatusCreated, encounter)
 }
 
 // @Summary      Get a combat encounter
@@ -91,17 +91,17 @@ func (a *API) handleCreateEncounter(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleGetEncounter(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid encounter id")
+		respondWithError(w, http.StatusBadRequest, "invalid encounter id", err)
 		return
 	}
 
 	encounter, err := a.queries.GetEncounter(r.Context(), encounterID)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "encounter not found")
+		respondWithError(w, http.StatusNotFound, "encounter not found", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, encounter)
+	respondWithJSON(w, http.StatusOK, encounter)
 }
 
 // @Summary      Start a combat encounter
@@ -118,17 +118,17 @@ func (a *API) handleGetEncounter(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleStartEncounter(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid encounter id")
+		respondWithError(w, http.StatusBadRequest, "invalid encounter id", err)
 		return
 	}
 
 	encounter, err := a.queries.StartEncounter(r.Context(), encounterID)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "failed to start encounter")
+		respondWithError(w, http.StatusNotFound, "failed to start encounter", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, encounter)
+	respondWithJSON(w, http.StatusOK, encounter)
 }
 
 // @Summary      End a combat encounter
@@ -145,17 +145,17 @@ func (a *API) handleStartEncounter(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleEndEncounter(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid encounter id")
+		respondWithError(w, http.StatusBadRequest, "invalid encounter id", err)
 		return
 	}
 
 	encounter, err := a.queries.EndEncounter(r.Context(), encounterID)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "failed to end encounter")
+		respondWithError(w, http.StatusNotFound, "failed to end encounter", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, encounter)
+	respondWithJSON(w, http.StatusOK, encounter)
 }
 
 // @Summary      Advance to the next round
@@ -172,17 +172,17 @@ func (a *API) handleEndEncounter(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleNextRound(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid encounter id")
+		respondWithError(w, http.StatusBadRequest, "invalid encounter id", err)
 		return
 	}
 
 	encounter, err := a.queries.NextRound(r.Context(), encounterID)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "failed to advance round")
+		respondWithError(w, http.StatusNotFound, "failed to advance round", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, encounter)
+	respondWithJSON(w, http.StatusOK, encounter)
 }
 
 // @Summary      Delete a combat encounter
@@ -199,12 +199,12 @@ func (a *API) handleNextRound(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleDeleteEncounter(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid encounter id")
+		respondWithError(w, http.StatusBadRequest, "invalid encounter id", err)
 		return
 	}
 
 	if err := a.queries.DeleteEncounter(r.Context(), encounterID); err != nil {
-		respondError(w, http.StatusNotFound, "failed to advance round")
+		respondWithError(w, http.StatusNotFound, "failed to advance round", err)
 		return
 	}
 
@@ -225,17 +225,17 @@ func (a *API) handleDeleteEncounter(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleListParticipants(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid encounter id")
+		respondWithError(w, http.StatusBadRequest, "invalid encounter id", err)
 		return
 	}
 
 	participants, err := a.queries.ListParticipants(r.Context(), encounterID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to list participants")
+		respondWithError(w, http.StatusInternalServerError, "failed to list participants", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, participants)
+	respondWithJSON(w, http.StatusOK, participants)
 }
 
 // @Summary      Add a participant to an encounter
@@ -254,7 +254,7 @@ func (a *API) handleListParticipants(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleAddParticipant(w http.ResponseWriter, r *http.Request) {
 	encounterID, err := uuid.Parse(chi.URLParam(r, "encounterID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid encounter id")
+		respondWithError(w, http.StatusBadRequest, "invalid encounter id", err)
 		return
 	}
 
@@ -263,18 +263,18 @@ func (a *API) handleAddParticipant(w http.ResponseWriter, r *http.Request) {
 		Initiative  int32  `json:"initiative"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
 	if body.CharacterID == "" {
-		respondError(w, http.StatusBadRequest, "character_id is required")
+		respondWithError(w, http.StatusBadRequest, "character_id is required", err)
 		return
 	}
 
 	characterID, err := uuid.Parse(body.CharacterID)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
@@ -282,11 +282,11 @@ func (a *API) handleAddParticipant(w http.ResponseWriter, r *http.Request) {
 		r.Context(), encounterID, characterID, body.Initiative,
 	)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to add participant")
+		respondWithError(w, http.StatusInternalServerError, "failed to add participant", err)
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, participant)
+	respondWithJSON(w, http.StatusCreated, participant)
 	return
 }
 
@@ -305,12 +305,12 @@ func (a *API) handleAddParticipant(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleRemoveParticipant(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid participant id")
+		respondWithError(w, http.StatusBadRequest, "invalid participant id", err)
 		return
 	}
 
 	if err := a.queries.RemoveParticipant(r.Context(), participantID); err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to remove participant")
+		respondWithError(w, http.StatusInternalServerError, "failed to remove participant", err)
 		return
 	}
 
@@ -334,7 +334,7 @@ func (a *API) handleRemoveParticipant(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleParticipantDamage(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid participant id")
+		respondWithError(w, http.StatusBadRequest, "invalid participant id", err)
 		return
 	}
 
@@ -342,16 +342,16 @@ func (a *API) handleParticipantDamage(w http.ResponseWriter, r *http.Request) {
 		Amount int `json:"amount"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
-		respondError(w, http.StatusBadRequest, "amount must be a positive number")
+		respondWithError(w, http.StatusBadRequest, "amount must be a positive number", err)
 		return
 	}
 
 	participant, err := a.combatService.ApplyDamageToParticipant(r.Context(), participantID, body.Amount)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to apply damage")
+		respondWithError(w, http.StatusInternalServerError, "failed to apply damage", err)
 		return
 	}
-	respondJSON(w, http.StatusOK, participant)
+	respondWithJSON(w, http.StatusOK, participant)
 }
 
 // @Summary      Heal a participant
@@ -371,7 +371,7 @@ func (a *API) handleParticipantDamage(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleParticipantHeal(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid participant id")
+		respondWithError(w, http.StatusBadRequest, "invalid participant id", err)
 		return
 	}
 
@@ -379,16 +379,16 @@ func (a *API) handleParticipantHeal(w http.ResponseWriter, r *http.Request) {
 		Amount int `json:"amount"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
-		respondError(w, http.StatusBadRequest, "amount must be a positive number")
+		respondWithError(w, http.StatusBadRequest, "amount must be a positive number", err)
 		return
 	}
 
 	participant, err := a.combatService.HealParticipant(r.Context(), participantID, body.Amount)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to heal participant")
+		respondWithError(w, http.StatusInternalServerError, "failed to heal participant", err)
 		return
 	}
-	respondJSON(w, http.StatusOK, participant)
+	respondWithJSON(w, http.StatusOK, participant)
 }
 
 // @Summary      Give Temp HP to a participant
@@ -408,7 +408,7 @@ func (a *API) handleParticipantHeal(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleParticipantTempHP(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid participant id")
+		respondWithError(w, http.StatusBadRequest, "invalid participant id", err)
 		return
 	}
 
@@ -416,7 +416,7 @@ func (a *API) handleParticipantTempHP(w http.ResponseWriter, r *http.Request) {
 		Amount int32 `json:"amount"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
-		respondError(w, http.StatusBadRequest, "amount must be a positive number")
+		respondWithError(w, http.StatusBadRequest, "amount must be a positive number", err)
 		return
 	}
 
@@ -425,11 +425,11 @@ func (a *API) handleParticipantTempHP(w http.ResponseWriter, r *http.Request) {
 		TempHp: body.Amount,
 	})
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to update temp HP")
+		respondWithError(w, http.StatusInternalServerError, "failed to update temp HP", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, participant)
+	respondWithJSON(w, http.StatusOK, participant)
 }
 
 // @Summary      Update a participant's initiative
@@ -449,7 +449,7 @@ func (a *API) handleParticipantTempHP(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleParticipantInitiative(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid participant id")
+		respondWithError(w, http.StatusBadRequest, "invalid participant id", err)
 		return
 	}
 
@@ -457,7 +457,7 @@ func (a *API) handleParticipantInitiative(w http.ResponseWriter, r *http.Request
 		Initiative int32 `json:"initiative"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Initiative <= 0 {
-		respondError(w, http.StatusBadRequest, "initiative must be a positive number")
+		respondWithError(w, http.StatusBadRequest, "initiative must be a positive number", err)
 		return
 	}
 
@@ -466,11 +466,11 @@ func (a *API) handleParticipantInitiative(w http.ResponseWriter, r *http.Request
 		Initiative: body.Initiative,
 	})
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to update initiative")
+		respondWithError(w, http.StatusInternalServerError, "failed to update initiative", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, participant)
+	respondWithJSON(w, http.StatusOK, participant)
 }
 
 // @Summary      Update conditions on a participant
@@ -490,7 +490,7 @@ func (a *API) handleParticipantInitiative(w http.ResponseWriter, r *http.Request
 func (a *API) handleParticipantConditions(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid participant id")
+		respondWithError(w, http.StatusBadRequest, "invalid participant id", err)
 		return
 	}
 
@@ -498,7 +498,7 @@ func (a *API) handleParticipantConditions(w http.ResponseWriter, r *http.Request
 		Conditions []string `json:"conditions"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
@@ -507,11 +507,11 @@ func (a *API) handleParticipantConditions(w http.ResponseWriter, r *http.Request
 		Conditions: body.Conditions,
 	})
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to update conditions")
+		respondWithError(w, http.StatusInternalServerError, "failed to update conditions", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, participant)
+	respondWithJSON(w, http.StatusOK, participant)
 }
 
 // @Summary      Toggle concentration for a participant
@@ -529,17 +529,17 @@ func (a *API) handleParticipantConditions(w http.ResponseWriter, r *http.Request
 func (a *API) handleParticipantToggleConcentration(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid participant id")
+		respondWithError(w, http.StatusBadRequest, "invalid participant id", err)
 		return
 	}
 
 	participant, err := a.queries.ToggleParticipantConcentration(r.Context(), participantID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to toggle concentration")
+		respondWithError(w, http.StatusInternalServerError, "failed to toggle concentration", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, participant)
+	respondWithJSON(w, http.StatusOK, participant)
 }
 
 // @Summary      Deactivate a participant (knocked out or fled)
@@ -557,15 +557,15 @@ func (a *API) handleParticipantToggleConcentration(w http.ResponseWriter, r *htt
 func (a *API) handleDeactivateParticipant(w http.ResponseWriter, r *http.Request) {
 	participantID, err := uuid.Parse(chi.URLParam(r, "participantID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid participant id")
+		respondWithError(w, http.StatusBadRequest, "invalid participant id", err)
 		return
 	}
 
 	participant, err := a.queries.DeactivateParticipant(r.Context(), participantID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to deactivate participant")
+		respondWithError(w, http.StatusInternalServerError, "failed to deactivate participant", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, participant)
+	respondWithJSON(w, http.StatusOK, participant)
 }

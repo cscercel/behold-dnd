@@ -23,17 +23,17 @@ import (
 func (a *API) handleListInventory(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
 	items, err := a.queries.ListInventoryItems(r.Context(), characterID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to list inventory")
+		respondWithError(w, http.StatusInternalServerError, "failed to list inventory", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, items)
+	respondWithJSON(w, http.StatusOK, items)
 }
 
 // @Summary      Add an item to a character's inventory
@@ -52,13 +52,13 @@ func (a *API) handleListInventory(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleCreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
 	var params db.CreateInventoryItemParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
@@ -67,11 +67,11 @@ func (a *API) handleCreateInventoryItem(w http.ResponseWriter, r *http.Request) 
 
 	item, err := a.queries.CreateInventoryItem(r.Context(), params)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to create inventory")
+		respondWithError(w, http.StatusInternalServerError, "failed to create inventory", err)
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, item)
+	respondWithJSON(w, http.StatusCreated, item)
 }
 
 // @Summary      Update an inventory item
@@ -91,13 +91,13 @@ func (a *API) handleCreateInventoryItem(w http.ResponseWriter, r *http.Request) 
 func (a *API) handleUpdateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	itemID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid item id")
+		respondWithError(w, http.StatusBadRequest, "invalid item id", err)
 		return
 	}
 
 	var params db.UpdateInventoryItemParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
@@ -105,11 +105,11 @@ func (a *API) handleUpdateInventoryItem(w http.ResponseWriter, r *http.Request) 
 
 	item, err := a.queries.UpdateInventoryItem(r.Context(), params)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to update inventory")
+		respondWithError(w, http.StatusInternalServerError, "failed to update inventory", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, item)
+	respondWithJSON(w, http.StatusOK, item)
 }
 
 // @Summary      Delete an inventory item
@@ -127,12 +127,12 @@ func (a *API) handleUpdateInventoryItem(w http.ResponseWriter, r *http.Request) 
 func (a *API) handleDeleteInventoryItem(w http.ResponseWriter, r *http.Request) {
 	itemID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid item id")
+		respondWithError(w, http.StatusBadRequest, "invalid item id", err)
 		return
 	}
 
 	if err := a.queries.DeleteInventoryItem(r.Context(), itemID); err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to delete item")
+		respondWithError(w, http.StatusInternalServerError, "failed to delete item", err)
 		return
 	}
 
@@ -153,23 +153,23 @@ func (a *API) handleDeleteInventoryItem(w http.ResponseWriter, r *http.Request) 
 func (a *API) handleAttuneItem(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
 	itemID, err := uuid.Parse(chi.URLParam(r, "itemID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid item id")
+		respondWithError(w, http.StatusBadRequest, "invalid item id", err)
 		return
 	}
 
 	item, err := a.inventoryService.AttuneItem(r.Context(), characterID, itemID)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, "failed to attune item", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, item)
+	respondWithJSON(w, http.StatusOK, item)
 }
 
 // @Summary      Remove attunement from a magic item
@@ -186,21 +186,21 @@ func (a *API) handleAttuneItem(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleUnattuneItem(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
 	itemID, err := uuid.Parse(chi.URLParam(r, "itemID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid item id")
+		respondWithError(w, http.StatusBadRequest, "invalid item id", err)
 		return
 	}
 
 	item, err := a.inventoryService.UnattuneItem(r.Context(), characterID, itemID)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, "failed to unattune item", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, item)
+	respondWithJSON(w, http.StatusOK, item)
 }

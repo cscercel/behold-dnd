@@ -23,17 +23,17 @@ import (
 func (a *API) handleListSpells(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
 	spells, err := a.queries.ListSpells(r.Context(), characterID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to list spells")
+		respondWithError(w, http.StatusInternalServerError, "failed to list spells", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, spells)
+	respondWithJSON(w, http.StatusOK, spells)
 }
 
 // @Summary      Add a spell to a character
@@ -52,13 +52,13 @@ func (a *API) handleListSpells(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
 	var params db.CreateSpellParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
@@ -67,11 +67,11 @@ func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 
 	spell, err := a.queries.CreateSpell(r.Context(), params)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to create spell")
+		respondWithError(w, http.StatusInternalServerError, "failed to create spell", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, spell)
+	respondWithJSON(w, http.StatusOK, spell)
 }
 
 // @Summary      Update a spell
@@ -91,13 +91,13 @@ func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid spell id")
+		respondWithError(w, http.StatusBadRequest, "invalid spell id", err)
 		return
 	}
 
 	var params db.UpdateSpellParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
@@ -105,11 +105,11 @@ func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 
 	spell, err := a.queries.UpdateSpell(r.Context(), params)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to update inventory")
+		respondWithError(w, http.StatusInternalServerError, "failed to update inventory", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, spell)
+	respondWithJSON(w, http.StatusOK, spell)
 }
 
 // @Summary      Delete a spell
@@ -127,12 +127,12 @@ func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleDeleteSpell(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid spell item")
+		respondWithError(w, http.StatusBadRequest, "invalid spell item", err)
 		return
 	}
 
 	if err := a.queries.DeleteSpell(r.Context(), spellID); err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to delete spell")
+		respondWithError(w, http.StatusInternalServerError, "failed to delete spell", err)
 		return
 	}
 
@@ -154,17 +154,17 @@ func (a *API) handleDeleteSpell(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleToggleSpellPrepared(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid spell id")
+		respondWithError(w, http.StatusBadRequest, "invalid spell id", err)
 		return
 	}
 
 	spell, err := a.queries.ToggleSpellPrepared(r.Context(), spellID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to toggle spell preparation")
+		respondWithError(w, http.StatusInternalServerError, "failed to toggle spell preparation", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, spell)
+	respondWithJSON(w, http.StatusOK, spell)
 }
 
 // @Summary      List spell slots for a character
@@ -181,17 +181,17 @@ func (a *API) handleToggleSpellPrepared(w http.ResponseWriter, r *http.Request) 
 func (a *API) handleListSpellSlots(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
 	slots, err := a.queries.ListSpellSlots(r.Context(), characterID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to list spell slots")
+		respondWithError(w, http.StatusInternalServerError, "failed to list spell slots", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, slots)
+	respondWithJSON(w, http.StatusOK, slots)
 }
 
 // @Summary      Create or update a spell slot level
@@ -210,13 +210,13 @@ func (a *API) handleListSpellSlots(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
 	var params db.UpsertSpellSlotParams
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
@@ -224,11 +224,11 @@ func (a *API) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
 
 	slot, err := a.queries.UpsertSpellSlot(r.Context(), params)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "failed to upsert spell slots")
+		respondWithError(w, http.StatusInternalServerError, "failed to upsert spell slots", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, slot)
+	respondWithJSON(w, http.StatusOK, slot)
 }
 
 // @Summary      Use a spell slot
@@ -246,14 +246,14 @@ func (a *API) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
 func (a *API) handleUseSpellSlot(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "invalid character id")
+		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
 	var params db.UseSpellSlotParams
 
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid request body")
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
@@ -261,9 +261,9 @@ func (a *API) handleUseSpellSlot(w http.ResponseWriter, r *http.Request) {
 
 	slot, err := a.queries.UseSpellSlot(r.Context(), params)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "failed to use spell slot")
+		respondWithError(w, http.StatusBadRequest, "failed to use spell slot", err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, slot)
+	respondWithJSON(w, http.StatusOK, slot)
 }
