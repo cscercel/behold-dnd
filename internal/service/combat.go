@@ -43,13 +43,13 @@ func (s *CombatService) ListEncouters(ctx context.Context) ([]db.CombatEncounter
 	return encounters, nil
 }
 
-func (s *CombatService) GetActiveEncouter(ctx context.Context) (db.CombatEncounter, error) {
-	encounter, err := s.queries.GetActiveEncounter(ctx)
+func (s *CombatService) GetActiveEncouters(ctx context.Context) ([]db.CombatEncounter, error) {
+	encounters, err := s.queries.GetActiveEncounters(ctx)
 	if err != nil {
-		return db.CombatEncounter{}, fmt.Errorf("failed to list active encounter: %w", err)
+		return []db.CombatEncounter{}, fmt.Errorf("failed to list active encounters: %w", err)
 	}
 
-	return encounter, nil
+	return encounters, nil
 }
 
 func (s *CombatService) StartEncounter(ctx context.Context, combatID uuid.UUID) (db.CombatEncounter, error) {
