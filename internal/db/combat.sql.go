@@ -156,24 +156,37 @@ func (q *Queries) EndEncounter(ctx context.Context, id uuid.UUID) (CombatEncount
 	return i, err
 }
 
-const getActiveEncounter = `-- name: GetActiveEncounter :one
+const getActiveEncounters = `-- name: GetActiveEncounters :many
 SELECT id, name, is_active, round, created_at, updated_at FROM combat_encounters
 WHERE is_active = TRUE
-LIMIT 1
+ORDER BY created_at DESC
 `
 
-func (q *Queries) GetActiveEncounter(ctx context.Context) (CombatEncounter, error) {
-	row := q.db.QueryRow(ctx, getActiveEncounter)
-	var i CombatEncounter
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.IsActive,
-		&i.Round,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) GetActiveEncounters(ctx context.Context) ([]CombatEncounter, error) {
+	rows, err := q.db.Query(ctx, getActiveEncounters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CombatEncounter{}
+	for rows.Next() {
+		var i CombatEncounter
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.IsActive,
+			&i.Round,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getEncounter = `-- name: GetEncounter :one

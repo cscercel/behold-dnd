@@ -24,7 +24,7 @@ type Querier interface {
 	DeleteInventoryItem(ctx context.Context, id uuid.UUID) error
 	DeleteSpell(ctx context.Context, id uuid.UUID) error
 	EndEncounter(ctx context.Context, id uuid.UUID) (CombatEncounter, error)
-	GetActiveEncounter(ctx context.Context) (CombatEncounter, error)
+	GetActiveEncounters(ctx context.Context) ([]CombatEncounter, error)
 	GetCharacter(ctx context.Context, id uuid.UUID) (GetCharacterRow, error)
 	GetEncounter(ctx context.Context, id uuid.UUID) (CombatEncounter, error)
 	GetInventoryItem(ctx context.Context, id uuid.UUID) (InventoryItem, error)

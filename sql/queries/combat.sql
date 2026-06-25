@@ -6,10 +6,10 @@ WHERE id = $1;
 SELECT * FROM combat_encounters
 ORDER BY created_at DESC;
 
--- name: GetActiveEncounter :one
+-- name: GetActiveEncounters :many
 SELECT * FROM combat_encounters
 WHERE is_active = TRUE
-LIMIT 1;
+ORDER BY created_at DESC;
 
 -- name: CreateEncounter :one
 INSERT INTO combat_encounters (name)

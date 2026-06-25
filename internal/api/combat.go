@@ -28,23 +28,23 @@ func (a *API) handleListEncounters(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, encounters)
 }
 
-// @Summary      Get the currently active encounter
+// @Summary      Get active encounters
 // @Tags         combat
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200  {object}  db.CombatEncounter
+// @Success      200  {array}   db.CombatEncounter
 // @Failure      401  {object}  object{error=string}
 // @Failure      403  {object}  object{error=string}
 // @Failure      404  {object}  object{error=string}
 // @Router       /combat/active [get]
-func (a *API) handleGetActiveEncounter(w http.ResponseWriter, r *http.Request) {
-	encounter, err := a.queries.GetActiveEncounter(r.Context())
+func (a *API) handleGetActiveEncounters(w http.ResponseWriter, r *http.Request) {
+	encounters, err := a.queries.GetActiveEncounters(r.Context())
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "no active encounter", err)
+		respondWithError(w, http.StatusNotFound, "no active encounters", err)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, encounter)
+	respondWithJSON(w, http.StatusOK, encounters)
 }
 
 // @Summary      Create a combat encounter

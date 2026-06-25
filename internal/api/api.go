@@ -132,7 +132,7 @@ func (a *API) Routes() *chi.Mux {
 			r.Route("/combat", func(r chi.Router) {
 				r.Get("/", a.handleListEncounters)
 				r.Post("/", a.handleCreateEncounter)
-				r.Get("/active", a.handleGetActiveEncounter)
+				r.Get("/active", a.handleGetActiveEncounters)
 
 				r.Route("/{encounterID}", func(r chi.Router) {
 					r.Get("/", a.handleGetEncounter)
