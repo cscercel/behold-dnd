@@ -1,4 +1,4 @@
-package api
+package handler
 
 import (
 	"encoding/json"
@@ -6,10 +6,68 @@ import (
 	"net/http"
 
 	"github.com/cscercel/behold-dnd/internal/db"
-	"github.com/cscercel/behold-dnd/internal/middleware"
+	"github.com/cscercel/behold-dnd/internal/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
+
+type CharacterHandler struct {
+	service          *service.CharacterService
+	inventoryHandler *InventoryHandler
+	spellHandler     *SpellHandler
+}
+
+func NewCharacterHandler(
+	service *service.CharacterService,
+	inventoryHandler *InventoryHandler,
+	spellHandler *SpellHandler,
+) *CharacterHandler {
+	return &CharacterHandler{
+		service:          service,
+		inventoryHandler: inventoryHandler,
+		spellHandler:     spellHandler,
+	}
+}
+
+func (h *CharacterHandler) RegisterRoutes(r chi.Router, authMiddleware, dmOnlyMiddleware func(http.Handler) http.Handler) {
+	r.Route("/characters", func(r chi.Router) {
+		r.Use(authMiddleware)
+
+		r.Get("/", h.handleListCharacters)
+		r.Post("/", h.handleCreateCharacter)
+
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", h.handleGetCharacter)
+			r.Delete("/", h.handleDeleteCharacter)
+			r.Patch("/info", h.handleUpdateCharacterInfo)
+			r.Patch("/ability-scores", h.handleUpdateCharacterAbilityScores)
+			r.Patch("/skills", h.handleUpdateCharacterSkills)
+			r.Patch("/level", h.handleUpdateCharacterLevel)
+			r.Patch("/training", h.handleUpdateCharacterTraining)
+			r.Patch("/currency", h.handleUpdateCharacterCurrency)
+
+			// Game mechanics
+			r.Post("/damage", h.handleDamage)
+			r.Post("/heal", h.handleHeal)
+			r.Post("/temp-hp", h.handleTempHP)
+			r.Post("/death-save", h.handleDeathSave)
+			r.Post("/long-rest", h.handleLongRest)
+			r.Post("/short-rest", h.handleShortRest)
+			r.Put("/conditions", h.handleUpdateConditions)
+
+			r.Route("/inventory", h.inventoryHandler.RegisterRoutes)
+			r.Route("/spells", h.spellHandler.RegisterSpellRoutes)
+			r.Route("/spell-slots", h.spellHandler.RegisterSlotRoutes)
+		})
+	})
+
+	// DM only routes
+	r.Group(func(r chi.Router) {
+		r.Use(authMiddleware, dmOnlyMiddleware)
+		r.Get("/players", h.handleListPlayerCharacters)
+		r.Get("/npcs", h.handleListNPCs)
+	})
+}
 
 // @Summary      List all characters
 // @Tags         characters
@@ -18,24 +76,21 @@ import (
 // @Success      200  {array}   db.Character
 // @Failure      401  {object}  object{error=string}
 // @Router       /characters [get]
-func (a *API) handleListCharacters(w http.ResponseWriter, r *http.Request) {
-	role, _ := middleware.RoleFromContext(r.Context())
-	userID, _ := middleware.UserIDFromContext(r.Context())
+func (h *CharacterHandler) handleListCharacters(w http.ResponseWriter, r *http.Request) {
+	role, _ := RoleFromContext(r.Context())
+	userID, _ := UserIDFromContext(r.Context())
 
 	if role == "dm" {
-		// DM should see all characters
-		characters, err := a.queries.ListCharacters(r.Context())
+		characters, err := h.service.ListCharacters(r.Context())
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "failed to list characters", err)
 			return
 		}
-
 		respondWithJSON(w, http.StatusOK, characters)
 		return
 	}
 
-	// Players only see their own characters
-	characters, err := a.queries.ListUserCharacters(r.Context(), userID)
+	characters, err := h.service.ListUserCharacters(r.Context(), userID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to list characters", err)
 		return
@@ -53,13 +108,12 @@ func (a *API) handleListCharacters(w http.ResponseWriter, r *http.Request) {
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/players [get]
-func (a *API) handleListPlayerCharacters(w http.ResponseWriter, r *http.Request) {
-	characters, err := a.queries.ListPlayerCharacters(r.Context())
+func (h *CharacterHandler) handleListPlayerCharacters(w http.ResponseWriter, r *http.Request) {
+	characters, err := h.service.ListPlayerCharacters(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to list player characters", err)
 		return
 	}
-
 	respondWithJSON(w, http.StatusOK, characters)
 }
 
@@ -72,13 +126,12 @@ func (a *API) handleListPlayerCharacters(w http.ResponseWriter, r *http.Request)
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/npcs [get]
-func (a *API) handleListNPCs(w http.ResponseWriter, r *http.Request) {
-	characters, err := a.queries.ListNPCs(r.Context())
+func (h *CharacterHandler) handleListNPCs(w http.ResponseWriter, r *http.Request) {
+	characters, err := h.service.ListNPCs(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to list NPCs", err)
 		return
 	}
-
 	respondWithJSON(w, http.StatusOK, characters)
 }
 
@@ -92,15 +145,14 @@ func (a *API) handleListNPCs(w http.ResponseWriter, r *http.Request) {
 // @Failure      403  {object}  object{error=string}
 // @Failure      404  {object}  object{error=string}
 // @Router       /characters/{id} [get]
-func (a *API) handleGetCharacter(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleGetCharacter(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
-
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	character, err := a.requireCharacterAccess(r, id)
+	character, err := h.requireCharacterAccess(r, id)
 	if err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
@@ -119,7 +171,7 @@ func (a *API) handleGetCharacter(w http.ResponseWriter, r *http.Request) {
 // @Failure      400  {object}  object{error=string}
 // @Failure      401  {object}  object{error=string}
 // @Router       /characters [post]
-func (a *API) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 	var params db.CreateCharacterParams
 
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
@@ -127,7 +179,7 @@ func (a *API) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	character, err := a.queries.CreateCharacter(r.Context(), params)
+	character, err := h.service.CreateCharacter(r.Context(), params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to create character", err)
 		return
@@ -150,14 +202,14 @@ func (a *API) handleCreateCharacter(w http.ResponseWriter, r *http.Request) {
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/info [patch]
-func (a *API) handleUpdateCharacterInfo(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleUpdateCharacterInfo(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -167,10 +219,9 @@ func (a *API) handleUpdateCharacterInfo(w http.ResponseWriter, r *http.Request) 
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
 	params.ID = id
 
-	character, err := a.queries.UpdateCharacterInfo(r.Context(), params)
+	character, err := h.service.UpdateCharacterInfo(r.Context(), params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to update character", err)
 		return
@@ -193,14 +244,14 @@ func (a *API) handleUpdateCharacterInfo(w http.ResponseWriter, r *http.Request) 
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/ability-scores [patch]
-func (a *API) handleUpdateCharacterAbilityScores(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleUpdateCharacterAbilityScores(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -210,10 +261,9 @@ func (a *API) handleUpdateCharacterAbilityScores(w http.ResponseWriter, r *http.
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
 	params.ID = id
 
-	character, err := a.queries.UpdateCharacterAbilityScores(r.Context(), params)
+	character, err := h.service.UpdateCharacterAbilityScores(r.Context(), params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to update character", err)
 		return
@@ -236,14 +286,14 @@ func (a *API) handleUpdateCharacterAbilityScores(w http.ResponseWriter, r *http.
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/skills [patch]
-func (a *API) handleUpdateCharacterSkills(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleUpdateCharacterSkills(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -253,10 +303,9 @@ func (a *API) handleUpdateCharacterSkills(w http.ResponseWriter, r *http.Request
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
 	params.ID = id
 
-	character, err := a.queries.UpdateCharacterSkills(r.Context(), params)
+	character, err := h.service.UpdateCharacterSkills(r.Context(), params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to update character", err)
 		return
@@ -279,14 +328,14 @@ func (a *API) handleUpdateCharacterSkills(w http.ResponseWriter, r *http.Request
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/level [patch]
-func (a *API) handleUpdateCharacterLevel(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleUpdateCharacterLevel(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -296,10 +345,9 @@ func (a *API) handleUpdateCharacterLevel(w http.ResponseWriter, r *http.Request)
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
 	params.ID = id
 
-	character, err := a.queries.UpdateCharacterLevel(r.Context(), params)
+	character, err := h.service.UpdateCharacterLevel(r.Context(), params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to update character", err)
 		return
@@ -322,14 +370,14 @@ func (a *API) handleUpdateCharacterLevel(w http.ResponseWriter, r *http.Request)
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/training [patch]
-func (a *API) handleUpdateCharacterTraining(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleUpdateCharacterTraining(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -339,10 +387,9 @@ func (a *API) handleUpdateCharacterTraining(w http.ResponseWriter, r *http.Reque
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
 	params.ID = id
 
-	character, err := a.queries.UpdateCharacterTraining(r.Context(), params)
+	character, err := h.service.UpdateCharacterTraining(r.Context(), params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to update character", err)
 		return
@@ -364,15 +411,15 @@ func (a *API) handleUpdateCharacterTraining(w http.ResponseWriter, r *http.Reque
 // @Failure      403  {object}  object{error=string}
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
-// @Router       /characters/{id}/skills [patch]
-func (a *API) handleUpdateCharacterCurrency(w http.ResponseWriter, r *http.Request) {
+// @Router       /characters/{id}/currency [patch]
+func (h *CharacterHandler) handleUpdateCharacterCurrency(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -382,10 +429,9 @@ func (a *API) handleUpdateCharacterCurrency(w http.ResponseWriter, r *http.Reque
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
 	params.ID = id
 
-	character, err := a.queries.UpdateCharacterCurrency(r.Context(), params)
+	character, err := h.service.UpdateCharacterCurrency(r.Context(), params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to update character", err)
 		return
@@ -406,24 +452,24 @@ func (a *API) handleUpdateCharacterCurrency(w http.ResponseWriter, r *http.Reque
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id} [delete]
-func (a *API) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
 
-	if err := a.queries.DeleteCharacter(r.Context(), id); err != nil {
+	if err := h.service.DeleteCharacter(r.Context(), id); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to delete character", err)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	respondWithJSON(w, http.StatusNoContent, "")
 }
 
 // @Summary      Deal damage to a character
@@ -440,14 +486,14 @@ func (a *API) handleDeleteCharacter(w http.ResponseWriter, r *http.Request) {
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/damage [post]
-func (a *API) handleDamage(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleDamage(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -455,13 +501,12 @@ func (a *API) handleDamage(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Amount int `json:"amount"`
 	}
-
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
 		respondWithError(w, http.StatusBadRequest, "amount must be a positive number", err)
 		return
 	}
 
-	character, err := a.characterService.ApplyDamage(r.Context(), id, body.Amount)
+	character, err := h.service.ApplyDamage(r.Context(), id, body.Amount)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to apply damage", err)
 		return
@@ -484,14 +529,14 @@ func (a *API) handleDamage(w http.ResponseWriter, r *http.Request) {
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/heal [post]
-func (a *API) handleHeal(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleHeal(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -499,13 +544,12 @@ func (a *API) handleHeal(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Amount int `json:"amount"`
 	}
-
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
 		respondWithError(w, http.StatusBadRequest, "amount must be a positive number", err)
 		return
 	}
 
-	character, err := a.characterService.Heal(r.Context(), id, body.Amount)
+	character, err := h.service.Heal(r.Context(), id, body.Amount)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to heal character", err)
 		return
@@ -528,14 +572,14 @@ func (a *API) handleHeal(w http.ResponseWriter, r *http.Request) {
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/temp-hp [post]
-func (a *API) handleTempHP(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleTempHP(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -543,13 +587,12 @@ func (a *API) handleTempHP(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Amount int `json:"amount"`
 	}
-
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Amount <= 0 {
 		respondWithError(w, http.StatusBadRequest, "amount must be a positive number", err)
 		return
 	}
 
-	character, err := a.characterService.AddTempHP(r.Context(), id, body.Amount)
+	character, err := h.service.AddTempHP(r.Context(), id, body.Amount)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to add temp HP", err)
 		return
@@ -572,14 +615,14 @@ func (a *API) handleTempHP(w http.ResponseWriter, r *http.Request) {
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/death-save [post]
-func (a *API) handleDeathSave(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleDeathSave(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -587,13 +630,12 @@ func (a *API) handleDeathSave(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Success bool `json:"success"`
 	}
-
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		respondWithError(w, http.StatusBadRequest, "amount must be a positive number", err)
+		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
-	character, err := a.characterService.RecordDeathSave(r.Context(), id, body.Success)
+	character, err := h.service.RecordDeathSave(r.Context(), id, body.Success)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to record death save", err)
 		return
@@ -614,27 +656,21 @@ func (a *API) handleDeathSave(w http.ResponseWriter, r *http.Request) {
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/long-rest [post]
-func (a *API) handleLongRest(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleLongRest(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
 
-	character, err := a.queries.LongRest(r.Context(), id)
+	character, err := h.service.LongRest(r.Context(), id)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to apply long rest", err)
-		return
-	}
-
-	// Reset spell slots
-	if err := a.spellService.LongRestSlots(r.Context(), id); err != nil {
-		respondWithError(w, http.StatusInternalServerError, "failed to reset spell slots", err)
 		return
 	}
 
@@ -647,7 +683,7 @@ func (a *API) handleLongRest(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path      string                                        true  "Character ID"
-// @Param        body body      object{hit_dice_used=int,hp_regained=int}     true  "Short rest details"
+// @Param        body body      object{hit_dice_remaining=int,current_hp=int} true  "Short rest details"
 // @Success      200  {object}  db.Character
 // @Failure      400  {object}  object{error=string}
 // @Failure      401  {object}  object{error=string}
@@ -655,14 +691,14 @@ func (a *API) handleLongRest(w http.ResponseWriter, r *http.Request) {
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/short-rest [post]
-func (a *API) handleShortRest(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleShortRest(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -671,19 +707,14 @@ func (a *API) handleShortRest(w http.ResponseWriter, r *http.Request) {
 		HitDiceRemaining int `json:"hit_dice_remaining"`
 		CurrentHp        int `json:"current_hp"`
 	}
-
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
-	character, err := a.queries.ShortRest(r.Context(), db.ShortRestParams{
-		ID:               id,
-		HitDiceRemaining: int32(body.HitDiceRemaining),
-		CurrentHp:        int32(body.CurrentHp),
-	})
+	character, err := h.service.ShortRest(r.Context(), id, body.HitDiceRemaining, body.CurrentHp)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "failed to apply long rest", err)
+		respondWithError(w, http.StatusInternalServerError, "failed to apply short rest", err)
 		return
 	}
 
@@ -704,14 +735,14 @@ func (a *API) handleShortRest(w http.ResponseWriter, r *http.Request) {
 // @Failure      404  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/conditions [put]
-func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
+func (h *CharacterHandler) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	if _, err := a.requireCharacterAccess(r, id); err != nil {
+	if _, err := h.requireCharacterAccess(r, id); err != nil {
 		respondWithError(w, http.StatusForbidden, "you do not own this character", err)
 		return
 	}
@@ -719,16 +750,12 @@ func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Conditions []string `json:"conditions"`
 	}
-
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
 
-	character, err := a.queries.UpdateConditions(r.Context(), db.UpdateConditionsParams{
-		ID:         id,
-		Conditions: body.Conditions,
-	})
+	character, err := h.service.UpdateConditions(r.Context(), id, body.Conditions)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to update conditions", err)
 		return
@@ -737,19 +764,19 @@ func (a *API) handleUpdateConditions(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, character)
 }
 
-// Function to authenticate character ownership
-func (a *API) requireCharacterAccess(r *http.Request, characterID uuid.UUID) (db.GetCharacterRow, error) {
-	character, err := a.queries.GetCharacter(r.Context(), characterID)
+// requireCharacterAccess checks the requester either is the DM or owns the character.
+func (h *CharacterHandler) requireCharacterAccess(r *http.Request, characterID uuid.UUID) (db.GetCharacterRow, error) {
+	character, err := h.service.GetCharacter(r.Context(), characterID)
 	if err != nil {
 		return db.GetCharacterRow{}, fmt.Errorf("not found")
 	}
 
-	role, _ := middleware.RoleFromContext(r.Context())
+	role, _ := RoleFromContext(r.Context())
 	if role == "dm" {
 		return character, nil
 	}
 
-	userID, _ := middleware.UserIDFromContext(r.Context())
+	userID, _ := UserIDFromContext(r.Context())
 	if character.OwnerID != userID {
 		return db.GetCharacterRow{}, fmt.Errorf("forbidden")
 	}

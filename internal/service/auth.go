@@ -116,3 +116,7 @@ func (s *AuthService) generateToken(user db.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(s.jwtSecret)
 }
+
+func (s *AuthService) GetUserByID(ctx context.Context, id uuid.UUID) (db.User, error) {
+	return s.queries.GetUserByID(ctx, id)
+}

@@ -1,13 +1,38 @@
-package api
+package handler
 
 import (
 	"encoding/json"
 	"net/http"
 
 	"github.com/cscercel/behold-dnd/internal/db"
+	"github.com/cscercel/behold-dnd/internal/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
+
+type SpellHandler struct {
+	service *service.SpellService
+}
+
+func NewSpellHandler(service *service.SpellService) *SpellHandler {
+	return &SpellHandler{service: service}
+}
+
+// RegisterSpellRoutes mounts spell routes. Call within a router scoped to /characters/{id}/spells.
+func (h *SpellHandler) RegisterSpellRoutes(r chi.Router) {
+	r.Get("/", h.handleListSpells)
+	r.Post("/", h.handleCreateSpell)
+	r.Patch("/{spellID}", h.handleUpdateSpell)
+	r.Delete("/{spellID}", h.handleDeleteSpell)
+	r.Post("/{spellID}/toggle-prepared", h.handleToggleSpellPrepared)
+}
+
+// RegisterSlotRoutes mounts spell slot routes. Call within a router scoped to /characters/{id}/spell-slots.
+func (h *SpellHandler) RegisterSlotRoutes(r chi.Router) {
+	r.Get("/", h.handleListSpellSlots)
+	r.Put("/", h.handleUpsertSpellSlot)
+	r.Post("/use", h.handleUseSpellSlot)
+}
 
 // @Summary      List spells for a character
 // @Tags         spells
@@ -20,14 +45,14 @@ import (
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/spells [get]
-func (a *API) handleListSpells(w http.ResponseWriter, r *http.Request) {
+func (h *SpellHandler) handleListSpells(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	spells, err := a.queries.ListSpells(r.Context(), characterID)
+	spells, err := h.service.ListSpells(r.Context(), characterID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to list spells", err)
 		return
@@ -49,7 +74,7 @@ func (a *API) handleListSpells(w http.ResponseWriter, r *http.Request) {
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/spells [post]
-func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
+func (h *SpellHandler) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
@@ -61,11 +86,9 @@ func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
-	// Assign spell to character
 	params.CharacterID = characterID
 
-	spell, err := a.queries.CreateSpell(r.Context(), params)
+	spell, err := h.service.CreateSpell(r.Context(), params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to create spell", err)
 		return
@@ -88,7 +111,7 @@ func (a *API) handleCreateSpell(w http.ResponseWriter, r *http.Request) {
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/spells/{spellID} [patch]
-func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
+func (h *SpellHandler) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid spell id", err)
@@ -100,12 +123,11 @@ func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
 	params.ID = spellID
 
-	spell, err := a.queries.UpdateSpell(r.Context(), params)
+	spell, err := h.service.UpdateSpell(r.Context(), params)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "failed to update inventory", err)
+		respondWithError(w, http.StatusInternalServerError, "failed to update spell", err)
 		return
 	}
 
@@ -124,19 +146,19 @@ func (a *API) handleUpdateSpell(w http.ResponseWriter, r *http.Request) {
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/spells/{spellID} [delete]
-func (a *API) handleDeleteSpell(w http.ResponseWriter, r *http.Request) {
+func (h *SpellHandler) handleDeleteSpell(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "invalid spell item", err)
+		respondWithError(w, http.StatusBadRequest, "invalid spell id", err)
 		return
 	}
 
-	if err := a.queries.DeleteSpell(r.Context(), spellID); err != nil {
+	if err := h.service.DeleteSpell(r.Context(), spellID); err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to delete spell", err)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	respondWithJSON(w, http.StatusNoContent, "")
 }
 
 // @Summary      Toggle a spell's prepared status
@@ -148,17 +170,16 @@ func (a *API) handleDeleteSpell(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object}  db.Spell
 // @Failure      400  {object}  object{error=string}
 // @Failure      401  {object}  object{error=string}
-// @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/spells/{spellID}/toggle-prepared [post]
-func (a *API) handleToggleSpellPrepared(w http.ResponseWriter, r *http.Request) {
+func (h *SpellHandler) handleToggleSpellPrepared(w http.ResponseWriter, r *http.Request) {
 	spellID, err := uuid.Parse(chi.URLParam(r, "spellID"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid spell id", err)
 		return
 	}
 
-	spell, err := a.queries.ToggleSpellPrepared(r.Context(), spellID)
+	spell, err := h.service.ToggleSpellPrepared(r.Context(), spellID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to toggle spell preparation", err)
 		return
@@ -178,14 +199,14 @@ func (a *API) handleToggleSpellPrepared(w http.ResponseWriter, r *http.Request) 
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/spell-slots [get]
-func (a *API) handleListSpellSlots(w http.ResponseWriter, r *http.Request) {
+func (h *SpellHandler) handleListSpellSlots(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
 		return
 	}
 
-	slots, err := a.queries.ListSpellSlots(r.Context(), characterID)
+	slots, err := h.service.ListSpellSlots(r.Context(), characterID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to list spell slots", err)
 		return
@@ -207,7 +228,7 @@ func (a *API) handleListSpellSlots(w http.ResponseWriter, r *http.Request) {
 // @Failure      403  {object}  object{error=string}
 // @Failure      500  {object}  object{error=string}
 // @Router       /characters/{id}/spell-slots [put]
-func (a *API) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
+func (h *SpellHandler) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
@@ -219,12 +240,11 @@ func (a *API) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
 	params.CharacterID = characterID
 
-	slot, err := a.queries.UpsertSpellSlot(r.Context(), params)
+	slot, err := h.service.UpsertSpellSlot(r.Context(), params)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "failed to upsert spell slots", err)
+		respondWithError(w, http.StatusInternalServerError, "failed to upsert spell slot", err)
 		return
 	}
 
@@ -243,7 +263,7 @@ func (a *API) handleUpsertSpellSlot(w http.ResponseWriter, r *http.Request) {
 // @Failure      401  {object}  object{error=string}
 // @Failure      403  {object}  object{error=string}
 // @Router       /characters/{id}/spell-slots/use [post]
-func (a *API) handleUseSpellSlot(w http.ResponseWriter, r *http.Request) {
+func (h *SpellHandler) handleUseSpellSlot(w http.ResponseWriter, r *http.Request) {
 	characterID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
@@ -251,15 +271,13 @@ func (a *API) handleUseSpellSlot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var params db.UseSpellSlotParams
-
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
 	}
-
 	params.CharacterID = characterID
 
-	slot, err := a.queries.UseSpellSlot(r.Context(), params)
+	slot, err := h.service.UseSpellSlot(r.Context(), params)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "failed to use spell slot", err)
 		return

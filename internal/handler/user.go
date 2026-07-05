@@ -1,12 +1,30 @@
-package api
+package handler
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"github.com/cscercel/behold-dnd/internal/middleware"
+	"github.com/cscercel/behold-dnd/internal/service"
+	"github.com/go-chi/chi/v5"
 )
+
+type UserHandler struct {
+	service *service.AuthService
+}
+
+func NewUserHandler(service *service.AuthService) *UserHandler {
+	return &UserHandler{service: service}
+}
+
+func (h *UserHandler) RegisterPublicRoutes(r chi.Router) {
+	r.Post("/auth/register", h.handleRegister)
+	r.Post("/auth/login", h.handleLogin)
+}
+
+func (h *UserHandler) RegisterProtectedRoutes(r chi.Router) {
+	r.Get("/auth/me", h.handleMe)
+}
 
 // @Summary      Register a new user
 // @Tags         auth
@@ -17,7 +35,7 @@ import (
 // @Failure      400  {object}  object{error=string}
 // @Failure      401  {object}  object{error=string}
 // @Router       /auth/register [post]
-func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Username         string `json:"username"`
 		Email            string `json:"email"`
@@ -35,9 +53,9 @@ func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.authService.Register(r.Context(), body.Username, body.Email, body.Password, body.Role, body.RegistrationCode)
+	user, err := h.service.Register(r.Context(), body.Username, body.Email, body.Password, body.Role, body.RegistrationCode)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "failed to register", err)
+		respondWithError(w, http.StatusBadRequest, "failed to get user", err)
 		return
 	}
 
@@ -58,7 +76,7 @@ func (a *API) handleRegister(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object}  object{token=string}
 // @Failure      401  {object}  object{error=string}
 // @Router       /auth/login [post]
-func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -68,9 +86,9 @@ func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, user, err := a.authService.Login(r.Context(), body.Email, body.Password)
+	token, user, err := h.service.Login(r.Context(), body.Email, body.Password)
 	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "failed to login", err)
+		respondWithError(w, http.StatusUnauthorized, "failed to login user", err)
 		return
 	}
 
@@ -92,14 +110,14 @@ func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object}  object{id=string,username=string,email=string,role=string}
 // @Failure      401  {object}  object{error=string}
 // @Router       /auth/me [get]
-func (a *API) handleMe(w http.ResponseWriter, r *http.Request) {
-	userID, ok := middleware.UserIDFromContext(r.Context())
+func (h *UserHandler) handleMe(w http.ResponseWriter, r *http.Request) {
+	userID, ok := UserIDFromContext(r.Context())
 	if !ok {
 		respondWithError(w, http.StatusUnauthorized, "not authenticated", fmt.Errorf(""))
 		return
 	}
 
-	user, err := a.queries.GetUserByID(r.Context(), userID)
+	user, err := h.service.GetUserByID(r.Context(), userID)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "user not found", err)
 		return
