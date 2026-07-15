@@ -132,14 +132,26 @@
     notesSaved = true; setTimeout(() => notesSaved=false, 2000); await reload();
   }
 
-  $derived: var profBonus = char ? pb(char.level) : 2;
-  $derived: var hpPct     = char ? Math.max(0, Math.min(100, (char.current_hp / char.max_hp) * 100)) : 0;
-  $derived: var hpColor   = hpPct > 50 ? '#27ae60' : hpPct > 25 ? '#f39c12' : '#c0392b';
-  $derived: var byLevel   = Array.from({length:10}, (_,i) => ({
+  let profBonus = $derived(char ? pb(char.level) : 2);
+  let hpPct     = $derived(char ? Math.max(0, Math.min(100, (char.current_hp / char.max_hp) * 100)) : 0);
+  let hpColor   = $derived(hpPct > 50 ? '#27ae60' : hpPct > 25 ? '#f39c12' : '#c0392b');
+  let byLevel   = $derived(Array.from({length:10}, (_,i) => ({
     level: i,
     spells: spells.filter((s:any) => s.level === i),
     slot: i > 0 ? slots.find((s:any) => s.spell_level === i) : undefined,
-  })).filter(g => g.spells.length > 0 || (g.slot && g.slot.total > 0));
+  })).filter(g => g.spells.length > 0 || (g.slot && g.slot.total > 0)));
+
+  const invTotalWeight = $derived(inventory.reduce((s:number,i:any) => s+i.weight*i.quantity, 0));
+  const invTotalValue  = $derived(inventory.reduce((s:number,i:any) => s+i.value*i.quantity, 0));
+
+  const spellAbMod  = $derived(char && char.spellcasting_ability && char.spellcasting_ability !== 'none' ? mod(char[char.spellcasting_ability]) : 0);
+  const spellSaveDC = $derived(8 + profBonus + spellAbMod);
+  const spellAtkMod = $derived(profBonus + spellAbMod);
+
+  async function toggleInspiration() {
+    await api.updateCharacterInfo(id, { ...editInfo, inspiration: !char.inspiration });
+    await reload();
+  }
 </script>
 
 {#if loading}
@@ -159,7 +171,9 @@
       <p class="char-meta">Level {char.level} {char.race} {char.class} · {char.background} · {char.alignment}</p>
     </div>
     <div class="header-badges">
-      {#if char.inspiration}<span class="badge gold">✦ Inspired</span>{/if}
+      <button class="badge insp-toggle" class:gold={char.inspiration} onclick={toggleInspiration} title="Toggle inspiration">
+        ✦ {char.inspiration ? 'Inspired' : 'Inspiration'}
+      </button>
       {#if char.is_npc}<span class="badge crimson">NPC</span>{/if}
       <span class="badge">{char.xp?.toLocaleString()} XP</span>
       <button class="edit-btn" class:active={editing} onclick={() => editing = !editing}>
@@ -438,18 +452,6 @@
             </div>
           </div>
 
-          <div class="panel">
-            <h3 class="panel-title">Currency</h3>
-            <div class="currency-row">
-              {#each [['CP',char.copper,'#b5651d'],['SP',char.silver,'#c0c0c0'],['EP',char.electrum,'#b8b8ff'],['GP',char.gold,'#ffd700'],['PP',char.platinum,'#e5e4e2']] as [l,v,color]}
-                <div class="coin">
-                  <div class="coin-circle" style="border-color:{color};color:{color}">{l}</div>
-                  <div class="coin-val">{v}</div>
-                </div>
-              {/each}
-            </div>
-          </div>
-
           <div class="panel panel-full">
             <h3 class="panel-title">Character Traits</h3>
             <div class="traits-grid">
@@ -478,9 +480,22 @@
 
     {:else if tab === 'inventory'}
       <div class="tab-content">
+        <div class="panel currency-panel">
+          <h3 class="panel-title">Currency</h3>
+          <div class="currency-row">
+            {#each [['CP',char.copper,'#b5651d'],['SP',char.silver,'#c0c0c0'],['EP',char.electrum,'#b8b8ff'],['GP',char.gold,'#ffd700'],['PP',char.platinum,'#e5e4e2']] as [l,v,color]}
+              <div class="coin">
+                <div class="coin-circle" style="border-color:{color};color:{color}">{l}</div>
+                <div class="coin-val">{v}</div>
+              </div>
+            {/each}
+          </div>
+        </div>
+
         <div class="tab-header">
           <div class="tab-meta">
-            <span>{inventory.reduce((s:number,i:any) => s+i.weight*i.quantity, 0)} lbs</span>
+            <span>{invTotalWeight} lbs</span>
+            <span>{invTotalValue} gp total</span>
             <span>{inventory.filter((i:any) => i.is_attuned).length}/{char.attunement_slots} attuned</span>
           </div>
           <button class="add-btn" onclick={() => showAddItem=true}><Icon name="plus" size={14}/> Add Item</button>
@@ -515,8 +530,9 @@
                 {#if item.description}<div class="item-desc">{item.description}</div>{/if}
                 <div class="item-meta">
                   <span>Qty: {item.quantity}</span>
-                  {#if item.weight>0}<span>{item.weight}lb</span>{/if}
-                  {#if item.value>0}<span>{item.value}gp</span>{/if}
+                  <span>{item.weight}lb ea{#if item.quantity>1} · {item.weight*item.quantity}lb total{/if}</span>
+                  <span>{item.value}gp ea{#if item.quantity>1} · {item.value*item.quantity}gp total{/if}</span>
+                  {#if item.requires_attunement && !item.is_attuned}<span>Requires Attunement</span>{/if}
                 </div>
               </div>
               <div class="item-actions">
@@ -542,6 +558,17 @@
 
     {:else if tab === 'spells'}
       <div class="tab-content">
+        {#if char.spellcasting_ability && char.spellcasting_ability !== 'none'}
+          <div class="panel spellcasting-panel">
+            <h3 class="panel-title">{char.class} Spellcasting</h3>
+            <div class="sc-stats">
+              <div class="sc-stat"><div class="sc-val">{char.spellcasting_ability.slice(0,3).toUpperCase()}</div><div class="sc-label">Ability</div></div>
+              <div class="sc-stat"><div class="sc-val">{spellSaveDC}</div><div class="sc-label">Save DC</div></div>
+              <div class="sc-stat"><div class="sc-val">{fmt(spellAtkMod)}</div><div class="sc-label">Attack Mod</div></div>
+              <div class="sc-stat"><div class="sc-val">{fmt(profBonus)}</div><div class="sc-label">Prof Bonus</div></div>
+            </div>
+          </div>
+        {/if}
         <div class="tab-header">
           <div class="tab-meta"><span>{spells.filter((s:any) => s.is_prepared).length} prepared</span></div>
           <button class="add-btn" onclick={() => showAddSpell=true}><Icon name="plus" size={14}/> Add Spell</button>
@@ -599,7 +626,8 @@
                 </button>
                 <div class="spell-main">
                   <div class="spell-name">{spell.name}</div>
-                  <div class="spell-meta">{spell.school} · {spell.casting_time} · {spell.range}</div>
+                  <div class="spell-meta">{spell.school} · {spell.casting_time} · {spell.range} · {spell.duration}</div>
+                  {#if spell.components}<div class="spell-meta">{spell.components}</div>{/if}
                   {#if spell.description}<div class="spell-desc">{spell.description}</div>{/if}
                 </div>
                 <button class="item-btn-danger" onclick={() => api.deleteSpell(id, spell.id).then(reload)}>
@@ -638,6 +666,9 @@
 .header-badges { display:flex;gap:8px;flex-wrap:wrap;align-items:center; }
 .badge { font-size:11px;padding:3px 8px;border-radius:12px;background:var(--stone-mid);color:var(--ash-light); }
 .badge.gold { background:rgba(201,168,76,.2);color:var(--gold); }
+.insp-toggle { appearance:none;-webkit-appearance:none;font:inherit;line-height:inherit;border:1px solid var(--stone-border);cursor:pointer;transition:all var(--transition); }
+.insp-toggle:hover { border-color:var(--gold-dim);color:var(--parchment); }
+.insp-toggle.gold { border-color:rgba(201,168,76,.4); }
 .badge.crimson { background:rgba(139,26,26,.2);color:var(--crimson-light); }
 .edit-btn { display:flex;align-items:center;gap:6px;background:var(--stone);border:1px solid var(--stone-border);color:var(--ash-light);padding:7px 14px;border-radius:var(--radius);font-size:13px;font-weight:500;transition:all var(--transition); }
 .edit-btn:hover { border-color:var(--gold-dim);color:var(--parchment); }
@@ -735,6 +766,7 @@
 .skill-edit-select { width:auto;padding:4px 6px;font-size:12px; }
 .currency-edit-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:10px; }
 .tab-content { }
+.currency-panel { margin-bottom:20px; }
 .tab-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px; }
 .tab-meta { display:flex;gap:16px;font-size:13px;color:var(--ash); }
 .add-btn { display:flex;align-items:center;gap:6px;background:var(--stone);border:1px solid var(--stone-border);color:var(--ash-light);padding:8px 14px;border-radius:var(--radius);font-size:13px;transition:all var(--transition); }
@@ -761,6 +793,11 @@
 .item-btn:hover { border-color:var(--gold-dim);color:var(--gold); }
 .item-btn-danger { background:none;border:none;color:var(--stone-border);padding:5px;transition:color var(--transition); }
 .item-btn-danger:hover { color:var(--crimson-light); }
+.spellcasting-panel { margin-bottom:20px; }
+.sc-stats { display:flex;gap:24px;flex-wrap:wrap; }
+.sc-stat { text-align:center; }
+.sc-val { font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--gold); }
+.sc-label { font-size:10px;color:var(--ash);letter-spacing:.08em;text-transform:uppercase;margin-top:2px; }
 .spell-group { margin-bottom:20px; }
 .spell-group-header { display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--stone-border);margin-bottom:8px;font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--gold);letter-spacing:.06em; }
 .slot-track { display:flex;align-items:center;gap:4px; }

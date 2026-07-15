@@ -14,6 +14,7 @@ type Config struct {
 	JWTSecret        string
 	JWTExpiryHours   int
 	RegistrationCode string
+	FrontendURL	     string
 }
 
 func Load() (*Config, error) {
@@ -32,6 +33,7 @@ func Load() (*Config, error) {
 		JWTSecret:        os.Getenv("JWT_SECRET"),
 		JWTExpiryHours:   expiryHours,
 		RegistrationCode: os.Getenv("REGISTRATION_CODE"),
+		FrontendURL:      os.Getenv("FRONTEND_URL"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -45,6 +47,9 @@ func Load() (*Config, error) {
 	}
 	if cfg.RegistrationCode == "" {
 		return nil, fmt.Errorf("REGISTRATION_CODE is required")
+	}
+	if cfg.FrontendURL == "" {
+		return nil, fmt.Errorf("FrontendURL is required")
 	}
 
 	return cfg, nil

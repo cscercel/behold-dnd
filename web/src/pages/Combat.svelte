@@ -59,8 +59,8 @@
     else   partForm = { ...partForm, character_id:charId };
   }
 
-  $derived: var encId      = active?.id || selectedId;
-  $derived: var currentEnc = active || encounters.find((e:any) => e.id === selectedId);
+  let encId      = $derived(active?.id || selectedId);
+  let currentEnc = $derived(active || encounters.find((e:any) => e.id === selectedId));
 </script>
 
 {#if loading}

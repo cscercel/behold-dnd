@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 
 	"github.com/cscercel/behold-dnd/internal/config"
 	"github.com/cscercel/behold-dnd/internal/database"
@@ -66,6 +67,15 @@ func main() {
 
 	// Router
 	r := chi.NewRouter()
+
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{cfg.FrontendURL},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"*"},
+		ExposedHeaders: []string{"Link"},
+		AllowCredentials: false,
+		MaxAge: 300,
+	}))
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
