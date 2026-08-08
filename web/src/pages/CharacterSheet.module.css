@@ -1,0 +1,152 @@
+.page { min-height: 100vh; }
+.loading { display: flex; align-items: center; justify-content: center; height: 300px; color: var(--ash); }
+
+.sheetHeader { display: flex; align-items: center; gap: 20px; padding: 20px 32px; background: var(--stone); border-bottom: 1px solid var(--stone-border); flex-wrap: wrap; }
+.back { display: flex; align-items: center; gap: 4px; background: none; border: none; color: var(--ash); font-size: 13px; transition: color var(--transition); }
+.back:hover { color: var(--parchment); }
+.headerInfo { flex: 1; }
+.charName { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--parchment); }
+.charMeta { font-size: 13px; color: var(--ash); margin-top: 3px; }
+.headerBadges { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge { font-size: 11px; padding: 3px 8px; border-radius: 12px; background: var(--stone-mid); color: var(--ash-light); }
+
+.combatBar { padding: 20px 32px; background: var(--stone-mid); border-bottom: 1px solid var(--stone-border); display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+.hpSection { min-width: 220px; }
+.hpLabel { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: var(--ash); margin-bottom: 6px; }
+.hpTrack { height: 6px; background: var(--stone-border); border-radius: 3px; margin-bottom: 8px; overflow: hidden; }
+.hpBar { height: 100%; border-radius: 3px; transition: width 0.4s ease, background 0.4s ease; }
+.hpNumbers { display: flex; align-items: baseline; gap: 6px; margin-bottom: 12px; }
+.hpMax { color: var(--ash); font-size: 14px; }
+.tempHp { font-size: 13px; color: #3498db; }
+.hpControls { display: flex; flex-direction: column; gap: 6px; }
+.hpModeRow { display: flex; gap: 4px; }
+.hpModeBtn { background: var(--stone); border: 1px solid var(--stone-border); color: var(--ash); padding: 5px 10px; border-radius: var(--radius-sm); font-size: 11px; transition: all var(--transition); }
+.hpModeActive { background: var(--stone-light); border-color: var(--gold-dim); color: var(--parchment); }
+.hpInputRow { display: flex; gap: 6px; }
+.hpInput { width: 70px; text-align: center; padding: 6px 8px; }
+.hpApply { background: var(--crimson); border: none; color: var(--parchment); padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; transition: background var(--transition); }
+.hpApply:hover { background: var(--crimson-light); }
+
+.combatStats { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.combatStat { text-align: center; }
+.combatStatVal { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--parchment); }
+.combatStatLabel { font-size: 10px; color: var(--ash); letter-spacing: 0.08em; margin-top: 2px; }
+
+.restSection { display: flex; flex-direction: column; gap: 6px; }
+.restBtn { display: flex; align-items: center; gap: 6px; background: var(--stone); border: 1px solid var(--stone-border); color: var(--ash-light); padding: 8px 14px; border-radius: var(--radius); font-size: 12px; transition: all var(--transition); }
+.restBtn:hover { border-color: var(--gold-dim); color: var(--parchment); }
+
+.deathSaves { }
+.deathLabel { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--crimson-light); margin-bottom: 8px; }
+.deathRow { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.deathName { font-size: 11px; color: var(--ash); width: 70px; }
+.deathDot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--stone-border); background: transparent; transition: all var(--transition); }
+.deathSuccess { background: var(--emerald); border-color: var(--emerald); }
+.deathFailure { background: var(--crimson); border-color: var(--crimson); }
+
+.tabs { display: flex; gap: 2px; padding: 0 32px; background: var(--stone); border-bottom: 1px solid var(--stone-border); }
+.tabBtn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--ash); padding: 14px 18px; font-size: 13px; font-weight: 500; border-bottom: 2px solid transparent; transition: all var(--transition); }
+.tabBtn:hover { color: var(--parchment); }
+.tabActive { color: var(--gold); border-bottom-color: var(--gold); }
+
+.content { padding: 24px 32px; }
+
+.statsGrid { display: grid; grid-template-columns: auto 1fr 1fr; gap: 20px; }
+.panel { background: var(--stone); border: 1px solid var(--stone-border); border-radius: var(--radius-lg); padding: 20px; }
+.panelFull { grid-column: 1 / -1; }
+.panelTitle { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px; }
+
+.abilityGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.abilityBox { display: flex; flex-direction: column; align-items: center; background: var(--stone-mid); border: 1px solid var(--stone-border); border-radius: var(--radius); padding: 10px 8px; }
+.abilityName { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; color: var(--ash); margin-bottom: 4px; }
+.abilityScore { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--parchment); line-height: 1; }
+.abilityMod { font-size: 16px; font-weight: 600; color: var(--gold); }
+.saveBadge { font-size: 10px; color: var(--ash); margin-top: 4px; }
+.saveProf { color: var(--gold-dim); }
+
+.skillList { display: flex; flex-direction: column; gap: 3px; }
+.skillRow { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 3px; }
+.skillRow:hover { background: var(--stone-mid); }
+.skillDot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--stone-border); flex-shrink: 0; }
+.proficient { background: var(--gold-dim); border-color: var(--gold-dim); }
+.expert { background: var(--gold); border-color: var(--gold); }
+.skillName { flex: 1; font-size: 13px; color: var(--ash-light); }
+.skillMod { font-weight: 600; font-size: 13px; color: var(--parchment); width: 30px; text-align: right; }
+.skillAbility { font-size: 10px; color: var(--ash); width: 24px; text-align: center; }
+
+.conditionGrid { display: flex; flex-wrap: wrap; gap: 6px; }
+.conditionPill { background: var(--stone-mid); border: 1px solid var(--stone-border); color: var(--ash); padding: 5px 10px; border-radius: 12px; font-size: 12px; transition: all var(--transition); }
+.conditionPill:hover { border-color: var(--crimson); color: var(--parchment); }
+.condActive { background: rgba(139,26,26,0.2); border-color: var(--crimson); color: var(--crimson-light); }
+
+.currencyRow { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.coin { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.coinCircle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; }
+.coinVal { font-size: 15px; font-weight: 600; color: var(--parchment); }
+
+.traitsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.traitBox { background: var(--stone-mid); border-radius: var(--radius); padding: 14px; }
+.traitLabel { font-size: 10px; font-weight: 700; color: var(--gold-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+.traitText { font-family: var(--font-body); font-size: 15px; color: var(--parchment); line-height: 1.5; }
+
+.tabContent { }
+.tabHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.tabMeta { display: flex; gap: 16px; font-size: 13px; color: var(--ash); }
+.addBtn { display: flex; align-items: center; gap: 6px; background: var(--stone); border: 1px solid var(--stone-border); color: var(--ash-light); padding: 8px 14px; border-radius: var(--radius); font-size: 13px; transition: all var(--transition); }
+.addBtn:hover { border-color: var(--gold-dim); color: var(--parchment); }
+
+.addForm { background: var(--stone); border: 1px solid var(--stone-border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px; }
+.formRow { display: flex; gap: 12px; flex-wrap: wrap; }
+.formRow > * { flex: 1; min-width: 120px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 11px; color: var(--ash); text-transform: uppercase; letter-spacing: 0.05em; }
+.field textarea { resize: vertical; }
+.check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ash-light); cursor: pointer; }
+.check input { width: auto; }
+.modalActions { display: flex; justify-content: flex-end; gap: 8px; }
+.cancelBtn { background: var(--stone-mid); border: none; color: var(--ash-light); padding: 8px 16px; border-radius: var(--radius); font-size: 13px; }
+.submitBtn { background: var(--crimson); border: none; color: var(--parchment); padding: 8px 16px; border-radius: var(--radius); font-family: var(--font-display); font-size: 13px; font-weight: 600; }
+.submitBtn:hover { background: var(--crimson-light); }
+.emptyState { text-align: center; padding: 40px; color: var(--ash); font-size: 14px; }
+
+.itemList { display: flex; flex-direction: column; gap: 6px; }
+.itemRow { display: flex; align-items: center; gap: 12px; background: var(--stone); border: 1px solid var(--stone-border); border-radius: var(--radius); padding: 12px 16px; }
+.itemEquipped { border-color: var(--gold-dim); }
+.itemMain { flex: 1; }
+.itemName { font-size: 14px; font-weight: 500; color: var(--parchment); display: flex; align-items: center; gap: 8px; }
+.equippedTag { font-size: 10px; background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); padding: 1px 6px; border-radius: 3px; }
+.attunedTag { font-size: 10px; background: rgba(52,152,219,0.15); color: #3498db; border: 1px solid rgba(52,152,219,0.3); padding: 1px 6px; border-radius: 3px; }
+.itemDesc { font-size: 12px; color: var(--ash); margin-top: 3px; }
+.itemMeta { display: flex; gap: 10px; font-size: 11px; color: var(--ash); margin-top: 4px; }
+.itemActions { display: flex; gap: 6px; }
+.itemBtn { background: none; border: 1px solid var(--stone-border); color: var(--ash); padding: 5px 9px; border-radius: var(--radius-sm); font-size: 13px; transition: all var(--transition); }
+.itemBtn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.itemBtnDanger { background: none; border: none; color: var(--stone-border); padding: 5px; transition: color var(--transition); }
+.itemBtnDanger:hover { color: var(--crimson-light); }
+
+.spellGroup { margin-bottom: 20px; }
+.spellGroupHeader { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--stone-border); margin-bottom: 8px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--gold); letter-spacing: 0.06em; }
+.slotTrack { display: flex; align-items: center; gap: 4px; }
+.slotDot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--gold-dim); background: rgba(201,168,76,0.15); transition: all var(--transition); }
+.slotDot:hover { border-color: var(--gold); }
+.slotUsed { background: transparent; border-color: var(--stone-border); opacity: 0.4; }
+.slotLabel { font-size: 12px; color: var(--ash); margin-left: 6px; }
+.spellRow { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--radius); margin-bottom: 4px; background: var(--stone); border: 1px solid var(--stone-border); }
+.unprepared { opacity: 0.5; }
+.prepareBtn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--stone-border); background: transparent; display: flex; align-items: center; justify-content: center; color: transparent; transition: all var(--transition); flex-shrink: 0; margin-top: 2px; }
+.prepareBtn:hover { border-color: var(--gold-dim); }
+.prepared { background: var(--gold-dim); border-color: var(--gold); color: var(--ink); }
+.spellMain { flex: 1; }
+.spellName { font-size: 14px; font-weight: 500; color: var(--parchment); }
+.spellMeta { font-size: 12px; color: var(--ash); margin-top: 2px; }
+.spellDesc { font-family: var(--font-body); font-size: 14px; color: var(--ash-light); margin-top: 6px; line-height: 1.5; }
+
+.notesArea { width: 100%; min-height: 400px; background: var(--stone); border: 1px solid var(--stone-border); border-radius: var(--radius-lg); padding: 20px; font-family: var(--font-body); font-size: 16px; color: var(--parchment); line-height: 1.7; resize: vertical; }
+
+@media (max-width: 900px) {
+  .statsGrid { grid-template-columns: 1fr; }
+  .panelFull { grid-column: 1; }
+  .combatBar { gap: 20px; }
+  .content { padding: 16px; }
+  .sheetHeader { padding: 16px; }
+}

@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
 function token() { return localStorage.getItem('token'); }
 
@@ -25,70 +25,70 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
     return data as T;
 }
 
-const get   = <T>(path: string)                 => req<T>('GET',    path);
-const post  = <T>(path: string, body?: unknown) => req<T>('POST',   path, body);
-const put   = <T>(path: string, body?: unknown) => req<T>('PUT',    path, body);
-const patch = <T>(path: string, body?: unknown) => req<T>('PATCH',  path, body);
-const del   = <T>(path: string)                 => req<T>('DELETE', path);
+const get = <T>(path: string) => req<T>('GET', path);
+const post = <T>(path: string, body?: unknown) => req<T>('POST', path, body);
+const put = <T>(path: string, body?: unknown) => req<T>('PUT', path, body);
+const patch = <T>(path: string, body?: unknown) => req<T>('PATCH', path, body);
+const del = <T>(path: string) => req<T>('DELETE', path);
 
-export const login    = (email: string, password: string) =>
-    post<{token:string}>('/auth/login', { email, password });
+export const login = (email: string, password: string) =>
+    post<{ token: string }>('/auth/login', { email, password });
 export const register = (username: string, email: string, password: string, registration_code: string) =>
-    post<{token:string}>('/auth/register', { username, email, password, registration_code });
-export const getMe    = () => get<any>('/auth/me');
+    post<{ token: string }>('/auth/register', { username, email, password, registration_code });
+export const getMe = () => get<any>('/auth/me');
 
-export const listCharacters      = () => get<any[]>('/characters');
-export const getCharacter        = (id: string) => get<any>(`/characters/${id}`);
-export const createCharacter     = (data: any)  => post<any>('/characters', data);
-export const deleteCharacter     = (id: string) => del<any>(`/characters/${id}`);
+export const listCharacters = () => get<any[]>('/characters');
+export const getCharacter = (id: string) => get<any>(`/characters/${id}`);
+export const createCharacter = (data: any) => post<any>('/characters', data);
+export const deleteCharacter = (id: string) => del<any>(`/characters/${id}`);
 export const updateCharacterInfo = (id: string, data: any) => patch<any>(`/characters/${id}/info`, data);
 export const updateAbilityScores = (id: string, data: any) => patch<any>(`/characters/${id}/ability-scores`, data);
-export const updateSkills        = (id: string, data: any) => patch<any>(`/characters/${id}/skills`, data);
-export const updateLevel         = (id: string, data: any) => patch<any>(`/characters/${id}/level`, data);
-export const updateTraining      = (id: string, data: any) => patch<any>(`/characters/${id}/training`, data);
-export const updateCurrency      = (id: string, data: any) => patch<any>(`/characters/${id}/currency`, data);
-export const applyDamage         = (id: string, amount: number) => post<any>(`/characters/${id}/damage`, { amount });
-export const applyHeal           = (id: string, amount: number) => post<any>(`/characters/${id}/heal`, { amount });
-export const addTempHP           = (id: string, amount: number) => post<any>(`/characters/${id}/temp-hp`, { amount });
-export const recordDeathSave     = (id: string, success: boolean) => post<any>(`/characters/${id}/death-save`, { success });
-export const longRest            = (id: string) => post<any>(`/characters/${id}/long-rest`);
-export const shortRest           = (id: string, hit_dice_remaining: number, current_hp: number) =>
+export const updateSkills = (id: string, data: any) => patch<any>(`/characters/${id}/skills`, data);
+export const updateLevel = (id: string, data: any) => patch<any>(`/characters/${id}/level`, data);
+export const updateTraining = (id: string, data: any) => patch<any>(`/characters/${id}/training`, data);
+export const updateCurrency = (id: string, data: any) => patch<any>(`/characters/${id}/currency`, data);
+export const applyDamage = (id: string, amount: number) => post<any>(`/characters/${id}/damage`, { amount });
+export const applyHeal = (id: string, amount: number) => post<any>(`/characters/${id}/heal`, { amount });
+export const addTempHP = (id: string, amount: number) => post<any>(`/characters/${id}/temp-hp`, { amount });
+export const recordDeathSave = (id: string, success: boolean) => post<any>(`/characters/${id}/death-save`, { success });
+export const longRest = (id: string) => post<any>(`/characters/${id}/long-rest`);
+export const shortRest = (id: string, hit_dice_remaining: number, current_hp: number) =>
     post<any>(`/characters/${id}/short-rest`, { hit_dice_remaining, current_hp });
-export const updateConditions    = (id: string, conditions: string[]) =>
+export const updateConditions = (id: string, conditions: string[]) =>
     put<any>(`/characters/${id}/conditions`, { conditions });
 
-export const listInventory       = (id: string) => get<any[]>(`/characters/${id}/inventory`);
+export const listInventory = (id: string) => get<any[]>(`/characters/${id}/inventory`);
 export const createInventoryItem = (id: string, data: any) => post<any>(`/characters/${id}/inventory`, data);
 export const updateInventoryItem = (id: string, itemId: string, data: any) =>
     patch<any>(`/characters/${id}/inventory/${itemId}`, data);
 export const deleteInventoryItem = (id: string, itemId: string) =>
     del<any>(`/characters/${id}/inventory/${itemId}`);
-export const attuneItem          = (id: string, itemId: string) =>
+export const attuneItem = (id: string, itemId: string) =>
     post<any>(`/characters/${id}/inventory/${itemId}/attune`);
-export const unattuneItem        = (id: string, itemId: string) =>
+export const unattuneItem = (id: string, itemId: string) =>
     post<any>(`/characters/${id}/inventory/${itemId}/unattune`);
 
-export const listSpells          = (id: string) => get<any[]>(`/characters/${id}/spells`);
-export const createSpell         = (id: string, data: any) => post<any>(`/characters/${id}/spells`, data);
-export const deleteSpell         = (id: string, spellId: string) =>
+export const listSpells = (id: string) => get<any[]>(`/characters/${id}/spells`);
+export const createSpell = (id: string, data: any) => post<any>(`/characters/${id}/spells`, data);
+export const deleteSpell = (id: string, spellId: string) =>
     del<any>(`/characters/${id}/spells/${spellId}`);
 export const toggleSpellPrepared = (id: string, spellId: string) =>
     post<any>(`/characters/${id}/spells/${spellId}/toggle-prepared`);
-export const listSpellSlots      = (id: string) => get<any[]>(`/characters/${id}/spell-slots`);
-export const useSpellSlot        = (id: string, spell_level: number) =>
+export const listSpellSlots = (id: string) => get<any[]>(`/characters/${id}/spell-slots`);
+export const useSpellSlot = (id: string, spell_level: number) =>
     post<any>(`/characters/${id}/spell-slots/use`, { spell_level });
 
-export const listEncounters     = () => get<any[]>('/combat');
-export const createEncounter    = (name: string) => post<any>('/combat', { name });
+export const listEncounters = () => get<any[]>('/combat');
+export const createEncounter = (name: string) => post<any>('/combat', { name });
 export const getActiveEncounter = () => get<any>('/combat/active');
-export const startEncounter     = (id: string) => post<any>(`/combat/${id}/start`);
-export const endEncounter       = (id: string) => post<any>(`/combat/${id}/end`);
-export const nextRound          = (id: string) => post<any>(`/combat/${id}/next-round`);
-export const listParticipants   = (id: string) => get<any[]>(`/combat/${id}/participants`);
-export const addParticipant     = (id: string, data: any) => post<any>(`/combat/${id}/participants`, data);
-export const removeParticipant  = (encId: string, partId: string) =>
+export const startEncounter = (id: string) => post<any>(`/combat/${id}/start`);
+export const endEncounter = (id: string) => post<any>(`/combat/${id}/end`);
+export const nextRound = (id: string) => post<any>(`/combat/${id}/next-round`);
+export const listParticipants = (id: string) => get<any[]>(`/combat/${id}/participants`);
+export const addParticipant = (id: string, data: any) => post<any>(`/combat/${id}/participants`, data);
+export const removeParticipant = (encId: string, partId: string) =>
     del<any>(`/combat/${encId}/participants/${partId}`);
-export const participantDamage  = (encId: string, partId: string, amount: number) =>
+export const participantDamage = (encId: string, partId: string, amount: number) =>
     post<any>(`/combat/${encId}/participants/${partId}/damage`, { amount });
-export const participantHeal    = (encId: string, partId: string, amount: number) =>
+export const participantHeal = (encId: string, partId: string, amount: number) =>
     post<any>(`/combat/${encId}/participants/${partId}/heal`, { amount });
