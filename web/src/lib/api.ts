@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 function token() { return localStorage.getItem('token'); }
 
@@ -33,8 +33,8 @@ const del = <T>(path: string) => req<T>('DELETE', path);
 
 export const login = (email: string, password: string) =>
     post<{ token: string }>('/auth/login', { email, password });
-export const register = (username: string, email: string, password: string, registration_code: string) =>
-    post<{ token: string }>('/auth/register', { username, email, password, registration_code });
+export const register = (username: string, email: string, password: string, registration_code: string, role: string) =>
+    post<{ token: string }>('/auth/register', { username, email, password, registration_code, role });
 export const getMe = () => get<any>('/auth/me');
 
 export const listCharacters = () => get<any[]>('/characters');
