@@ -57,24 +57,26 @@ func main() {
 	characterService := service.NewCharacterService(queries, spellService)
 	inventoryService := service.NewInventoryService(queries)
 	combatService := service.NewCombatService(queries)
+	featureService := service.NewFeatureService(queries)
 
 	// Handlers
 	userHandler := handler.NewUserHandler(authService)
 	inventoryHandler := handler.NewInventoryHandler(inventoryService)
 	spellHandler := handler.NewSpellHandler(spellService)
-	characterHandler := handler.NewCharacterHandler(characterService, inventoryHandler, spellHandler)
+	featureHandler := handler.NewFeatureHandler(featureService)
+	characterHandler := handler.NewCharacterHandler(characterService, inventoryHandler, spellHandler, featureHandler)
 	combatHandler := handler.NewCombatHandler(combatService)
 
 	// Router
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{cfg.FrontendURL},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{"*"},
-		ExposedHeaders: []string{"Link"},
+		AllowedOrigins:   []string{cfg.FrontendURL},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
-		MaxAge: 300,
+		MaxAge:           300,
 	}))
 
 	r.Use(middleware.Logger)

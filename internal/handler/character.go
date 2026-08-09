@@ -15,21 +15,26 @@ type CharacterHandler struct {
 	service          *service.CharacterService
 	inventoryHandler *InventoryHandler
 	spellHandler     *SpellHandler
+	featureHandler   *FeatureHandler
 }
 
 func NewCharacterHandler(
 	service *service.CharacterService,
 	inventoryHandler *InventoryHandler,
 	spellHandler *SpellHandler,
+	featureHandler *FeatureHandler,
 ) *CharacterHandler {
 	return &CharacterHandler{
 		service:          service,
 		inventoryHandler: inventoryHandler,
 		spellHandler:     spellHandler,
+		featureHandler:   featureHandler,
 	}
 }
 
-func (h *CharacterHandler) RegisterRoutes(r chi.Router, authMiddleware, dmOnlyMiddleware func(http.Handler) http.Handler) {
+func (h *CharacterHandler) RegisterRoutes(
+	r chi.Router, authMiddleware, dmOnlyMiddleware func(http.Handler) http.Handler,
+) {
 	r.Route("/characters", func(r chi.Router) {
 		r.Use(authMiddleware)
 
@@ -58,6 +63,7 @@ func (h *CharacterHandler) RegisterRoutes(r chi.Router, authMiddleware, dmOnlyMi
 			r.Route("/inventory", h.inventoryHandler.RegisterRoutes)
 			r.Route("/spells", h.spellHandler.RegisterSpellRoutes)
 			r.Route("/spell-slots", h.spellHandler.RegisterSlotRoutes)
+			r.Route("/features", h.featureHandler.RegisterFeatureRoutes)
 		})
 	})
 

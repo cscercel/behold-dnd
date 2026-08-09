@@ -78,6 +78,13 @@ export const listSpellSlots = (id: string) => get<any[]>(`/characters/${id}/spel
 export const useSpellSlot = (id: string, spell_level: number) =>
     post<any>(`/characters/${id}/spell-slots/use`, { spell_level });
 
+export const listFeatures = (id: string) => get<any[]>(`/characters/${id}/features`);
+export const createFeature = (id: string, data: any) => post<any>(`/characters/${id}/features`, data);
+export const updateFeature = (id: string, featureId: string, data: any) =>
+    patch<any>(`/characters/${id}/features/${featureId}`, data);
+export const deleteFeature = (id: string, featureId: string) =>
+    del<any>(`/characters/${id}/features/${featureId}`);
+
 export const listEncounters = () => get<any[]>('/combat');
 export const createEncounter = (name: string) => post<any>('/combat', { name });
 export const getActiveEncounter = () => get<any>('/combat/active');
