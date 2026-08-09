@@ -115,6 +115,8 @@ export function CharacterSheet() {
     const [loading, setLoading] = useState(true);
     const [hpInput, setHpInput] = useState('');
     const [hpMode, setHpMode] = useState<'damage' | 'heal' | 'temp'>('damage');
+    const [showConditions, setShowConditions] = useState(false);
+    const [showManageLevel, setShowManageLevel] = useState(false);
 
     const reload = useCallback(async () => {
         if (!id) return;
@@ -183,112 +185,270 @@ export function CharacterSheet() {
     return (
         <div className="h-full flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="shrink-0 flex items-center gap-5 py-3 px-8 bg-stone border-b border-stone-border flex-wrap">
+            <div className="shrink-0 flex items-center gap-4 py-2 px-8 bg-stone border-b border-stone-border flex-wrap">
                 <button className="flex items-center gap-1 bg-transparent border-none text-ash text-[13px] transition-colors duration-180 hover:text-parchment" onClick={() => navigate('/characters')}>
                     <IconChevronLeft size={16} /> Characters
                 </button>
                 <div className="flex-1">
-                    <h1 className="font-display text-xl font-bold text-parchment">{char.name}</h1>
-                    <p className="text-[12px] text-ash mt-[2px]">Level {char.level} {char.race} {char.class} · {char.background} · {char.alignment}</p>
+                    <h1 className="font-display text-lg font-bold text-parchment leading-tight">{char.name}</h1>
+                    <p className="text-[11px] text-ash">Level {char.level} {char.race} {char.class} · {char.background} · {char.alignment}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                     <button
                         className={`flex items-center gap-1.5 bg-transparent border-none transition-colors duration-180 ${char.inspiration ? 'text-gold hover:text-gold-light' : 'text-stone-border hover:text-ash'}`}
                         onClick={toggleInspiration} title="Toggle inspiration">
-                        <span className="text-2xl leading-none">★</span>
-                        {char.inspiration && <span className="font-display text-sm font-semibold tracking-wide">Inspired</span>}
+                        <span className="text-xl leading-none">★</span>
+                        {char.inspiration && <span className="font-display text-xs font-semibold tracking-wide">Inspired</span>}
                     </button>
                     {char.is_npc && <span className="text-[11px] px-2 py-[3px] rounded-full bg-crimson/20 text-crimson-light">NPC</span>}
                     <span className="text-[11px] px-2 py-[3px] rounded-full bg-stone-mid text-ash-light">XP {char.xp?.toLocaleString()}</span>
+                    <button className="flex items-center gap-1.5 bg-stone-mid border border-stone-border text-ash-light px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-180 hover:border-gold-dim hover:text-gold" onClick={() => setShowManageLevel(true)}>
+                        <IconPlus size={13} /> Manage Level
+                    </button>
                 </div>
             </div>
 
             {/* Combat bar */}
-            <div className="shrink-0 py-3 px-8 bg-stone-mid border-b border-stone-border flex gap-8 items-start flex-wrap">
-                <div className="min-w-[220px]">
-                    <div className="text-[10px] font-bold tracking-widest text-ash mb-1.5">HIT POINTS</div>
-                    <div className="h-1.5 bg-stone-border rounded-sm mb-2 overflow-hidden">
-                        <div className="h-full rounded-sm transition-[width,background] duration-[0.4s] ease-out" style={{ width: `${hpPct}%`, background: hpColor }} />
-                    </div>
-                    <div className="flex items-baseline gap-1.5 mb-2">
-                        <span style={{ color: hpColor, fontWeight: 700, fontSize: 20 }}>{char.current_hp}</span>
-                        <span className="text-ash text-sm">/ {char.max_hp}</span>
-                        {char.temp_hp > 0 && <span className="text-[13px] text-info">+{char.temp_hp} temp</span>}
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                        <div className="flex gap-1">
-                            {(['damage', 'heal', 'temp'] as const).map(m => (
-                                <button key={m}
-                                    className={`bg-stone border border-stone-border text-ash px-2.5 py-[5px] rounded-sm text-[11px] transition-all duration-180 ${hpMode === m ? 'bg-stone-light border-gold-dim text-parchment' : ''}`}
-                                    onClick={() => setHpMode(m)}>
-                                    {m === 'damage' ? '⚔ Dmg' : m === 'heal' ? '❤ Heal' : '🛡 Temp'}
-                                </button>
-                            ))}
+            <div className="shrink-0 py-2.5 px-8 bg-stone-mid border-b border-stone-border flex items-center justify-between gap-6 flex-wrap">
+                <div className="flex items-center gap-6 flex-1 min-w-0 flex-wrap">
+                    <div className="w-[170px] shrink-0">
+                        <div className="text-[10px] font-bold tracking-widest text-ash mb-1">HIT POINTS</div>
+                        <div className="w-full h-1.5 bg-stone-border rounded-sm mb-1 overflow-hidden">
+                            <div className="h-full rounded-sm transition-[width,background] duration-[0.4s] ease-out" style={{ width: `${hpPct}%`, background: hpColor }} />
                         </div>
-                        <div className="flex gap-1.5">
-                            <input className="w-[70px] text-center px-2 py-1.5" type="number" min={1} value={hpInput}
-                                onChange={e => setHpInput(e.target.value)} placeholder="0"
-                                onKeyDown={e => e.key === 'Enter' && handleHP()} />
-                            <button className="bg-crimson border-none text-parchment px-3.5 py-1.5 rounded-sm text-[13px] transition-colors duration-180 hover:bg-crimson-light" onClick={handleHP}>Apply</button>
+                        <div className="flex items-baseline gap-1.5">
+                            <span style={{ color: hpColor, fontWeight: 700, fontSize: 18 }}>{char.current_hp}</span>
+                            <span className="text-ash text-sm">/ {char.max_hp}</span>
+                            {char.temp_hp > 0 && <span className="text-[12px] text-info">+{char.temp_hp}</span>}
                         </div>
                     </div>
-                </div>
 
-                <div className="flex gap-4 flex-wrap items-center">
-                    {[
-                        { l: 'AC', v: char.armor_class },
-                        { l: 'INIT', v: fmt(mod(char.dexterity)) },
-                        { l: 'SPEED', v: `${char.speed}ft` },
-                        { l: 'PROF', v: `+${profBonus}` },
-                        { l: `d${char.hit_dice_type}`, v: `${char.hit_dice_remaining} left` },
-                    ].map(s => (
-                        <div key={s.l} className="text-center">
-                            <div className="font-display text-[22px] font-bold text-parchment">{s.v}</div>
-                            <div className="text-[10px] text-ash tracking-wide mt-0.5">{s.l}</div>
-                        </div>
-                    ))}
-                </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        {(['damage', 'heal', 'temp'] as const).map(m => (
+                            <button key={m}
+                                className={`bg-stone border border-stone-border text-ash px-2.5 py-[5px] rounded-sm text-[11px] transition-all duration-180 ${hpMode === m ? 'bg-stone-light border-gold-dim text-parchment' : ''}`}
+                                onClick={() => setHpMode(m)}>
+                                {m === 'damage' ? '⚔ Dmg' : m === 'heal' ? '❤ Heal' : '🛡 Temp'}
+                            </button>
+                        ))}
+                        <input className="w-[60px] text-center px-2 py-1.5" type="number" min={1} value={hpInput}
+                            onChange={e => setHpInput(e.target.value)} placeholder="0"
+                            onKeyDown={e => e.key === 'Enter' && handleHP()} />
+                        <button className="bg-crimson border-none text-parchment px-3.5 py-1.5 rounded-sm text-[13px] transition-colors duration-180 hover:bg-crimson-light" onClick={handleHP}>Apply</button>
+                    </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <button className="flex items-center gap-1.5 bg-stone border border-stone-border text-ash-light px-3.5 py-2 rounded-md text-xs transition-all duration-180 hover:border-gold-dim hover:text-parchment" onClick={() => handleRest('short')}><IconMoon size={14} /> Short Rest</button>
-                    <button className="flex items-center gap-1.5 bg-stone border border-stone-border text-ash-light px-3.5 py-2 rounded-md text-xs transition-all duration-180 hover:border-gold-dim hover:text-parchment" onClick={() => handleRest('long')}><IconSun size={14} /> Long Rest</button>
-                </div>
-
-                {char.current_hp <= 0 && (
-                    <div>
-                        <div className="text-[10px] font-bold tracking-wide text-crimson-light mb-2">DEATH SAVES</div>
-                        {(['Successes', 'Failures'] as const).map(label => (
-                            <div key={label} className="flex items-center gap-2 mb-1.5">
-                                <span className="text-[11px] text-ash w-[70px]">{label}</span>
-                                {[0, 1, 2].map(i => {
-                                    const count = label === 'Successes' ? char.death_save_successes : char.death_save_failures;
-                                    const cls = i < count ? (label === 'Successes' ? 'bg-emerald border-emerald' : 'bg-crimson border-crimson') : '';
-                                    return <button key={i} className={`w-[18px] h-[18px] rounded-full border-2 border-stone-border bg-transparent transition-all duration-180 ${cls}`}
-                                        onClick={() => api.recordDeathSave(id!, label === 'Successes').then(reload)} />;
-                                })}
+                    <div className="flex items-center gap-6 flex-1 justify-center flex-wrap">
+                        {[
+                            { l: 'AC', v: char.armor_class },
+                            { l: 'INIT', v: fmt(mod(char.dexterity)) },
+                            { l: 'SPEED', v: `${char.speed}ft` },
+                            { l: 'PROF', v: `+${profBonus}` },
+                            { l: `d${char.hit_dice_type}`, v: `${char.hit_dice_remaining} left` },
+                        ].map(s => (
+                            <div key={s.l} className="text-center">
+                                <div className="font-display text-lg font-bold text-parchment">{s.v}</div>
+                                <div className="text-[10px] text-ash tracking-wide mt-0.5">{s.l}</div>
                             </div>
                         ))}
                     </div>
-                )}
+
+                    {char.current_hp <= 0 && (
+                        <div className="flex items-center gap-4 shrink-0">
+                            <span className="text-[10px] font-bold tracking-wide text-crimson-light">DEATH SAVES</span>
+                            {(['Successes', 'Failures'] as const).map(label => (
+                                <div key={label} className="flex items-center gap-1.5">
+                                    <span className="text-[10px] text-ash">{label === 'Successes' ? 'Succ' : 'Fail'}</span>
+                                    {[0, 1, 2].map(i => {
+                                        const count = label === 'Successes' ? char.death_save_successes : char.death_save_failures;
+                                        const cls = i < count ? (label === 'Successes' ? 'bg-emerald border-emerald' : 'bg-crimson border-crimson') : '';
+                                        return <button key={i} className={`w-[16px] h-[16px] rounded-full border-2 border-stone-border bg-transparent transition-all duration-180 ${cls}`}
+                                            onClick={() => api.recordDeathSave(id!, label === 'Successes').then(reload)} />;
+                                    })}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                    <button className="flex items-center gap-1.5 bg-stone border border-stone-border text-ash-light px-3 py-2 rounded-md text-xs transition-all duration-180 hover:border-gold-dim hover:text-parchment" onClick={() => handleRest('short')}><IconMoon size={14} /> Short Rest</button>
+                    <button className="flex items-center gap-1.5 bg-stone border border-stone-border text-ash-light px-3 py-2 rounded-md text-xs transition-all duration-180 hover:border-gold-dim hover:text-parchment" onClick={() => handleRest('long')}><IconSun size={14} /> Long Rest</button>
+                    <div className="relative">
+                        <button
+                            className={`flex items-center gap-1.5 bg-stone border border-stone-border text-ash-light px-3 py-2 rounded-md text-xs transition-all duration-180 hover:border-gold-dim hover:text-parchment ${char.conditions?.length ? 'border-crimson/50 text-crimson-light' : ''}`}
+                            onClick={() => setShowConditions(v => !v)}>
+                            ⚠ Conditions{char.conditions?.length ? ` (${char.conditions.length})` : ''}
+                        </button>
+                        {showConditions && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setShowConditions(false)} />
+                                <div className="absolute top-full right-0 mt-1.5 z-50 bg-stone border border-stone-border rounded-md p-3 w-[260px] shadow-[0_12px_32px_rgba(0,0,0,0.5)] flex flex-wrap gap-1.5">
+                                    {CONDITIONS.map(c => (
+                                        <button key={c}
+                                            className={`bg-stone-mid border border-stone-border text-ash px-2.5 py-[5px] rounded-full text-xs transition-all duration-180 hover:border-crimson hover:text-parchment ${char.conditions?.includes(c) ? 'bg-crimson/20 border-crimson text-crimson-light' : ''}`}
+                                            onClick={() => toggleCond(c)}>
+                                            {c}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Tabs */}
             <div className="shrink-0 flex gap-0.5 px-8 bg-stone border-b border-stone-border">
                 {TABS.map(([t, icon, label]) => (
-                    <button key={t} className={`flex items-center gap-1.5 bg-transparent border-none text-ash px-[18px] py-3 text-[13px] font-medium border-b-2 border-transparent transition-all duration-180 hover:text-parchment ${tab === t ? 'text-gold border-gold' : ''}`} onClick={() => setTab(t)}>
+                    <button key={t} className={`flex items-center gap-1.5 bg-transparent border-none text-ash px-[18px] py-2.5 text-[13px] font-medium border-b-2 border-transparent transition-all duration-180 hover:text-parchment ${tab === t ? 'text-gold border-gold' : ''}`} onClick={() => setTab(t)}>
                         {icon} {label}
                     </button>
                 ))}
             </div>
 
             {/* Tab content — the only region that may ever scroll; the page itself never does */}
-            <div className="flex-1 min-h-0 overflow-hidden py-4 px-8">
+            <div className="flex-1 min-h-0 overflow-y-auto py-4 px-8">
                 {tab === 'stats' && <StatsTab char={char} profBonus={profBonus} toggleCond={toggleCond} features={features} id={id!} reload={reload} />}
                 {tab === 'inventory' && <InventoryTab id={id!} items={inventory} char={char} reload={reload} />}
                 {tab === 'spells' && <SpellsTab id={id!} spells={spells} slots={slots} reload={reload} />}
                 {tab === 'background' && <BackgroundTab char={char} id={id!} reload={reload} />}
             </div>
+
+            {showManageLevel && (
+                <ManageLevelModal char={char} id={id!} reload={reload} onClose={() => setShowManageLevel(false)} />
+            )}
         </div>
+    );
+}
+
+function ManageLevelModal({ char, id, reload, onClose }: { char: any; id: string; reload: () => void; onClose: () => void }) {
+    const [level, setLevel] = useState<number>(char.level);
+    const [maxHp, setMaxHp] = useState<number>(char.max_hp);
+    const [abilities, setAbilities] = useState<Record<string, number>>(() =>
+        Object.fromEntries(ABILITIES.map(a => [a, char[a]])));
+    const [showAbilities, setShowAbilities] = useState(false);
+    const [showAddFeature, setShowAddFeature] = useState(false);
+    const [featureForm, setFeatureForm] = useState({ name: '', action_type: 'action', source: '', description: '' });
+    const [confirming, setConfirming] = useState(false);
+    const [saving, setSaving] = useState(false);
+
+    const abilityChanges = ABILITIES.filter(a => abilities[a] !== char[a]);
+    const dirty = level !== char.level || maxHp !== char.max_hp || abilityChanges.length > 0;
+
+    const submitFeature = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await api.createFeature(id, featureForm);
+        setFeatureForm({ name: '', action_type: 'action', source: '', description: '' });
+        setShowAddFeature(false);
+        reload();
+    };
+
+    const applyChanges = async () => {
+        setSaving(true);
+        try {
+            await api.updateLevel(id, { level, max_hp: maxHp });
+            if (abilityChanges.length > 0) {
+                await api.updateAbilityScores(id, Object.fromEntries(abilityChanges.map(a => [a, abilities[a]])));
+            }
+            await reload();
+            onClose();
+        } catch (err) {
+            console.error('Failed to save level changes', err);
+            setSaving(false);
+            setConfirming(false);
+        }
+    };
+
+    return (
+        <DetailModal onClose={onClose}>
+            {!confirming ? (
+                <>
+                    <h2 className="font-display text-xl font-bold text-parchment mb-5">Manage Level</h2>
+
+                    <div className={`${field} mb-4`}>
+                        <label className={fieldLabel}>Level</label>
+                        <div className="flex items-center gap-3">
+                            <button type="button" className="w-8 h-8 rounded-md bg-stone-mid border border-stone-border text-ash transition-colors duration-180 hover:text-parchment hover:border-gold-dim" onClick={() => setLevel(l => Math.max(1, l - 1))}>−</button>
+                            <span className="font-display text-2xl font-bold text-parchment w-10 text-center">{level}</span>
+                            <button type="button" className="w-8 h-8 rounded-md bg-stone-mid border border-stone-border text-ash transition-colors duration-180 hover:text-parchment hover:border-gold-dim" onClick={() => setLevel(l => Math.min(20, l + 1))}>+</button>
+                        </div>
+                    </div>
+
+                    <div className={`${field} mb-5`}>
+                        <label className={fieldLabel}>Max HP</label>
+                        <div className="flex items-center gap-3">
+                            <button type="button" className="w-8 h-8 rounded-md bg-stone-mid border border-stone-border text-ash transition-colors duration-180 hover:text-parchment hover:border-gold-dim" onClick={() => setMaxHp(h => Math.max(1, h - 1))}>−</button>
+                            <input className="w-20 text-center" type="number" min={1} value={maxHp} onChange={e => setMaxHp(Math.max(1, +e.target.value))} />
+                            <button type="button" className="w-8 h-8 rounded-md bg-stone-mid border border-stone-border text-ash transition-colors duration-180 hover:text-parchment hover:border-gold-dim" onClick={() => setMaxHp(h => h + 1)}>+</button>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2 mb-6 flex-wrap">
+                        <button type="button" className={addBtn} onClick={() => setShowAbilities(true)}>Change Ability Scores</button>
+                        <button type="button" className={addBtn} onClick={() => setShowAddFeature(true)}><IconPlus size={14} /> Add Feature</button>
+                    </div>
+
+                    <div className={modalActions}>
+                        <button className={cancelBtn} onClick={onClose}>Cancel</button>
+                        <button className={submitBtn} disabled={!dirty} onClick={() => setConfirming(true)}>Save Changes</button>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <h2 className="font-display text-xl font-bold text-parchment mb-3">Confirm Changes</h2>
+                    <div className="bg-stone-mid rounded-md p-4 mb-5 flex flex-col gap-1.5 text-sm">
+                        {level !== char.level && <div className="text-ash-light">Level: <span className="text-parchment font-medium">{char.level} → {level}</span></div>}
+                        {maxHp !== char.max_hp && <div className="text-ash-light">Max HP: <span className="text-parchment font-medium">{char.max_hp} → {maxHp}</span></div>}
+                        {abilityChanges.map(a => (
+                            <div key={a} className="text-ash-light">{a.slice(0, 3).toUpperCase()}: <span className="text-parchment font-medium">{char[a]} → {abilities[a]}</span></div>
+                        ))}
+                    </div>
+                    <p className="text-[13px] text-ash mb-5">Are you sure you want to apply these changes?</p>
+                    <div className={modalActions}>
+                        <button className={cancelBtn} onClick={() => setConfirming(false)} disabled={saving}>Cancel</button>
+                        <button className={submitBtn} onClick={applyChanges} disabled={saving}>{saving ? 'Saving…' : 'Confirm'}</button>
+                    </div>
+                </>
+            )}
+
+            {showAbilities && (
+                <DetailModal onClose={() => setShowAbilities(false)}>
+                    <h2 className="font-display text-lg font-bold text-parchment mb-4">Ability Scores</h2>
+                    <div className="grid grid-cols-3 gap-3 mb-5">
+                        {ABILITIES.map(a => (
+                            <div key={a} className={field}>
+                                <label className={fieldLabel}>{a.slice(0, 3).toUpperCase()}</label>
+                                <input className="text-center" type="number" min={1} max={30} value={abilities[a]}
+                                    onChange={e => setAbilities(v => ({ ...v, [a]: +e.target.value }))} />
+                            </div>
+                        ))}
+                    </div>
+                    <div className={modalActions}>
+                        <button className={submitBtn} onClick={() => setShowAbilities(false)}>Done</button>
+                    </div>
+                </DetailModal>
+            )}
+
+            {showAddFeature && (
+                <DetailModal onClose={() => setShowAddFeature(false)}>
+                    <h2 className="font-display text-lg font-bold text-parchment mb-4">Add Feature</h2>
+                    <form onSubmit={submitFeature} className="flex flex-col gap-3">
+                        <div className={field}><label className={fieldLabel}>Name *</label><input value={featureForm.name} onChange={e => setFeatureForm(f => ({ ...f, name: e.target.value }))} required /></div>
+                        <div className={field}><label className={fieldLabel}>Action Type</label>
+                            <select value={featureForm.action_type} onChange={e => setFeatureForm(f => ({ ...f, action_type: e.target.value }))}>
+                                {ACTION_TYPES.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+                            </select>
+                        </div>
+                        <div className={field}><label className={fieldLabel}>Source</label><input value={featureForm.source} onChange={e => setFeatureForm(f => ({ ...f, source: e.target.value }))} placeholder="Class, race, feat…" /></div>
+                        <div className={field}><label className={fieldLabel}>Description</label><textarea value={featureForm.description} onChange={e => setFeatureForm(f => ({ ...f, description: e.target.value }))} rows={3} /></div>
+                        <div className={modalActions}>
+                            <button type="button" className={cancelBtn} onClick={() => setShowAddFeature(false)}>Cancel</button>
+                            <button type="submit" className={submitBtn}>Add</button>
+                        </div>
+                    </form>
+                </DetailModal>
+            )}
+        </DetailModal>
     );
 }
 
@@ -325,49 +485,64 @@ function StatsTab({ char, profBonus, toggleCond, features, id, reload }: {
     );
 
     return (
-        <div className="h-full flex flex-col gap-4">
-            <div className="grid grid-cols-[1fr_1fr_1.3fr] gap-4 flex-1 min-h-0 max-[1050px]:grid-cols-1 max-[1050px]:overflow-y-auto">
-                <div className={`${panel} flex flex-col min-h-0`}>
-                    <h3 className={panelTitle}>Ability Scores</h3>
-                    <div className="grid grid-cols-3 gap-2.5">
-                        {ABILITIES.map(ab => {
-                            const score = char[ab];
-                            const m = mod(score);
-                            const saveProf = char[`save_prof_${ab}`] as boolean;
-                            return (
-                                <div key={ab} className="flex flex-col items-center bg-stone-mid border border-stone-border rounded-md py-2.5 px-2">
-                                    <div className="text-[9px] font-bold tracking-widest text-ash mb-1">{ab.slice(0, 3).toUpperCase()}</div>
-                                    <div className="font-display text-2xl font-bold text-parchment leading-none">{score}</div>
-                                    <div className="text-base font-semibold text-gold">{fmt(m)}</div>
-                                    <div className={`text-[10px] text-ash mt-1 ${saveProf ? 'text-gold-dim' : ''}`}>
-                                        {fmt(m + (saveProf ? profBonus : 0))} save
+        <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-[1fr_1fr_1.3fr] gap-4 max-[1050px]:grid-cols-1">
+                <div className="flex flex-col gap-4">
+                    <div className={panel}>
+                        <h3 className={panelTitle}>Ability Scores</h3>
+                        <div className="grid grid-cols-3 gap-2.5">
+                            {ABILITIES.map(ab => {
+                                const score = char[ab];
+                                const m = mod(score);
+                                const saveProf = char[`save_prof_${ab}`] as boolean;
+                                return (
+                                    <div key={ab} className="flex flex-col items-center bg-stone-mid border border-stone-border rounded-md py-2.5 px-2">
+                                        <div className="text-[9px] font-bold tracking-widest text-ash mb-1">{ab.slice(0, 3).toUpperCase()}</div>
+                                        <div className="font-display text-2xl font-bold text-parchment leading-none">{score}</div>
+                                        <div className="text-base font-semibold text-gold">{fmt(m)}</div>
+                                        <div className={`text-[10px] text-ash mt-1 ${saveProf ? 'text-gold-dim' : ''}`}>
+                                            {fmt(m + (saveProf ? profBonus : 0))} save
+                                        </div>
                                     </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className={panel}>
+                        <h3 className={panelTitle}>Proficiencies & Training</h3>
+                        <div className="flex flex-col gap-2.5">
+                            {[['Armor', char.training_armor], ['Weapons', char.training_weapons], ['Tools', char.training_tools], ['Languages', char.training_languages]].map(([l, v]) => (
+                                <div key={l as string} className="bg-stone-mid rounded-md p-3">
+                                    <div className="text-[10px] font-bold text-gold-dim tracking-wide uppercase mb-1">{l as string}</div>
+                                    <div className="font-body text-sm text-parchment leading-relaxed">{((v as string[]) || []).join(', ') || '—'}</div>
                                 </div>
-                            );
-                        })}
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                <div className={`${panel} flex flex-col min-h-0`}>
+                <div className={panel}>
                     <h3 className={panelTitle}>Skills</h3>
-                    <div className="flex flex-col gap-[3px] flex-1 min-h-0 overflow-y-auto pr-1">
+                    <div className="flex flex-col gap-[3px]">
                         {SKILLS.map(sk => {
                             const val = char[sk.f] as number;
                             const total = mod(char[sk.ab]) + val * profBonus;
                             return (
                                 <div key={sk.f} className="flex items-center gap-2 py-1 px-1.5 rounded-sm hover:bg-stone-mid">
                                     <div className={`w-2.5 h-2.5 rounded-full border-2 border-stone-border shrink-0 ${val === 2 ? 'bg-gold border-gold' : val === 1 ? 'bg-gold-dim border-gold-dim' : ''}`} />
-                                    <span className="flex-1 text-[13px] text-ash-light">{sk.name}</span>
+                                    <span className="flex-1 text-[13px] text-ash-light">
+                                        {sk.name} <span className="text-ash">({sk.ab.slice(0, 3).toUpperCase()})</span>
+                                    </span>
                                     <span className="font-semibold text-[13px] text-parchment w-[30px] text-right">{fmt(total)}</span>
-                                    <span className="text-[10px] text-ash w-6 text-center">{sk.ab.slice(0, 3)}</span>
                                 </div>
                             );
                         })}
                     </div>
                 </div>
 
-                <div className={`${panel} flex flex-col min-h-0`}>
-                    <div className="shrink-0 flex items-center justify-between mb-3">
+                <div className={panel}>
+                    <div className="flex items-center justify-between mb-3">
                         <h3 className="font-display text-[13px] font-semibold text-gold tracking-wide uppercase flex items-center gap-1.5">
                             <IconZap size={13} /> Actions & Features
                         </h3>
@@ -382,43 +557,29 @@ function StatsTab({ char, profBonus, toggleCond, features, id, reload }: {
                             { key: 'conditions', label: 'Conditions' },
                         ]}
                         active={box} onChange={setBox} />
-                    <div className="flex-1 min-h-0 overflow-y-auto">
-                        {box === 'actions' && (
-                            <div className="flex flex-col gap-1">
-                                {actionFeatures.map(f => <FeatureRow key={f.id} feature={f} />)}
-                                {actionFeatures.length === 0 && <div className={emptyState}>No actions yet.</div>}
-                            </div>
-                        )}
-                        {box === 'features' && (
-                            <div className="flex flex-col gap-1">
-                                {passiveFeatures.map(f => <FeatureRow key={f.id} feature={f} />)}
-                                {passiveFeatures.length === 0 && <div className={emptyState}>No features yet.</div>}
-                            </div>
-                        )}
-                        {box === 'conditions' && (
-                            <div className="flex flex-wrap content-start gap-1.5">
-                                {CONDITIONS.map(c => (
-                                    <button key={c}
-                                        className={`bg-stone-mid border border-stone-border text-ash px-2.5 py-[5px] rounded-full text-xs transition-all duration-180 hover:border-crimson hover:text-parchment ${char.conditions?.includes(c) ? 'bg-crimson/20 border-crimson text-crimson-light' : ''}`}
-                                        onClick={() => toggleCond(c)}>
-                                        {c}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            <div className={`${panel} shrink-0`}>
-                <h3 className={panelTitle}>Proficiencies & Training</h3>
-                <div className="grid grid-cols-4 gap-3 max-[800px]:grid-cols-2">
-                    {[['Armor', char.training_armor], ['Weapons', char.training_weapons], ['Tools', char.training_tools], ['Languages', char.training_languages]].map(([l, v]) => (
-                        <div key={l as string} className="bg-stone-mid rounded-md p-3">
-                            <div className="text-[10px] font-bold text-gold-dim tracking-wide uppercase mb-1">{l as string}</div>
-                            <div className="font-body text-sm text-parchment leading-relaxed">{((v as string[]) || []).join(', ') || '—'}</div>
+                    {box === 'actions' && (
+                        <div className="flex flex-col gap-1">
+                            {actionFeatures.map(f => <FeatureRow key={f.id} feature={f} />)}
+                            {actionFeatures.length === 0 && <div className={emptyState}>No actions yet.</div>}
                         </div>
-                    ))}
+                    )}
+                    {box === 'features' && (
+                        <div className="flex flex-col gap-1">
+                            {passiveFeatures.map(f => <FeatureRow key={f.id} feature={f} />)}
+                            {passiveFeatures.length === 0 && <div className={emptyState}>No features yet.</div>}
+                        </div>
+                    )}
+                    {box === 'conditions' && (
+                        <div className="flex flex-wrap content-start gap-1.5">
+                            {CONDITIONS.map(c => (
+                                <button key={c}
+                                    className={`bg-stone-mid border border-stone-border text-ash px-2.5 py-[5px] rounded-full text-xs transition-all duration-180 hover:border-crimson hover:text-parchment ${char.conditions?.includes(c) ? 'bg-crimson/20 border-crimson text-crimson-light' : ''}`}
+                                    onClick={() => toggleCond(c)}>
+                                    {c}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
