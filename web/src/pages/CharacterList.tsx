@@ -16,15 +16,16 @@ export function CharacterList() {
     const [chars, setChars] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreate, setShowCreate] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<any>(null);
     const navigate = useNavigate();
 
     useEffect(() => { listCharacters().then(setChars).finally(() => setLoading(false)); }, []);
 
-    const handleDelete = async (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!confirm('Delete this character permanently?')) return;
-        await deleteCharacter(id);
-        setChars(c => c.filter(ch => ch.id !== id));
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
+        await deleteCharacter(deleteTarget.id);
+        setChars(c => c.filter(ch => ch.id !== deleteTarget.id));
+        setDeleteTarget(null);
     };
 
     if (loading) return <div className="flex items-center justify-center h-[200px] text-ash">Loading characters…</div>;
@@ -57,7 +58,7 @@ export function CharacterList() {
                                         <h2 className="font-display text-[17px] font-semibold text-parchment">{char.name}</h2>
                                         <p className="text-xs text-ash mt-0.5">Level {char.level} {char.race} {char.class}</p>
                                     </div>
-                                    <button className="bg-transparent border-none text-stone-border p-1 rounded-sm transition-colors duration-180 shrink-0 hover:text-crimson-light" onClick={e => handleDelete(char.id, e)}>
+                                    <button className="bg-transparent border-none text-stone-border p-1 rounded-sm transition-colors duration-180 shrink-0 hover:text-crimson-light" onClick={e => { e.stopPropagation(); setDeleteTarget(char); }}>
                                         <IconTrash size={14} />
                                     </button>
                                 </div>
@@ -78,6 +79,21 @@ export function CharacterList() {
                     onClose={() => setShowCreate(false)}
                     onCreated={c => { setChars(ch => [...ch, c]); setShowCreate(false); navigate(`/characters/${c.id}`); }}
                 />
+            )}
+
+            {deleteTarget && (
+                <div className="fixed inset-0 bg-black/75 z-[100] flex items-center justify-center p-5" onClick={() => setDeleteTarget(null)}>
+                    <div className="bg-stone border border-stone-border rounded-lg p-7 w-full max-w-[400px]" onClick={e => e.stopPropagation()}>
+                        <h2 className="font-display text-lg font-bold text-parchment mb-2">Delete Character?</h2>
+                        <p className="text-sm text-ash-light leading-relaxed mb-6">
+                            Are you sure you want to permanently delete <span className="text-parchment font-medium">{deleteTarget.name}</span>? This can't be undone.
+                        </p>
+                        <div className="flex justify-end gap-2.5">
+                            <button className="bg-stone-mid border-none text-ash-light px-5 py-2.5 rounded-md text-[13px] hover:text-parchment" onClick={() => setDeleteTarget(null)}>Cancel</button>
+                            <button className="bg-crimson border-none text-parchment px-5 py-2.5 rounded-md font-display text-[13px] font-semibold tracking-wide hover:bg-crimson-light" onClick={confirmDelete}>Delete</button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

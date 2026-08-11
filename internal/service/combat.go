@@ -80,12 +80,59 @@ func (s *CombatService) ListParticipants(ctx context.Context, encounterID uuid.U
 }
 
 // Add character with initiative roll already done
-func (s *CombatService) AddCharacterToEncounter(
-	ctx context.Context,
-	encounterID uuid.UUID,
-	characterID uuid.UUID,
-	initiative int32,
-) (db.CombatParticipant, error) {
+// AddParticipantInput describes a combatant to add to an encounter. Either
+// CharacterID is set (add an existing character), or Name/MaxHP/ArmorClass/Speed
+// are set and a lightweight NPC character is created on the fly to back the
+// participant (combat_participants.character_id is a required foreign key).
+type AddParticipantInput struct {
+	CharacterID *uuid.UUID
+	Name        string
+	MaxHP       int32
+	ArmorClass  int32
+	Speed       int32
+	Initiative  int32
+}
+
+func (s *CombatService) AddParticipant(ctx context.Context, ownerID uuid.UUID, encounterID uuid.UUID, input AddParticipantInput) (db.CombatParticipant, error) {
+	characterID := uuid.Nil
+	if input.CharacterID != nil {
+		characterID = *input.CharacterID
+	} else {
+		if input.Name == "" {
+			return db.CombatParticipant{}, fmt.Errorf("name is required when character_id is not provided")
+		}
+		created, err := s.queries.CreateCharacter(ctx, db.CreateCharacterParams{
+			OwnerID:           ownerID,
+			IsNpc:             true,
+			Name:              input.Name,
+			Level:             1,
+			Strength:          10,
+			Dexterity:         10,
+			Constitution:      10,
+			Intelligence:      10,
+			Wisdom:            10,
+			Charisma:          10,
+			MaxHp:             input.MaxHP,
+			CurrentHp:         input.MaxHP,
+			ArmorClass:        input.ArmorClass,
+			Speed:             input.Speed,
+			HitDiceType:       8,
+			HitDiceRemaining:  1,
+			TrainingArmor:     []string{},
+			TrainingWeapons:   []string{},
+			TrainingTools:     []string{},
+			TrainingLanguages: []string{},
+			Conditions:        []string{},
+			Resistances:       []string{},
+			Vulnerabilities:   []string{},
+			Immunities:        []string{},
+		})
+		if err != nil {
+			return db.CombatParticipant{}, fmt.Errorf("failed to create npc character: %w", err)
+		}
+		characterID = created.ID
+	}
+
 	character, err := s.queries.GetCharacter(ctx, characterID)
 	if err != nil {
 		return db.CombatParticipant{}, fmt.Errorf("character not found: %w", err)
@@ -95,7 +142,7 @@ func (s *CombatService) AddCharacterToEncounter(
 		EncounterID: encounterID,
 		CharacterID: characterID,
 		Name:        character.Name,
-		Initiative:  initiative,
+		Initiative:  input.Initiative,
 		CurrentHp:   character.CurrentHp,
 		MaxHp:       character.MaxHp,
 		TempHp:      character.TempHp,

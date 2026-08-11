@@ -32,9 +32,7 @@ func NewCharacterHandler(
 	}
 }
 
-func (h *CharacterHandler) RegisterRoutes(
-	r chi.Router, authMiddleware, dmOnlyMiddleware func(http.Handler) http.Handler,
-) {
+func (h *CharacterHandler) RegisterRoutes(r chi.Router, authMiddleware, dmOnlyMiddleware func(http.Handler) http.Handler) {
 	r.Route("/characters", func(r chi.Router) {
 		r.Use(authMiddleware)
 
@@ -63,7 +61,7 @@ func (h *CharacterHandler) RegisterRoutes(
 			r.Route("/inventory", h.inventoryHandler.RegisterRoutes)
 			r.Route("/spells", h.spellHandler.RegisterSpellRoutes)
 			r.Route("/spell-slots", h.spellHandler.RegisterSlotRoutes)
-			r.Route("/features", h.featureHandler.RegisterFeatureRoutes)
+			r.Route("/features", h.featureHandler.RegisterRoutes)
 		})
 	})
 
@@ -183,6 +181,39 @@ func (h *CharacterHandler) handleCreateCharacter(w http.ResponseWriter, r *http.
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
 		return
+	}
+
+	userID, ok := UserIDFromContext(r.Context())
+	if !ok {
+		respondWithError(w, http.StatusUnauthorized, "missing user id", nil)
+		return
+	}
+	params.OwnerID = userID
+
+	// TEXT[] columns are NOT NULL with a '{}' default, but an explicit NULL
+	if params.TrainingArmor == nil {
+		params.TrainingArmor = []string{}
+	}
+	if params.TrainingWeapons == nil {
+		params.TrainingWeapons = []string{}
+	}
+	if params.TrainingTools == nil {
+		params.TrainingTools = []string{}
+	}
+	if params.TrainingLanguages == nil {
+		params.TrainingLanguages = []string{}
+	}
+	if params.Conditions == nil {
+		params.Conditions = []string{}
+	}
+	if params.Resistances == nil {
+		params.Resistances = []string{}
+	}
+	if params.Vulnerabilities == nil {
+		params.Vulnerabilities = []string{}
+	}
+	if params.Immunities == nil {
+		params.Immunities = []string{}
 	}
 
 	character, err := h.service.CreateCharacter(r.Context(), params)

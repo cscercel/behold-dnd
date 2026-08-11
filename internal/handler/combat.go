@@ -263,7 +263,7 @@ func (h *CombatHandler) handleListParticipants(w http.ResponseWriter, r *http.Re
 // @Produce      json
 // @Security     BearerAuth
 // @Param        encounterID  path      string  true  "Encounter ID"
-// @Param        body body object{character_id=string,initiative=int} true "Participant data. Copies stats from the character sheet."
+// @Param        body body object{character_id=string,name=string,max_hp=int,armor_class=int,speed=int,initiative=int} true "Either character_id (add an existing character), or name/max_hp/armor_class/speed to create an NPC on the fly. Stats are copied from the character sheet."
 // @Success      201  {object}  db.CombatParticipant
 // @Failure      400  {object}  object{error=string}
 // @Failure      401  {object}  object{error=string}
@@ -279,6 +279,10 @@ func (h *CombatHandler) handleAddParticipant(w http.ResponseWriter, r *http.Requ
 
 	var body struct {
 		CharacterID string `json:"character_id"`
+		Name        string `json:"name"`
+		MaxHP       int32  `json:"max_hp"`
+		ArmorClass  int32  `json:"armor_class"`
+		Speed       int32  `json:"speed"`
 		Initiative  int32  `json:"initiative"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -286,18 +290,29 @@ func (h *CombatHandler) handleAddParticipant(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if body.CharacterID == "" {
-		respondWithError(w, http.StatusBadRequest, "character_id is required", nil)
+	userID, ok := UserIDFromContext(r.Context())
+	if !ok {
+		respondWithError(w, http.StatusUnauthorized, "missing user id", nil)
 		return
 	}
 
-	characterID, err := uuid.Parse(body.CharacterID)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "invalid character id", err)
-		return
+	input := service.AddParticipantInput{
+		Name:       body.Name,
+		MaxHP:      body.MaxHP,
+		ArmorClass: body.ArmorClass,
+		Speed:      body.Speed,
+		Initiative: body.Initiative,
+	}
+	if body.CharacterID != "" {
+		characterID, err := uuid.Parse(body.CharacterID)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "invalid character id", err)
+			return
+		}
+		input.CharacterID = &characterID
 	}
 
-	participant, err := h.service.AddCharacterToEncounter(r.Context(), encounterID, characterID, body.Initiative)
+	participant, err := h.service.AddParticipant(r.Context(), userID, encounterID, input)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to add participant", err)
 		return

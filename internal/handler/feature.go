@@ -19,7 +19,7 @@ func NewFeatureHandler(service *service.FeatureService) *FeatureHandler {
 }
 
 // RegisterFeatureRoutes mounts feature routes. Call within a router scoped to /characters/{id}/features.
-func (h *FeatureHandler) RegisterFeatureRoutes(r chi.Router) {
+func (h *FeatureHandler) RegisterRoutes(r chi.Router) {
 	r.Get("/", h.handleListFeatures)
 	r.Post("/", h.handleCreateFeature)
 	r.Patch("/{featureID}", h.handleUpdateFeature)

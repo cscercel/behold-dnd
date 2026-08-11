@@ -93,6 +93,8 @@ export const endEncounter = (id: string) => post<any>(`/combat/${id}/end`);
 export const nextRound = (id: string) => post<any>(`/combat/${id}/next-round`);
 export const listParticipants = (id: string) => get<any[]>(`/combat/${id}/participants`);
 export const addParticipant = (id: string, data: any) => post<any>(`/combat/${id}/participants`, data);
+export const updateParticipantInitiative = (encId: string, partId: string, initiative: number) =>
+    put<any>(`/combat/${encId}/participants/${partId}/initiative`, { initiative });
 export const removeParticipant = (encId: string, partId: string) =>
     del<any>(`/combat/${encId}/participants/${partId}`);
 export const participantDamage = (encId: string, partId: string, amount: number) =>

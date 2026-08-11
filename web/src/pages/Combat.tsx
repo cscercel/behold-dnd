@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import * as api from '../lib/api';
-import { IconPlus, IconSword, IconSkip, IconStop, IconPlay, IconTrash, IconChevronDown, IconChevronUp } from '../components/Icon';
+import { IconPlus, IconSword, IconSkip, IconStop, IconPlay, IconTrash, IconChevronDown, IconChevronUp, IconZap } from '../components/Icon';
 
 const field = "flex flex-col gap-1.5";
 const fieldLabel = "text-[11px] text-ash uppercase tracking-wide";
+
+const rollD20 = () => Math.floor(Math.random() * 20) + 1;
 
 export function Combat() {
     const [encounters, setEncounters] = useState<any[]>([]);
@@ -14,7 +16,11 @@ export function Combat() {
     const [newName, setNewName] = useState('');
     const [loading, setLoading] = useState(true);
     const [showAddPart, setShowAddPart] = useState(false);
-    const [partForm, setPartForm] = useState({ character_id: '', name: '', initiative: 0, max_hp: 10, current_hp: 10, armor_class: 10, speed: 30 });
+    const [showRoll, setShowRoll] = useState(false);
+    const [partForm, setPartForm] = useState({ character_id: '', name: '', initiative_bonus: 0, max_hp: 10, current_hp: 10, armor_class: 10, speed: 30 });
+    // Initiative bonuses live client-side only, keyed by participant id — the backend
+    // stores just the final rolled total. Lost on page refresh; re-enter before rerolling.
+    const [bonuses, setBonuses] = useState<Record<string, number>>({});
 
     const reload = async () => {
         const [enc, chars] = await Promise.all([api.listEncounters(), api.listCharacters()]);
@@ -46,9 +52,11 @@ export function Combat() {
         e.preventDefault();
         const encId = active?.id || selectedId;
         if (!encId) return;
-        await api.addParticipant(encId, partForm);
+        const { initiative_bonus, ...rest } = partForm;
+        const created = await api.addParticipant(encId, { ...rest, initiative: Math.max(1, initiative_bonus) });
+        if (created?.id) setBonuses(b => ({ ...b, [created.id]: initiative_bonus }));
         setShowAddPart(false);
-        setPartForm({ character_id: '', name: '', initiative: 0, max_hp: 10, current_hp: 10, armor_class: 10, speed: 30 });
+        setPartForm({ character_id: '', name: '', initiative_bonus: 0, max_hp: 10, current_hp: 10, armor_class: 10, speed: 30 });
         reload();
     };
 
@@ -104,6 +112,11 @@ export function Combat() {
                                         <button className="flex items-center gap-1.5 bg-crimson/15 border border-crimson/30 text-crimson-light px-3.5 py-2 rounded-md text-[13px] hover:bg-crimson/25" onClick={() => api.endEncounter(currentEnc.id).then(reload)}><IconStop size={15} /> End</button>
                                     </>
                                 }
+                                {participants.length > 0 && (
+                                    <button className="flex items-center gap-1.5 bg-stone border border-stone-border text-ash-light px-3.5 py-2 rounded-md text-[13px] transition-all duration-180 hover:border-gold-dim hover:text-parchment" onClick={() => setShowRoll(true)}>
+                                        <IconZap size={15} /> Roll Initiative
+                                    </button>
+                                )}
                                 <button className="flex items-center gap-1.5 bg-stone border border-stone-border text-ash-light px-3.5 py-2 rounded-md text-[13px] transition-all duration-180 hover:border-gold-dim hover:text-parchment" onClick={() => setShowAddPart(v => !v)}><IconPlus size={15} /> Add Combatant</button>
                             </div>
                         </div>
@@ -119,10 +132,14 @@ export function Combat() {
                                         </select>
                                     </div>
                                     <div className={field}><label className={fieldLabel}>Name *</label><input value={partForm.name} onChange={e => setPartForm(f => ({ ...f, name: e.target.value }))} required /></div>
-                                    <div className={field}><label className={fieldLabel}>Initiative</label><input type="number" value={partForm.initiative} onChange={e => setPartForm(f => ({ ...f, initiative: +e.target.value }))} /></div>
+                                    <div className={field}>
+                                        <label className={fieldLabel}>Initiative Bonus</label>
+                                        <input type="number" value={partForm.initiative_bonus} onChange={e => setPartForm(f => ({ ...f, initiative_bonus: +e.target.value }))} />
+                                    </div>
                                     <div className={field}><label className={fieldLabel}>Max HP</label><input type="number" min={1} value={partForm.max_hp} onChange={e => setPartForm(f => ({ ...f, max_hp: +e.target.value, current_hp: +e.target.value }))} /></div>
                                     <div className={field}><label className={fieldLabel}>AC</label><input type="number" min={1} value={partForm.armor_class} onChange={e => setPartForm(f => ({ ...f, armor_class: +e.target.value }))} /></div>
                                 </div>
+                                <p className="text-[11px] text-ash">The bonus is added to a d20 roll — yours if a player, auto-rolled otherwise — when you click "Roll Initiative".</p>
                                 <div className="flex justify-end gap-2">
                                     <button type="button" className="bg-stone-mid border-none text-ash-light px-4 py-2 rounded-md text-[13px]" onClick={() => setShowAddPart(false)}>Cancel</button>
                                     <button type="submit" className="bg-crimson border-none text-parchment px-4 py-2 rounded-md font-display text-[13px] font-semibold">Add to Battle</button>
@@ -149,6 +166,94 @@ export function Combat() {
                         <p>Select or create an encounter to begin</p>
                     </div>
                 )}
+            </div>
+
+            {showRoll && (
+                <RollInitiativeModal
+                    encId={encId}
+                    participants={participants}
+                    characters={characters}
+                    bonuses={bonuses}
+                    onClose={() => setShowRoll(false)}
+                    onDone={reload}
+                />
+            )}
+        </div>
+    );
+}
+
+function RollInitiativeModal({ encId, participants, characters, bonuses, onClose, onDone }: {
+    encId: string; participants: any[]; characters: any[]; bonuses: Record<string, number>;
+    onClose: () => void; onDone: () => void;
+}) {
+    const isPlayer = (p: any) => {
+        const c = characters.find((ch: any) => ch.id === p.character_id);
+        return !!c && !c.is_npc;
+    };
+    const players = participants.filter(isPlayer);
+    const npcs = participants.filter(p => !isPlayer(p));
+
+    const [rolls, setRolls] = useState<Record<string, string>>(() =>
+        Object.fromEntries(players.map(p => [p.id, ''])));
+    const [rolling, setRolling] = useState(false);
+
+    const allFilled = players.every(p => rolls[p.id]?.trim() !== '');
+
+    const submit = async () => {
+        setRolling(true);
+        try {
+            await Promise.all(participants.map(p => {
+                const bonus = bonuses[p.id] ?? 0;
+                const d20 = isPlayer(p) ? Math.max(1, Math.min(20, parseInt(rolls[p.id]) || 1)) : rollD20();
+                const total = Math.max(1, d20 + bonus);
+                return api.updateParticipantInitiative(encId, p.id, total);
+            }));
+            onDone();
+            onClose();
+        } finally {
+            setRolling(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/75 z-[100] flex items-center justify-center p-5" onClick={onClose}>
+            <div className="bg-stone border border-stone-border rounded-lg p-7 w-full max-w-[440px] max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <h2 className="font-display text-lg font-bold text-parchment mb-1">Roll Initiative</h2>
+                <p className="text-[13px] text-ash mb-5">Enter each player's physical d20 roll. Non-player combatants are rolled automatically.</p>
+
+                {players.length > 0 && (
+                    <div className="flex flex-col gap-2.5 mb-5">
+                        {players.map(p => (
+                            <div key={p.id} className="flex items-center gap-3">
+                                <span className="flex-1 text-sm text-parchment">{p.name}</span>
+                                <span className="text-[11px] text-ash">+{bonuses[p.id] ?? 0}</span>
+                                <input className="w-16 text-center" type="number" min={1} max={20}
+                                    value={rolls[p.id]} placeholder="d20"
+                                    onChange={e => setRolls(r => ({ ...r, [p.id]: e.target.value }))} />
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {npcs.length > 0 && (
+                    <div className="bg-stone-mid rounded-md p-3 mb-5">
+                        <div className="text-[11px] text-ash-light">
+                            {npcs.length} combatant{npcs.length !== 1 ? 's' : ''} will be rolled automatically: {npcs.map(n => n.name).join(', ')}
+                        </div>
+                    </div>
+                )}
+
+                {players.length === 0 && npcs.length === 0 && (
+                    <div className="text-center py-6 text-ash text-sm">No combatants to roll.</div>
+                )}
+
+                <div className="flex justify-end gap-2">
+                    <button className="bg-stone-mid border-none text-ash-light px-4 py-2 rounded-md text-[13px] hover:text-parchment" onClick={onClose} disabled={rolling}>Cancel</button>
+                    <button className="bg-crimson border-none text-parchment px-4 py-2 rounded-md font-display text-[13px] font-semibold hover:bg-crimson-light disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={submit} disabled={rolling || !allFilled}>
+                        {rolling ? 'Rolling…' : 'Roll'}
+                    </button>
+                </div>
             </div>
         </div>
     );
