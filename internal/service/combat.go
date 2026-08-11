@@ -79,21 +79,19 @@ func (s *CombatService) ListParticipants(ctx context.Context, encounterID uuid.U
 	return participants, nil
 }
 
-// Add character with initiative roll already done
-// AddParticipantInput describes a combatant to add to an encounter. Either
-// CharacterID is set (add an existing character), or Name/MaxHP/ArmorClass/Speed
-// are set and a lightweight NPC character is created on the fly to back the
-// participant (combat_participants.character_id is a required foreign key).
 type AddParticipantInput struct {
-	CharacterID *uuid.UUID
-	Name        string
-	MaxHP       int32
-	ArmorClass  int32
-	Speed       int32
-	Initiative  int32
+	CharacterID     *uuid.UUID
+	Name            string
+	MaxHP           int32
+	ArmorClass      int32
+	Speed           int32
+	Initiative      int32
+	InitiativeBonus int32
 }
 
-func (s *CombatService) AddParticipant(ctx context.Context, ownerID uuid.UUID, encounterID uuid.UUID, input AddParticipantInput) (db.CombatParticipant, error) {
+func (s *CombatService) AddParticipant(
+	ctx context.Context, ownerID uuid.UUID, encounterID uuid.UUID, input AddParticipantInput,
+) (db.CombatParticipant, error) {
 	characterID := uuid.Nil
 	if input.CharacterID != nil {
 		characterID = *input.CharacterID
@@ -139,15 +137,16 @@ func (s *CombatService) AddParticipant(ctx context.Context, ownerID uuid.UUID, e
 	}
 
 	return s.queries.AddParticipant(ctx, db.AddParticipantParams{
-		EncounterID: encounterID,
-		CharacterID: characterID,
-		Name:        character.Name,
-		Initiative:  input.Initiative,
-		CurrentHp:   character.CurrentHp,
-		MaxHp:       character.MaxHp,
-		TempHp:      character.TempHp,
-		ArmorClass:  character.ArmorClass,
-		Speed:       character.Speed,
+		EncounterID:     encounterID,
+		CharacterID:     characterID,
+		Name:            character.Name,
+		Initiative:      input.Initiative,
+		InitiativeBonus: int32(character.Initiative),
+		CurrentHp:       character.CurrentHp,
+		MaxHp:           character.MaxHp,
+		TempHp:          character.TempHp,
+		ArmorClass:      character.ArmorClass,
+		Speed:           character.Speed,
 	})
 }
 
@@ -234,7 +233,9 @@ func (s *CombatService) HealParticipant(
 	return p, nil
 }
 
-func (s *CombatService) AddParticipantTempHP(ctx context.Context, participantID uuid.UUID, amount int32) (db.CombatParticipant, error) {
+func (s *CombatService) AddParticipantTempHP(
+	ctx context.Context, participantID uuid.UUID, amount int32,
+) (db.CombatParticipant, error) {
 	p, err := s.queries.UpdateParticipantTempHP(ctx, db.UpdateParticipantTempHPParams{
 		ID:     participantID,
 		TempHp: amount,
@@ -245,7 +246,9 @@ func (s *CombatService) AddParticipantTempHP(ctx context.Context, participantID 
 	return p, nil
 }
 
-func (s *CombatService) UpdateParticipantInitiative(ctx context.Context, participantID uuid.UUID, initiative int32) (db.CombatParticipant, error) {
+func (s *CombatService) UpdateParticipantInitiative(
+	ctx context.Context, participantID uuid.UUID, initiative int32,
+) (db.CombatParticipant, error) {
 	p, err := s.queries.UpdateParticipantInitiative(ctx, db.UpdateParticipantInitiativeParams{
 		ID:         participantID,
 		Initiative: initiative,
@@ -256,7 +259,9 @@ func (s *CombatService) UpdateParticipantInitiative(ctx context.Context, partici
 	return p, nil
 }
 
-func (s *CombatService) UpdateParticipantConditions(ctx context.Context, participantID uuid.UUID, conditions []string) (db.CombatParticipant, error) {
+func (s *CombatService) UpdateParticipantConditions(
+	ctx context.Context, participantID uuid.UUID, conditions []string,
+) (db.CombatParticipant, error) {
 	p, err := s.queries.UpdateParticipantConditions(ctx, db.UpdateParticipantConditionsParams{
 		ID:         participantID,
 		Conditions: conditions,
@@ -267,7 +272,9 @@ func (s *CombatService) UpdateParticipantConditions(ctx context.Context, partici
 	return p, nil
 }
 
-func (s *CombatService) ToggleParticipantConcentration(ctx context.Context, participantID uuid.UUID) (db.CombatParticipant, error) {
+func (s *CombatService) ToggleParticipantConcentration(
+	ctx context.Context, participantID uuid.UUID,
+) (db.CombatParticipant, error) {
 	p, err := s.queries.ToggleParticipantConcentration(ctx, participantID)
 	if err != nil {
 		return db.CombatParticipant{}, fmt.Errorf("failed to toggle concentration: %w", err)
@@ -275,7 +282,9 @@ func (s *CombatService) ToggleParticipantConcentration(ctx context.Context, part
 	return p, nil
 }
 
-func (s *CombatService) DeactivateParticipant(ctx context.Context, participantID uuid.UUID) (db.CombatParticipant, error) {
+func (s *CombatService) DeactivateParticipant(
+	ctx context.Context, participantID uuid.UUID,
+) (db.CombatParticipant, error) {
 	p, err := s.queries.DeactivateParticipant(ctx, participantID)
 	if err != nil {
 		return db.CombatParticipant{}, fmt.Errorf("failed to deactivate participant: %w", err)

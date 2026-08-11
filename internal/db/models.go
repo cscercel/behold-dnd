@@ -94,22 +94,23 @@ type CombatEncounter struct {
 }
 
 type CombatParticipant struct {
-	ID            uuid.UUID          `json:"id"`
-	EncounterID   uuid.UUID          `json:"encounter_id"`
-	CharacterID   uuid.UUID          `json:"character_id"`
-	Name          string             `json:"name"`
-	Initiative    int32              `json:"initiative"`
-	CurrentHp     int32              `json:"current_hp"`
-	MaxHp         int32              `json:"max_hp"`
-	TempHp        int32              `json:"temp_hp"`
-	ArmorClass    int32              `json:"armor_class"`
-	Speed         int32              `json:"speed"`
-	Conditions    []string           `json:"conditions"`
-	Concentration bool               `json:"concentration"`
-	IsActive      bool               `json:"is_active"`
-	Notes         string             `json:"notes"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+	ID              uuid.UUID          `json:"id"`
+	EncounterID     uuid.UUID          `json:"encounter_id"`
+	CharacterID     uuid.UUID          `json:"character_id"`
+	Name            string             `json:"name"`
+	Initiative      int32              `json:"initiative"`
+	CurrentHp       int32              `json:"current_hp"`
+	MaxHp           int32              `json:"max_hp"`
+	TempHp          int32              `json:"temp_hp"`
+	ArmorClass      int32              `json:"armor_class"`
+	Speed           int32              `json:"speed"`
+	Conditions      []string           `json:"conditions"`
+	Concentration   bool               `json:"concentration"`
+	IsActive        bool               `json:"is_active"`
+	Notes           string             `json:"notes"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	InitiativeBonus int32              `json:"initiative_bonus"`
 }
 
 type Feature struct {

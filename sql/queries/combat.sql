@@ -59,6 +59,7 @@ INSERT INTO combat_participants (
     encounter_id,
     character_id,
     name,
+    initiative_bonus,
     initiative,
     current_hp,
     max_hp,
@@ -66,7 +67,7 @@ INSERT INTO combat_participants (
     armor_class,
     speed
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 )
 RETURNING *;
 

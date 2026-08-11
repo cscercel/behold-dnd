@@ -278,12 +278,13 @@ func (h *CombatHandler) handleAddParticipant(w http.ResponseWriter, r *http.Requ
 	}
 
 	var body struct {
-		CharacterID string `json:"character_id"`
-		Name        string `json:"name"`
-		MaxHP       int32  `json:"max_hp"`
-		ArmorClass  int32  `json:"armor_class"`
-		Speed       int32  `json:"speed"`
-		Initiative  int32  `json:"initiative"`
+		CharacterID     string `json:"character_id"`
+		Name            string `json:"name"`
+		MaxHP           int32  `json:"max_hp"`
+		ArmorClass      int32  `json:"armor_class"`
+		Speed           int32  `json:"speed"`
+		Initiative      int32  `json:"initiative"`
+		InitiativeBonus int32  `json:"initiative_bonus"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		respondWithError(w, http.StatusBadRequest, "invalid request body", err)
@@ -297,11 +298,12 @@ func (h *CombatHandler) handleAddParticipant(w http.ResponseWriter, r *http.Requ
 	}
 
 	input := service.AddParticipantInput{
-		Name:       body.Name,
-		MaxHP:      body.MaxHP,
-		ArmorClass: body.ArmorClass,
-		Speed:      body.Speed,
-		Initiative: body.Initiative,
+		Name:            body.Name,
+		MaxHP:           body.MaxHP,
+		ArmorClass:      body.ArmorClass,
+		Speed:           body.Speed,
+		Initiative:      body.Initiative,
+		InitiativeBonus: body.InitiativeBonus,
 	}
 	if body.CharacterID != "" {
 		characterID, err := uuid.Parse(body.CharacterID)

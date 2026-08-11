@@ -16,6 +16,7 @@ INSERT INTO combat_participants (
     encounter_id,
     character_id,
     name,
+    initiative_bonus,
     initiative,
     current_hp,
     max_hp,
@@ -23,21 +24,22 @@ INSERT INTO combat_participants (
     armor_class,
     speed
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 )
-RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at
+RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus
 `
 
 type AddParticipantParams struct {
-	EncounterID uuid.UUID `json:"encounter_id"`
-	CharacterID uuid.UUID `json:"character_id"`
-	Name        string    `json:"name"`
-	Initiative  int32     `json:"initiative"`
-	CurrentHp   int32     `json:"current_hp"`
-	MaxHp       int32     `json:"max_hp"`
-	TempHp      int32     `json:"temp_hp"`
-	ArmorClass  int32     `json:"armor_class"`
-	Speed       int32     `json:"speed"`
+	EncounterID     uuid.UUID `json:"encounter_id"`
+	CharacterID     uuid.UUID `json:"character_id"`
+	Name            string    `json:"name"`
+	InitiativeBonus int32     `json:"initiative_bonus"`
+	Initiative      int32     `json:"initiative"`
+	CurrentHp       int32     `json:"current_hp"`
+	MaxHp           int32     `json:"max_hp"`
+	TempHp          int32     `json:"temp_hp"`
+	ArmorClass      int32     `json:"armor_class"`
+	Speed           int32     `json:"speed"`
 }
 
 func (q *Queries) AddParticipant(ctx context.Context, arg AddParticipantParams) (CombatParticipant, error) {
@@ -45,6 +47,7 @@ func (q *Queries) AddParticipant(ctx context.Context, arg AddParticipantParams) 
 		arg.EncounterID,
 		arg.CharacterID,
 		arg.Name,
+		arg.InitiativeBonus,
 		arg.Initiative,
 		arg.CurrentHp,
 		arg.MaxHp,
@@ -70,6 +73,7 @@ func (q *Queries) AddParticipant(ctx context.Context, arg AddParticipantParams) 
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.InitiativeBonus,
 	)
 	return i, err
 }
@@ -98,7 +102,7 @@ const deactivateParticipant = `-- name: DeactivateParticipant :one
 UPDATE combat_participants
 SET is_active = FALSE
 WHERE id = $1
-RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at
+RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus
 `
 
 func (q *Queries) DeactivateParticipant(ctx context.Context, id uuid.UUID) (CombatParticipant, error) {
@@ -121,6 +125,7 @@ func (q *Queries) DeactivateParticipant(ctx context.Context, id uuid.UUID) (Comb
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.InitiativeBonus,
 	)
 	return i, err
 }
@@ -209,7 +214,7 @@ func (q *Queries) GetEncounter(ctx context.Context, id uuid.UUID) (CombatEncount
 }
 
 const getParticipant = `-- name: GetParticipant :one
-SELECT id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at FROM combat_participants
+SELECT id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus FROM combat_participants
 WHERE id = $1
 `
 
@@ -233,12 +238,13 @@ func (q *Queries) GetParticipant(ctx context.Context, id uuid.UUID) (CombatParti
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.InitiativeBonus,
 	)
 	return i, err
 }
 
 const listActiveParticipants = `-- name: ListActiveParticipants :many
-SELECT id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at FROM combat_participants
+SELECT id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus FROM combat_participants
 WHERE encounter_id = $1
 AND is_active = TRUE
 ORDER BY initiative DESC, name
@@ -270,6 +276,7 @@ func (q *Queries) ListActiveParticipants(ctx context.Context, encounterID uuid.U
 			&i.Notes,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.InitiativeBonus,
 		); err != nil {
 			return nil, err
 		}
@@ -314,7 +321,7 @@ func (q *Queries) ListEncounters(ctx context.Context) ([]CombatEncounter, error)
 }
 
 const listParticipants = `-- name: ListParticipants :many
-SELECT id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at FROM combat_participants
+SELECT id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus FROM combat_participants
 WHERE encounter_id = $1
 ORDER BY initiative DESC, name
 `
@@ -345,6 +352,7 @@ func (q *Queries) ListParticipants(ctx context.Context, encounterID uuid.UUID) (
 			&i.Notes,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.InitiativeBonus,
 		); err != nil {
 			return nil, err
 		}
@@ -413,7 +421,7 @@ const toggleParticipantConcentration = `-- name: ToggleParticipantConcentration 
 UPDATE combat_participants
 SET concentration = NOT concentration
 WHERE id = $1
-RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at
+RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus
 `
 
 func (q *Queries) ToggleParticipantConcentration(ctx context.Context, id uuid.UUID) (CombatParticipant, error) {
@@ -436,6 +444,7 @@ func (q *Queries) ToggleParticipantConcentration(ctx context.Context, id uuid.UU
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.InitiativeBonus,
 	)
 	return i, err
 }
@@ -444,7 +453,7 @@ const updateParticipantConditions = `-- name: UpdateParticipantConditions :one
 UPDATE combat_participants
 SET conditions = $2
 WHERE id = $1
-RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at
+RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus
 `
 
 type UpdateParticipantConditionsParams struct {
@@ -472,6 +481,7 @@ func (q *Queries) UpdateParticipantConditions(ctx context.Context, arg UpdatePar
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.InitiativeBonus,
 	)
 	return i, err
 }
@@ -480,7 +490,7 @@ const updateParticipantHP = `-- name: UpdateParticipantHP :one
 UPDATE combat_participants
 SET current_hp = $2
 WHERE id = $1
-RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at
+RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus
 `
 
 type UpdateParticipantHPParams struct {
@@ -508,6 +518,7 @@ func (q *Queries) UpdateParticipantHP(ctx context.Context, arg UpdateParticipant
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.InitiativeBonus,
 	)
 	return i, err
 }
@@ -516,7 +527,7 @@ const updateParticipantInitiative = `-- name: UpdateParticipantInitiative :one
 UPDATE combat_participants
 SET initiative = $2
 WHERE id = $1
-RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at
+RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus
 `
 
 type UpdateParticipantInitiativeParams struct {
@@ -544,6 +555,7 @@ func (q *Queries) UpdateParticipantInitiative(ctx context.Context, arg UpdatePar
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.InitiativeBonus,
 	)
 	return i, err
 }
@@ -552,7 +564,7 @@ const updateParticipantTempHP = `-- name: UpdateParticipantTempHP :one
 UPDATE combat_participants
 SET temp_hp = $2
 WHERE id = $1
-RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at
+RETURNING id, encounter_id, character_id, name, initiative, current_hp, max_hp, temp_hp, armor_class, speed, conditions, concentration, is_active, notes, created_at, updated_at, initiative_bonus
 `
 
 type UpdateParticipantTempHPParams struct {
@@ -580,6 +592,7 @@ func (q *Queries) UpdateParticipantTempHP(ctx context.Context, arg UpdatePartici
 		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.InitiativeBonus,
 	)
 	return i, err
 }
