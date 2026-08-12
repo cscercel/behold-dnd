@@ -18,9 +18,6 @@ export function Combat() {
     const [showAddPart, setShowAddPart] = useState(false);
     const [showRoll, setShowRoll] = useState(false);
     const [partForm, setPartForm] = useState({ character_id: '', name: '', initiative_bonus: 0, max_hp: 10, current_hp: 10, armor_class: 10, speed: 30 });
-    // Initiative bonuses live client-side only, keyed by participant id — the backend
-    // stores just the final rolled total. Lost on page refresh; re-enter before rerolling.
-    const [bonuses, setBonuses] = useState<Record<string, number>>({});
 
     const reload = async () => {
         const [enc, chars] = await Promise.all([api.listEncounters(), api.listCharacters()]);
@@ -52,9 +49,7 @@ export function Combat() {
         e.preventDefault();
         const encId = active?.id || selectedId;
         if (!encId) return;
-        const { initiative_bonus, ...rest } = partForm;
-        const created = await api.addParticipant(encId, { ...rest, initiative: Math.max(1, initiative_bonus) });
-        if (created?.id) setBonuses(b => ({ ...b, [created.id]: initiative_bonus }));
+        await api.addParticipant(encId, { ...partForm, initiative: Math.max(1, partForm.initiative_bonus) });
         setShowAddPart(false);
         setPartForm({ character_id: '', name: '', initiative_bonus: 0, max_hp: 10, current_hp: 10, armor_class: 10, speed: 30 });
         reload();
@@ -173,7 +168,6 @@ export function Combat() {
                     encId={encId}
                     participants={participants}
                     characters={characters}
-                    bonuses={bonuses}
                     onClose={() => setShowRoll(false)}
                     onDone={reload}
                 />
@@ -182,8 +176,8 @@ export function Combat() {
     );
 }
 
-function RollInitiativeModal({ encId, participants, characters, bonuses, onClose, onDone }: {
-    encId: string; participants: any[]; characters: any[]; bonuses: Record<string, number>;
+function RollInitiativeModal({ encId, participants, characters, onClose, onDone }: {
+    encId: string; participants: any[]; characters: any[];
     onClose: () => void; onDone: () => void;
 }) {
     const isPlayer = (p: any) => {
@@ -203,7 +197,7 @@ function RollInitiativeModal({ encId, participants, characters, bonuses, onClose
         setRolling(true);
         try {
             await Promise.all(participants.map(p => {
-                const bonus = bonuses[p.id] ?? 0;
+                const bonus = p.initiative_bonus ?? 0;
                 const d20 = isPlayer(p) ? Math.max(1, Math.min(20, parseInt(rolls[p.id]) || 1)) : rollD20();
                 const total = Math.max(1, d20 + bonus);
                 return api.updateParticipantInitiative(encId, p.id, total);
@@ -226,7 +220,7 @@ function RollInitiativeModal({ encId, participants, characters, bonuses, onClose
                         {players.map(p => (
                             <div key={p.id} className="flex items-center gap-3">
                                 <span className="flex-1 text-sm text-parchment">{p.name}</span>
-                                <span className="text-[11px] text-ash">+{bonuses[p.id] ?? 0}</span>
+                                <span className="text-[11px] text-ash">+{p.initiative_bonus ?? 0}</span>
                                 <input className="w-16 text-center" type="number" min={1} max={20}
                                     value={rolls[p.id]} placeholder="d20"
                                     onChange={e => setRolls(r => ({ ...r, [p.id]: e.target.value }))} />
@@ -272,7 +266,10 @@ function ParticipantRow({ p, onDmg, onHeal, onRemove }: {
 
     return (
         <div className={`flex items-stretch bg-stone border border-stone-border rounded-lg overflow-hidden ${!p.is_active ? 'opacity-40' : ''}`}>
-            <div className="w-12 shrink-0 bg-stone-mid flex items-center justify-center font-display text-lg font-bold text-gold">{p.initiative}</div>
+            <div className="w-12 shrink-0 bg-stone-mid flex flex-col items-center justify-center">
+                <span className="font-display text-lg font-bold text-gold leading-none">{p.initiative}</span>
+                {!!p.initiative_bonus && <span className="text-[10px] text-ash mt-0.5">+{p.initiative_bonus}</span>}
+            </div>
             <div className="flex-1">
                 <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/[0.02]" onClick={() => setExpanded(v => !v)}>
                     <div>
