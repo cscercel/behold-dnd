@@ -5,6 +5,9 @@ import { IconPlus, IconSword, IconSkip, IconStop, IconPlay, IconTrash, IconChevr
 const field = "flex flex-col gap-1.5";
 const fieldLabel = "text-[11px] text-ash uppercase tracking-wide";
 
+const CONDITIONS = ['Blinded', 'Charmed', 'Deafened', 'Exhaustion', 'Frightened', 'Grappled',
+    'Incapacitated', 'Invisible', 'Paralyzed', 'Petrified', 'Poisoned', 'Prone', 'Restrained', 'Stunned', 'Unconscious'];
+
 const rollD20 = () => Math.floor(Math.random() * 20) + 1;
 
 export function Combat() {
@@ -22,14 +25,16 @@ export function Combat() {
     const reload = async () => {
         const [enc, chars] = await Promise.all([api.listEncounters(), api.listCharacters()]);
         setEncounters(enc || []); setCharacters(chars || []);
-        try {
-            const act = await api.getActiveEncounter();
-            setActive(act);
-            if (act) {
-                const parts = await api.listParticipants(act.id);
-                setParticipants((parts || []).sort((a: any, b: any) => b.initiative - a.initiative));
-            }
-        } catch { setActive(null); setParticipants([]); }
+        let act: any = null;
+        try { act = await api.getActiveEncounter(); } catch { act = null; }
+        setActive(act);
+        const targetId = act?.id || selectedId;
+        if (targetId) {
+            const parts = await api.listParticipants(targetId);
+            setParticipants((parts || []).sort((a: any, b: any) => b.initiative - a.initiative));
+        } else {
+            setParticipants([]);
+        }
     };
 
     useEffect(() => { reload().finally(() => setLoading(false)); }, []);
@@ -150,6 +155,10 @@ export function Combat() {
                                 <ParticipantRow key={p.id} p={p} encId={encId}
                                     onDmg={n => api.participantDamage(encId, p.id, n).then(reload)}
                                     onHeal={n => api.participantHeal(encId, p.id, n).then(reload)}
+                                    onTempHP={n => api.participantTempHP(encId, p.id, n).then(reload)}
+                                    onConditions={cs => api.updateParticipantConditions(encId, p.id, cs).then(reload)}
+                                    onToggleConcentration={() => api.toggleParticipantConcentration(encId, p.id).then(reload)}
+                                    onDeactivate={() => api.deactivateParticipant(encId, p.id).then(reload)}
                                     onRemove={() => api.removeParticipant(encId, p.id).then(reload)}
                                 />
                             ))}
@@ -253,16 +262,28 @@ function RollInitiativeModal({ encId, participants, characters, onClose, onDone 
     );
 }
 
-function ParticipantRow({ p, onDmg, onHeal, onRemove }: {
+function ParticipantRow({ p, onDmg, onHeal, onTempHP, onConditions, onToggleConcentration, onDeactivate, onRemove }: {
     p: any; encId: string;
     onDmg: (n: number) => void;
     onHeal: (n: number) => void;
+    onTempHP: (n: number) => void;
+    onConditions: (conditions: string[]) => void;
+    onToggleConcentration: () => void;
+    onDeactivate: () => void;
     onRemove: () => void;
 }) {
     const [expanded, setExpanded] = useState(false);
     const [amount, setAmount] = useState('');
+    const [tempAmount, setTempAmount] = useState('');
     const hpPct = Math.max(0, Math.min(100, (p.current_hp / p.max_hp) * 100));
     const hpColor = hpPct > 50 ? '#27ae60' : hpPct > 25 ? '#f39c12' : '#c0392b';
+
+    const toggleCondition = (c: string) => {
+        const next = (p.conditions || []).includes(c)
+            ? p.conditions.filter((x: string) => x !== c)
+            : [...(p.conditions || []), c];
+        onConditions(next);
+    };
 
     return (
         <div className={`flex items-stretch bg-stone border border-stone-border rounded-lg overflow-hidden ${!p.is_active ? 'opacity-40' : ''}`}>
@@ -286,20 +307,54 @@ function ParticipantRow({ p, onDmg, onHeal, onRemove }: {
                         </div>
                         <span className="font-bold text-base" style={{ color: hpColor }}>{p.current_hp}</span>
                         <span className="text-xs text-ash">/{p.max_hp}</span>
+                        {p.temp_hp > 0 && <span className="text-xs text-info">+{p.temp_hp}</span>}
                     </div>
-                    <div className="flex gap-2.5 text-xs text-ash">
+                    <div className="flex gap-2.5 text-xs text-ash items-center">
                         <span>AC {p.armor_class}</span>
-                        {p.concentration && <span className="text-[#9b59b6]">⊛</span>}
+                        {p.concentration && <span className="text-[#9b59b6]" title="Concentrating">⊛</span>}
+                        {!p.is_active && <span className="text-crimson-light" title="Inactive">✕</span>}
                     </div>
                     {expanded ? <IconChevronUp size={14} className="text-ash shrink-0" /> : <IconChevronDown size={14} className="text-ash shrink-0" />}
                 </div>
                 {expanded && (
-                    <div className="px-4 py-3 border-t border-stone-border flex items-center gap-2.5 bg-stone-mid">
-                        <input className="w-20 text-center px-2 py-1.5" type="number" min={1} value={amount}
-                            onChange={e => setAmount(e.target.value)} placeholder="Amount" />
-                        <button className="bg-crimson/20 border border-crimson/30 text-crimson-light px-3 py-1.5 rounded-sm text-xs hover:bg-crimson/35" onClick={() => { if (amount) { onDmg(+amount); setAmount(''); } }}>⚔ Damage</button>
-                        <button className="bg-emerald/15 border border-emerald/30 text-[#27ae60] px-3 py-1.5 rounded-sm text-xs hover:bg-emerald/25" onClick={() => { if (amount) { onHeal(+amount); setAmount(''); } }}>❤ Heal</button>
-                        <button className="flex items-center gap-1 bg-transparent border-none text-ash text-xs ml-auto hover:text-crimson-light" onClick={onRemove}><IconTrash size={13} /></button>
+                    <div className="px-4 py-3 border-t border-stone-border flex flex-col gap-3 bg-stone-mid">
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                            <input className="w-20 text-center px-2 py-1.5" type="number" min={1} value={amount}
+                                onChange={e => setAmount(e.target.value)} placeholder="Amount" />
+                            <button className="bg-crimson/20 border border-crimson/30 text-crimson-light px-3 py-1.5 rounded-sm text-xs hover:bg-crimson/35" onClick={() => { if (amount) { onDmg(+amount); setAmount(''); } }}>⚔ Damage</button>
+                            <button className="bg-emerald/15 border border-emerald/30 text-[#27ae60] px-3 py-1.5 rounded-sm text-xs hover:bg-emerald/25" onClick={() => { if (amount) { onHeal(+amount); setAmount(''); } }}>❤ Heal</button>
+
+                            <input className="w-20 text-center px-2 py-1.5" type="number" min={0} value={tempAmount}
+                                onChange={e => setTempAmount(e.target.value)} placeholder="Temp HP" />
+                            <button className="bg-info/15 border border-info/30 text-info px-3 py-1.5 rounded-sm text-xs hover:bg-info/25" onClick={() => { onTempHP(tempAmount === '' ? 0 : +tempAmount); setTempAmount(''); }}>🛡 Set Temp HP</button>
+                        </div>
+
+                        <div>
+                            <div className="text-[10px] text-ash uppercase tracking-wide mb-1.5">Conditions</div>
+                            <div className="flex flex-wrap gap-1.5">
+                                {CONDITIONS.map(c => (
+                                    <button key={c}
+                                        className={`bg-stone border border-stone-border text-ash px-2.5 py-[5px] rounded-full text-xs transition-all duration-180 hover:border-crimson hover:text-parchment ${p.conditions?.includes(c) ? 'bg-crimson/20 border-crimson text-crimson-light' : ''}`}
+                                        onClick={() => toggleCondition(c)}>
+                                        {c}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                                className={`flex items-center gap-1.5 border px-3 py-1.5 rounded-sm text-xs transition-all duration-180 ${p.concentration ? 'bg-[#9b59b6]/20 border-[#9b59b6]/40 text-[#c99ee0]' : 'bg-stone border-stone-border text-ash hover:text-parchment'}`}
+                                onClick={onToggleConcentration}>
+                                ⊛ Concentration
+                            </button>
+                            {p.is_active && (
+                                <button className="flex items-center gap-1.5 bg-stone border border-stone-border text-ash px-3 py-1.5 rounded-sm text-xs transition-all duration-180 hover:border-crimson hover:text-crimson-light" onClick={onDeactivate}>
+                                    ✕ Mark Inactive
+                                </button>
+                            )}
+                            <button className="flex items-center gap-1 bg-transparent border-none text-ash text-xs ml-auto hover:text-crimson-light" onClick={onRemove}><IconTrash size={13} /> Remove</button>
+                        </div>
                     </div>
                 )}
             </div>

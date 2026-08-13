@@ -101,3 +101,11 @@ export const participantDamage = (encId: string, partId: string, amount: number)
     post<any>(`/combat/${encId}/participants/${partId}/damage`, { amount });
 export const participantHeal = (encId: string, partId: string, amount: number) =>
     post<any>(`/combat/${encId}/participants/${partId}/heal`, { amount });
+export const participantTempHP = (encId: string, partId: string, amount: number) =>
+    post<any>(`/combat/${encId}/participants/${partId}/temp-hp`, { amount });
+export const updateParticipantConditions = (encId: string, partId: string, conditions: string[]) =>
+    put<any>(`/combat/${encId}/participants/${partId}/conditions`, { conditions });
+export const toggleParticipantConcentration = (encId: string, partId: string) =>
+    post<any>(`/combat/${encId}/participants/${partId}/toggle-concentration`);
+export const deactivateParticipant = (encId: string, partId: string) =>
+    post<any>(`/combat/${encId}/participants/${partId}/deactivate`);
