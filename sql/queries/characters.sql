@@ -108,6 +108,7 @@ SET
     alignment              = COALESCE(sqlc.narg('alignment'), alignment),
     inspiration            = COALESCE(sqlc.narg('inspiration'), inspiration),
     speed                  = COALESCE(sqlc.narg('speed'), speed),
+    armor_class            = COALESCE(sqlc.narg('armor_class'), armor_class),
     ideals                 = COALESCE(sqlc.narg('ideals'), ideals),
     bonds                  = COALESCE(sqlc.narg('bonds'), bonds),
     flaws                  = COALESCE(sqlc.narg('flaws'), flaws),

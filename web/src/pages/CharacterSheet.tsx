@@ -117,6 +117,7 @@ export function CharacterSheet() {
     const [hpMode, setHpMode] = useState<'damage' | 'heal' | 'temp'>('damage');
     const [showConditions, setShowConditions] = useState(false);
     const [showManageLevel, setShowManageLevel] = useState(false);
+    const [showCombatStats, setShowCombatStats] = useState(false);
 
     const reload = useCallback(async () => {
         if (!id) return;
@@ -237,21 +238,35 @@ export function CharacterSheet() {
                         <button className="bg-crimson border-none text-parchment px-3.5 py-1.5 rounded-sm text-[13px] transition-colors duration-180 hover:bg-crimson-light" onClick={handleHP}>Apply</button>
                     </div>
 
-                    <div className="flex items-center gap-6 flex-1 justify-center flex-wrap">
-                        {[
-                            { l: 'AC', v: char.armor_class },
-                            { l: 'INIT', v: fmt(mod(char.dexterity)) },
-                            { l: 'SPEED', v: `${char.speed}ft` },
-                            { l: 'PROF', v: `+${profBonus}` },
-                            { l: `d${char.hit_dice_type}`, v: `${char.hit_dice_remaining} left` },
-                        ].map(s => (
-                            <div key={s.l} className="text-center">
-                                <div className="font-display text-lg font-bold text-parchment">{s.v}</div>
-                                <div className="text-[10px] text-ash tracking-wide mt-0.5">{s.l}</div>
-                            </div>
-                        ))}
-                    </div>
+                    <div
+                        className="flex items-center bg-ink border border-stone-border rounded-md px-4 py-2 divide-x divide-stone-border cursor-pointer transition-colors duration-180 hover:border-gold-dim"
+                        onClick={() => setShowCombatStats(true)}
+                        title="Click to edit AC & Speed">
+                        <div className="text-center px-4 first:pl-0">
+                            <div className="font-display text-lg font-bold text-parchment">{char.armor_class}</div>
+                            <div className="text-[10px] text-ash tracking-wide mt-0.5">AC</div>
+                        </div>
 
+                        <div className="text-center px-4">
+                            <div className="font-display text-lg font-bold text-parchment">{fmt(mod(char.dexterity))}</div>
+                            <div className="text-[10px] text-ash tracking-wide mt-0.5">INIT</div>
+                        </div>
+
+                        <div className="text-center px-4">
+                            <div className="font-display text-lg font-bold text-parchment">{char.speed}ft</div>
+                            <div className="text-[10px] text-ash tracking-wide mt-0.5">SPEED</div>
+                        </div>
+
+                        <div className="text-center px-4">
+                            <div className="font-display text-lg font-bold text-parchment">+{profBonus}</div>
+                            <div className="text-[10px] text-ash tracking-wide mt-0.5">PROF</div>
+                        </div>
+
+                        <div className="text-center px-4 last:pr-0">
+                            <div className="font-display text-lg font-bold text-parchment">{char.hit_dice_remaining} left</div>
+                            <div className="text-[10px] text-ash tracking-wide mt-0.5">d{char.hit_dice_type}</div>
+                        </div>
+                    </div>
                     {char.current_hp <= 0 && (
                         <div className="flex items-center gap-4 shrink-0">
                             <span className="text-[10px] font-bold tracking-wide text-crimson-light">DEATH SAVES</span>
@@ -306,7 +321,7 @@ export function CharacterSheet() {
                 ))}
             </div>
 
-            {/* Tab content — the only region that may ever scroll; the page itself never does */}
+            {/* Tab content */}
             <div className="flex-1 min-h-0 overflow-y-auto py-4 px-8">
                 {tab === 'stats' && <StatsTab char={char} profBonus={profBonus} toggleCond={toggleCond} features={features} id={id!} reload={reload} />}
                 {tab === 'inventory' && <InventoryTab id={id!} items={inventory} char={char} reload={reload} />}
@@ -317,13 +332,58 @@ export function CharacterSheet() {
             {showManageLevel && (
                 <ManageLevelModal char={char} id={id!} reload={reload} onClose={() => setShowManageLevel(false)} />
             )}
+            {showCombatStats && (
+                <CombatStatsModal char={char} id={id!} reload={reload} onClose={() => setShowCombatStats(false)} />
+            )}
         </div>
+    );
+}
+
+function CombatStatsModal({ char, id, reload, onClose }: { char: any; id: string; reload: () => void; onClose: () => void }) {
+    const [ac, setAc] = useState<number>(char.armor_class);
+    const [speed, setSpeed] = useState<number>(char.speed);
+    const [saving, setSaving] = useState(false);
+
+    const dirty = ac !== char.armor_class || speed !== char.speed;
+
+    const confirm = async () => {
+        setSaving(true);
+        try {
+            await api.updateCharacterInfo(id, { ...char, armor_class: ac, speed });
+            await reload();
+            onClose();
+        } catch (err) {
+            console.error('Failed to update combat stats', err);
+            setSaving(false);
+        }
+    };
+
+    return (
+        <DetailModal onClose={onClose}>
+            <h2 className="font-display text-xl font-bold text-parchment mb-5">Edit AC & Speed</h2>
+            <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className={field}>
+                    <label className={fieldLabel}>Armor Class</label>
+                    <input type="number" min={0} value={ac} onChange={e => setAc(+e.target.value)} />
+                </div>
+                <div className={field}>
+                    <label className={fieldLabel}>Speed (ft)</label>
+                    <input type="number" min={0} value={speed} onChange={e => setSpeed(+e.target.value)} />
+                </div>
+            </div>
+            <div className={modalActions}>
+                <button className={cancelBtn} onClick={onClose} disabled={saving}>Cancel</button>
+                <button className={submitBtn} onClick={confirm} disabled={saving || !dirty}>{saving ? 'Saving…' : 'Confirm'}</button>
+            </div>
+        </DetailModal>
     );
 }
 
 function ManageLevelModal({ char, id, reload, onClose }: { char: any; id: string; reload: () => void; onClose: () => void }) {
     const [level, setLevel] = useState<number>(char.level);
     const [maxHp, setMaxHp] = useState<number>(char.max_hp);
+    const [charClass, setCharClass] = useState<string>(char.class || '');
+    const [charRace, setCharRace] = useState<string>(char.race || '');
     const [abilities, setAbilities] = useState<Record<string, number>>(() =>
         Object.fromEntries(ABILITIES.map(a => [a, char[a]])));
     const [showAbilities, setShowAbilities] = useState(false);
@@ -333,7 +393,7 @@ function ManageLevelModal({ char, id, reload, onClose }: { char: any; id: string
     const [saving, setSaving] = useState(false);
 
     const abilityChanges = ABILITIES.filter(a => abilities[a] !== char[a]);
-    const dirty = level !== char.level || maxHp !== char.max_hp || abilityChanges.length > 0;
+    const dirty = level !== char.level || maxHp !== char.max_hp || charClass !== char.class || charRace !== char.race || abilityChanges.length > 0;
 
     const submitFeature = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -346,7 +406,12 @@ function ManageLevelModal({ char, id, reload, onClose }: { char: any; id: string
     const applyChanges = async () => {
         setSaving(true);
         try {
-            await api.updateLevel(id, { level, max_hp: maxHp });
+            if (level !== char.level || maxHp !== char.max_hp) {
+                await api.updateLevel(id, { level, max_hp: maxHp });
+            }
+            if (charClass !== char.class || charRace !== char.race) {
+                await api.updateCharacterInfo(id, { ...char, class: charClass, race: charRace });
+            }
             if (abilityChanges.length > 0) {
                 await api.updateAbilityScores(id, Object.fromEntries(abilityChanges.map(a => [a, abilities[a]])));
             }
@@ -363,7 +428,18 @@ function ManageLevelModal({ char, id, reload, onClose }: { char: any; id: string
         <DetailModal onClose={onClose}>
             {!confirming ? (
                 <>
-                    <h2 className="font-display text-xl font-bold text-parchment mb-5">Manage Level</h2>
+                    <h2 className="font-display text-xl font-bold text-parchment mb-5">Manage Level & Identity</h2>
+
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className={field}>
+                            <label className={fieldLabel}>Class</label>
+                            <input value={charClass} onChange={e => setCharClass(e.target.value)} placeholder="Class name" />
+                        </div>
+                        <div className={field}>
+                            <label className={fieldLabel}>Race</label>
+                            <input value={charRace} onChange={e => setCharRace(e.target.value)} placeholder="Race name" />
+                        </div>
+                    </div>
 
                     <div className={`${field} mb-4`}>
                         <label className={fieldLabel}>Level</label>
@@ -397,6 +473,8 @@ function ManageLevelModal({ char, id, reload, onClose }: { char: any; id: string
                 <>
                     <h2 className="font-display text-xl font-bold text-parchment mb-3">Confirm Changes</h2>
                     <div className="bg-stone-mid rounded-md p-4 mb-5 flex flex-col gap-1.5 text-sm">
+                        {charClass !== char.class && <div className="text-ash-light">Class: <span className="text-parchment font-medium">{char.class} → {charClass}</span></div>}
+                        {charRace !== char.race && <div className="text-ash-light">Race: <span className="text-parchment font-medium">{char.race} → {charRace}</span></div>}
                         {level !== char.level && <div className="text-ash-light">Level: <span className="text-parchment font-medium">{char.level} → {level}</span></div>}
                         {maxHp !== char.max_hp && <div className="text-ash-light">Max HP: <span className="text-parchment font-medium">{char.max_hp} → {maxHp}</span></div>}
                         {abilityChanges.map(a => (
@@ -458,6 +536,13 @@ function StatsTab({ char, profBonus, toggleCond, features, id, reload }: {
 }) {
     const [box, setBox] = useState<'actions' | 'features' | 'conditions'>('actions');
     const [showAdd, setShowAdd] = useState(false);
+    const [showEditTraining, setShowEditTraining] = useState(false);
+    const [trainingForm, setTrainingForm] = useState({
+        training_armor: (char.training_armor || []).join(', '),
+        training_weapons: (char.training_weapons || []).join(', '),
+        training_tools: (char.training_tools || []).join(', '),
+        training_languages: (char.training_languages || []).join(', '),
+    });
     const [selected, setSelected] = useState<any>(null);
     const [form, setForm] = useState({ name: '', action_type: 'action', source: '', description: '' });
 
@@ -469,6 +554,19 @@ function StatsTab({ char, profBonus, toggleCond, features, id, reload }: {
         await api.createFeature(id, form);
         setShowAdd(false);
         setForm({ name: '', action_type: 'action', source: '', description: '' });
+        reload();
+    };
+
+    const saveTraining = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const payload = {
+            training_armor: trainingForm.training_armor.split(',').map((s: string) => s.trim()).filter(Boolean),
+            training_weapons: trainingForm.training_weapons.split(',').map((s: string) => s.trim()).filter(Boolean),
+            training_tools: trainingForm.training_tools.split(',').map((s: string) => s.trim()).filter(Boolean),
+            training_languages: trainingForm.training_languages.split(',').map((s: string) => s.trim()).filter(Boolean),
+        };
+        await api.updateTraining(id, payload);
+        setShowEditTraining(false);
         reload();
     };
 
@@ -510,7 +608,10 @@ function StatsTab({ char, profBonus, toggleCond, features, id, reload }: {
                     </div>
 
                     <div className={panel}>
-                        <h3 className={panelTitle}>Proficiencies & Training</h3>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-display text-[13px] font-semibold text-gold tracking-wide uppercase">Proficiencies & Training</h3>
+                            <button className="text-xs text-ash hover:text-gold" onClick={() => setShowEditTraining(true)}>Edit</button>
+                        </div>
                         <div className="flex flex-col gap-2.5">
                             {[['Armor', char.training_armor], ['Weapons', char.training_weapons], ['Tools', char.training_tools], ['Languages', char.training_languages]].map(([l, v]) => (
                                 <div key={l as string} className="bg-stone-mid rounded-md p-3">
@@ -582,6 +683,34 @@ function StatsTab({ char, profBonus, toggleCond, features, id, reload }: {
                     )}
                 </div>
             </div>
+
+            {showEditTraining && (
+                <DetailModal onClose={() => setShowEditTraining(false)}>
+                    <h2 className="font-display text-xl font-bold text-parchment mb-4">Edit Proficiencies & Training</h2>
+                    <form onSubmit={saveTraining} className="flex flex-col gap-3">
+                        <div className={field}>
+                            <label className={fieldLabel}>Armor (comma separated)</label>
+                            <input value={trainingForm.training_armor} onChange={e => setTrainingForm(f => ({ ...f, training_armor: e.target.value }))} placeholder="Light armor, Medium armor..." />
+                        </div>
+                        <div className={field}>
+                            <label className={fieldLabel}>Weapons (comma separated)</label>
+                            <input value={trainingForm.training_weapons} onChange={e => setTrainingForm(f => ({ ...f, training_weapons: e.target.value }))} placeholder="Simple weapons, Martial weapons..." />
+                        </div>
+                        <div className={field}>
+                            <label className={fieldLabel}>Tools (comma separated)</label>
+                            <input value={trainingForm.training_tools} onChange={e => setTrainingForm(f => ({ ...f, training_tools: e.target.value }))} placeholder="Thieves' tools, Herbalism kit..." />
+                        </div>
+                        <div className={field}>
+                            <label className={fieldLabel}>Languages (comma separated)</label>
+                            <input value={trainingForm.training_languages} onChange={e => setTrainingForm(f => ({ ...f, training_languages: e.target.value }))} placeholder="Common, Elvish, Dwarvish..." />
+                        </div>
+                        <div className={modalActions}>
+                            <button type="button" className={cancelBtn} onClick={() => setShowEditTraining(false)}>Cancel</button>
+                            <button type="submit" className={submitBtn}>Save</button>
+                        </div>
+                    </form>
+                </DetailModal>
+            )}
 
             {showAdd && (
                 <DetailModal onClose={() => setShowAdd(false)}>
@@ -911,10 +1040,24 @@ function BackgroundTab({ char, id, reload }: { char: any; id: string; reload: ()
     const [sub, setSub] = useState<'traits' | 'notes'>('traits');
     const [notes, setNotes] = useState(char.notes || '');
     const [saved, setSaved] = useState(false);
+    const [showEditTraits, setShowEditTraits] = useState(false);
+    const [traitsForm, setTraitsForm] = useState({
+        personality_traits: char.personality_traits || '',
+        ideals: char.ideals || '',
+        bonds: char.bonds || '',
+        flaws: char.flaws || '',
+    });
 
     const save = async () => {
         await api.updateCharacterInfo(id, { ...char, notes });
         setSaved(true); setTimeout(() => setSaved(false), 2000); reload();
+    };
+
+    const saveTraits = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await api.updateCharacterInfo(id, { ...char, ...traitsForm });
+        setShowEditTraits(false);
+        reload();
     };
 
     return (
@@ -923,7 +1066,10 @@ function BackgroundTab({ char, id, reload }: { char: any; id: string; reload: ()
 
             {sub === 'traits' && (
                 <div className={`${panel} overflow-y-auto`}>
-                    <h3 className={panelTitle}>Character Traits</h3>
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-display text-[13px] font-semibold text-gold tracking-wide uppercase">Character Traits</h3>
+                        <button className="text-xs text-ash hover:text-gold" onClick={() => setShowEditTraits(true)}>Edit Traits</button>
+                    </div>
                     <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                         {[['Personality', char.personality_traits], ['Ideals', char.ideals], ['Bonds', char.bonds], ['Flaws', char.flaws]].map(([l, v]) => (
                             <div key={l as string} className="bg-stone-mid rounded-md p-3.5">
@@ -946,6 +1092,34 @@ function BackgroundTab({ char, id, reload }: { char: any; id: string; reload: ()
                         value={notes} onChange={e => setNotes(e.target.value)}
                         placeholder="Session notes, backstory, important NPCs…" />
                 </div>
+            )}
+
+            {showEditTraits && (
+                <DetailModal onClose={() => setShowEditTraits(false)}>
+                    <h2 className="font-display text-xl font-bold text-parchment mb-4">Edit Character Traits</h2>
+                    <form onSubmit={saveTraits} className="flex flex-col gap-3">
+                        <div className={field}>
+                            <label className={fieldLabel}>Personality Traits</label>
+                            <textarea rows={2} value={traitsForm.personality_traits} onChange={e => setTraitsForm(f => ({ ...f, personality_traits: e.target.value }))} />
+                        </div>
+                        <div className={field}>
+                            <label className={fieldLabel}>Ideals</label>
+                            <textarea rows={2} value={traitsForm.ideals} onChange={e => setTraitsForm(f => ({ ...f, ideals: e.target.value }))} />
+                        </div>
+                        <div className={field}>
+                            <label className={fieldLabel}>Bonds</label>
+                            <textarea rows={2} value={traitsForm.bonds} onChange={e => setTraitsForm(f => ({ ...f, bonds: e.target.value }))} />
+                        </div>
+                        <div className={field}>
+                            <label className={fieldLabel}>Flaws</label>
+                            <textarea rows={2} value={traitsForm.flaws} onChange={e => setTraitsForm(f => ({ ...f, flaws: e.target.value }))} />
+                        </div>
+                        <div className={modalActions}>
+                            <button type="button" className={cancelBtn} onClick={() => setShowEditTraits(false)}>Cancel</button>
+                            <button type="submit" className={submitBtn}>Save</button>
+                        </div>
+                    </form>
+                </DetailModal>
             )}
         </div>
     );

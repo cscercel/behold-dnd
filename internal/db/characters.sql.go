@@ -1572,12 +1572,13 @@ SET
     alignment              = COALESCE($4, alignment),
     inspiration            = COALESCE($5, inspiration),
     speed                  = COALESCE($6, speed),
-    ideals                 = COALESCE($7, ideals),
-    bonds                  = COALESCE($8, bonds),
-    flaws                  = COALESCE($9, flaws),
-    notes                  = COALESCE($10, notes),
+    armor_class            = COALESCE($7, armor_class),
+    ideals                 = COALESCE($8, ideals),
+    bonds                  = COALESCE($9, bonds),
+    flaws                  = COALESCE($10, flaws),
+    notes                  = COALESCE($11, notes),
     updated_at             = NOW()
-WHERE id = $11
+WHERE id = $12
 RETURNING id, owner_id, is_npc, name, race, class, level, background, alignment, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, save_prof_strength, save_prof_dexterity, save_prof_constitution, save_prof_intelligence, save_prof_wisdom, save_prof_charisma, skill_acrobatics, skill_animal_handling, skill_arcana, skill_athletics, skill_deception, skill_history, skill_insight, skill_intimidation, skill_investigation, skill_medicine, skill_nature, skill_perception, skill_performance, skill_persuasion, skill_religion, skill_sleight_of_hand, skill_stealth, skill_survival, max_hp, current_hp, temp_hp, armor_class, speed, hit_dice_type, hit_dice_remaining, death_save_successes, death_save_failures, spellcasting_ability, inspiration, training_armor, training_weapons, training_tools, training_languages, attunement_slots, copper, silver, electrum, gold, platinum, conditions, resistances, vulnerabilities, immunities, personality_traits, ideals, bonds, flaws, notes, created_at, updated_at
 `
 
@@ -1588,6 +1589,7 @@ type UpdateCharacterInfoParams struct {
 	Alignment   *string   `json:"alignment"`
 	Inspiration *bool     `json:"inspiration"`
 	Speed       *int32    `json:"speed"`
+	ArmorClass  *int32    `json:"armor_class"`
 	Ideals      *string   `json:"ideals"`
 	Bonds       *string   `json:"bonds"`
 	Flaws       *string   `json:"flaws"`
@@ -1603,6 +1605,7 @@ func (q *Queries) UpdateCharacterInfo(ctx context.Context, arg UpdateCharacterIn
 		arg.Alignment,
 		arg.Inspiration,
 		arg.Speed,
+		arg.ArmorClass,
 		arg.Ideals,
 		arg.Bonds,
 		arg.Flaws,
