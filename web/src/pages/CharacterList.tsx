@@ -100,9 +100,12 @@ export function CharacterList() {
 }
 
 function CreateCharacterModal({ onClose, onCreated }: { onClose: () => void; onCreated: (c: any) => void }) {
-    const RACES = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome', 'Half-Elf', 'Half-Orc', 'Tiefling', 'Dragonborn', 'Aasimar', 'Tabaxi', 'Kenku', 'Firbolg'];
-    const CLASSES = ['Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard', 'Artificer'];
+    const RACES = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome', 'Half-Elf', 'Half-Orc', 'Tiefling', 'Dragonborn', 'Aasimar', 'Tabaxi', 'Kenku', 'Firbolg', 'Custom'];
+    const CLASSES = ['Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard', 'Artificer', 'Custom'];
     const ALIGNMENTS = ['Lawful Good', 'Neutral Good', 'Chaotic Good', 'Lawful Neutral', 'True Neutral', 'Chaotic Neutral', 'Lawful Evil', 'Neutral Evil', 'Chaotic Evil'];
+
+    const [isCustomRace, setIsCustomRace] = useState(false);
+    const [isCustomClass, setIsCustomClass] = useState(false);
 
     const [form, setForm] = useState({
         name: '', race: 'Human', class: 'Fighter', level: 1, background: '', alignment: 'True Neutral',
@@ -114,6 +117,28 @@ function CreateCharacterModal({ onClose, onCreated }: { onClose: () => void; onC
 
     const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
         setForm(f => ({ ...f, [k]: e.target.type === 'number' ? Number(e.target.value) : e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value }));
+
+    const handleRaceSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        if (value === 'Custom') {
+            setIsCustomRace(true);
+            setForm(f => ({ ...f, race: '' }));
+        } else {
+            setIsCustomRace(false);
+            setForm(f => ({ ...f, race: value }));
+        }
+    };
+
+    const handleClassSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        if (value === 'Custom') {
+            setIsCustomClass(true);
+            setForm(f => ({ ...f, class: '' }));
+        } else {
+            setIsCustomClass(false);
+            setForm(f => ({ ...f, class: value }));
+        }
+    };
 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -130,10 +155,43 @@ function CreateCharacterModal({ onClose, onCreated }: { onClose: () => void; onC
                         <div className={field}><label className={fieldLabel}>Name *</label><input value={form.name} onChange={set('name')} required placeholder="Character name" /></div>
                         <div className={field}><label className={fieldLabel}>Level</label><input type="number" min={1} max={20} value={form.level} onChange={set('level')} /></div>
                     </div>
+
                     <div className="grid grid-cols-2 gap-3">
-                        <div className={field}><label className={fieldLabel}>Race</label><select value={form.race} onChange={set('race')}>{RACES.map(r => <option key={r}>{r}</option>)}</select></div>
-                        <div className={field}><label className={fieldLabel}>Class</label><select value={form.class} onChange={set('class')}>{CLASSES.map(c => <option key={c}>{c}</option>)}</select></div>
+                        {/* Race Selection */}
+                        <div className={field}>
+                            <label className={fieldLabel}>Race</label>
+                            <select value={isCustomRace ? 'Custom' : form.race} onChange={handleRaceSelect}>
+                                {RACES.map(r => <option key={r} value={r}>{r}</option>)}
+                            </select>
+                            {isCustomRace && (
+                                <input
+                                    type="text"
+                                    value={form.race}
+                                    onChange={set('race')}
+                                    placeholder="Enter custom race"
+                                    required
+                                />
+                            )}
+                        </div>
+
+                        {/* Class Selection */}
+                        <div className={field}>
+                            <label className={fieldLabel}>Class</label>
+                            <select value={isCustomClass ? 'Custom' : form.class} onChange={handleClassSelect}>
+                                {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                            {isCustomClass && (
+                                <input
+                                    type="text"
+                                    value={form.class}
+                                    onChange={set('class')}
+                                    placeholder="Enter custom class"
+                                    required
+                                />
+                            )}
+                        </div>
                     </div>
+
                     <div className="grid grid-cols-2 gap-3">
                         <div className={field}><label className={fieldLabel}>Background</label><input value={form.background} onChange={set('background')} placeholder="Soldier, Sage…" /></div>
                         <div className={field}><label className={fieldLabel}>Alignment</label><select value={form.alignment} onChange={set('alignment')}>{ALIGNMENTS.map(a => <option key={a}>{a}</option>)}</select></div>
