@@ -9,12 +9,13 @@ import (
 )
 
 type Config struct {
-	DatabaseURL      string
-	Port             string
-	JWTSecret        string
-	JWTExpiryHours   int
-	RegistrationCode string
-	FrontendURL	     string
+	DatabaseURL           string
+	Port                  string
+	JWTSecret             string
+	JWTExpiryHours        int
+	RegistrationCode      string
+	AdminRegistrationCode string
+	FrontendURL           string
 }
 
 func Load() (*Config, error) {
@@ -28,12 +29,13 @@ func Load() (*Config, error) {
 	}
 
 	cfg := &Config{
-		DatabaseURL:      os.Getenv("DATABASE_URL"),
-		Port:             os.Getenv("PORT"),
-		JWTSecret:        os.Getenv("JWT_SECRET"),
-		JWTExpiryHours:   expiryHours,
-		RegistrationCode: os.Getenv("REGISTRATION_CODE"),
-		FrontendURL:      os.Getenv("FRONTEND_URL"),
+		DatabaseURL:           os.Getenv("DATABASE_URL"),
+		Port:                  os.Getenv("PORT"),
+		JWTSecret:             os.Getenv("JWT_SECRET"),
+		JWTExpiryHours:        expiryHours,
+		RegistrationCode:      os.Getenv("REGISTRATION_CODE"),
+		AdminRegistrationCode: os.Getenv("ADMIN_REGISTRATION_CODE"),
+		FrontendURL:           os.Getenv("FRONTEND_URL"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -48,8 +50,11 @@ func Load() (*Config, error) {
 	if cfg.RegistrationCode == "" {
 		return nil, fmt.Errorf("REGISTRATION_CODE is required")
 	}
+	if cfg.AdminRegistrationCode == "" {
+		return nil, fmt.Errorf("ADMIN_REGISTRATION_CODE is required")
+	}
 	if cfg.FrontendURL == "" {
-		return nil, fmt.Errorf("FrontendURL is required")
+		return nil, fmt.Errorf("FRONTEND_URL is required")
 	}
 
 	return cfg, nil

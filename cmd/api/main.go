@@ -52,7 +52,7 @@ func main() {
 	queries := db.New(pool)
 
 	// Services
-	authService := service.NewAuthService(queries, cfg.JWTSecret, cfg.JWTExpiryHours, cfg.RegistrationCode)
+	authService := service.NewAuthService(queries, cfg.JWTSecret, cfg.JWTExpiryHours, cfg.RegistrationCode, cfg.AdminRegistrationCode)
 	spellService := service.NewSpellService(queries)
 	characterService := service.NewCharacterService(queries, spellService)
 	inventoryService := service.NewInventoryService(queries)

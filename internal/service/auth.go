@@ -12,18 +12,22 @@ import (
 )
 
 type AuthService struct {
-	queries          *db.Queries
-	jwtSecret        []byte
-	jwtExpiryHours   int
-	registrationCode string
+	queries               *db.Queries
+	jwtSecret             []byte
+	jwtExpiryHours        int
+	registrationCode      string
+	adminRegistrationCode string
 }
 
-func NewAuthService(queries *db.Queries, jwtSecret string, jwtExpiryHours int, registrationCode string) *AuthService {
+func NewAuthService(
+	queries *db.Queries, jwtSecret string, jwtExpiryHours int, registrationCode string, adminRegistrationCode string,
+) *AuthService {
 	return &AuthService{
-		queries:          queries,
-		jwtSecret:        []byte(jwtSecret),
-		jwtExpiryHours:   jwtExpiryHours,
-		registrationCode: registrationCode,
+		queries:               queries,
+		jwtSecret:             []byte(jwtSecret),
+		jwtExpiryHours:        jwtExpiryHours,
+		registrationCode:      registrationCode,
+		adminRegistrationCode: adminRegistrationCode,
 	}
 }
 
@@ -37,8 +41,14 @@ type Claims struct {
 
 func (s *AuthService) Register(ctx context.Context, username, email, password, role, code string) (db.User, error) {
 	// Validate registration code
-	if code != s.registrationCode {
-		return db.User{}, fmt.Errorf("invalid registration code")
+	if role == "dm" {
+		if code != s.adminRegistrationCode {
+			return db.User{}, fmt.Errorf("invalid registration code")
+		}
+	} else {
+		if code != s.registrationCode {
+			return db.User{}, fmt.Errorf("invalid registration code")
+		}
 	}
 
 	// Validate role
